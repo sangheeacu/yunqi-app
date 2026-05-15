@@ -6,7 +6,7 @@ By Sang Hee Park, PhD — Blossom Skin & Health, Sydney
 
 ---
 
-## Features
+## Features 
 
 - 🔢 **Any year 1924–2103** — automatic analysis
 - 🌏 **Northern & Southern Hemisphere** date switching
