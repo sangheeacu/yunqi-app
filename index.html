@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#1C2D58">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="運氣 Analyzer">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yun Qi Analyzer — Sang Hee Park, PhD</title>
 <style>
@@ -108,7 +114,7 @@ const FY=["木","火","土","金","水"];
 const GN={木:"火",火:"土",土:"金",金:"水",水:"木"};
 const CT={木:"土",土:"水",水:"火",火:"金",金:"木"};
 const ES={木:{b:"#D0EAD8",d:"#4A8C6A",t:"#2D5A3D"},火:{b:"#FAEAE6",d:"#C84B30",t:"#8B2A18"},相火:{b:"#FAEEE0",d:"#E07030",t:"#8B4010"},土:{b:"#FDF3DC",d:"#B8860B",t:"#7A5A06"},金:{b:"#EBEBEB",d:"#6B7A6A",t:"#3A4A3A"},水:{b:"#DCE8F5",d:"#2E5F8A",t:"#1A3A5A"}};
-const RS={双火:{l:"★★ Epidemic Peak 雙火",c:"#C84B30",b:"#FFF0EE",d:"#C84B30"},双土:{l:"★ Damp-Heat 雙土",c:"#E07030",b:"#FFF5EC",d:"#E07030"},逆:{l:"★ Adverse 逆",c:"#B8860B",b:"#FFFBE8",d:"#B8860B"},顺:{l:"顺 Harmonious",c:"#2D6A4F",b:"#F0FBF5",d:"#2D6A4F"},同氣:{l:"同氣 Same Qi",c:"#2E5F8A",b:"#EEF4FF",d:"#2E5F8A"}};
+const RS={双火:{l:"★★ Epidemic Peak 雙火",c:"#C84B30",b:"#FFF0EE",d:"#C84B30"},双土:{l:"★ Damp-Heat 雙土",c:"#E07030",b:"#FFF5EC",d:"#E07030"},逆:{l:"★ Adverse 逆",c:"#B8860B",b:"#FFFBE8",d:"#B8860B"},顺:{l:"顺 Harmonious",c:"#2D6A4F",b:"#F0FBF5",d:"#2D6A4F"},同氣:{l:"★★ Same Qi 同氣",c:"#C84B30",b:"#FFF0EE",d:"#C84B30"}};
 const DN=["Jan 20~Mar 21","Mar 21~Apr 3","Apr 3~May 21","May 21~Jun 16","Jun 16~Jul 22","Jul 22~Aug 29","Aug 29~Sep 22","Sep 22~Nov 11","Nov 11~Nov 22","Nov 22~Jan 20"];
 const DS=["Jul 22~Sep 22","Sep 22~Oct 3","Oct 3~Nov 21","Nov 21~Dec 16","Dec 16~Jan 21","Jan 21~Feb 28","Feb 28~Mar 21","Mar 21~May 11","May 11~May 21","May 21~Jul 22"];
 const YQP=[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[4,5]];
@@ -132,6 +138,7 @@ const CL={
     太陰濕土:{w:"★ Excessive damp 과습 극성\nHeavy rainfall · Flooding conditions",d:"★ Damp diseases 습성 질환\nOedema · Bloating · Heavy limbs\nCloudy thinking · Diarrhoea · Skin weeping",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, BL 20 脾俞\nSP 6 三陰交, ST 36 足三里",h:"Wu Ling San 五苓散\nSan Ren Tang 三仁湯\nYi Yi Ren 薏苡仁, Cang Zhu 蒼朮, Ze Xie 澤瀉"}
   },
   双火:{w:"★★ EXTREME HEAT 극열 — Both Guest & Host Qi are Fire\nDrought · Heat waves · Very dry & hot",d:"★★ EPIDEMIC PEAK — Wen Bing 溫病\nAcute febrile illness · Cardiovascular emergency\nHeatstroke 열중증 · Cerebrovascular events\nSeasonal epidemic outbreaks 역병 최고조",a:"PC 6 內關, HT 8 少府\nKID 6 照海, LI 11 曲池\nSP 6 三陰交, DU 14 大椎\nST 44 內庭",h:"Huang Lian Jie Du Tang 黃連解毒湯\nBai Hu Tang 白虎湯\nShi Gao 石膏, Zhi Mu 知母, Huang Lian 黃連\nSheng Mai San 生脈散: Mai Dong 麥冬, Wu Wei Zi 五味子\n⚠️ Prepare 2–3 weeks BEFORE this period!"},
+  同氣:{w:"★★ EXTREME — Identical Qi amplified\nSame elemental force doubled\nClimate extremes amplified",d:"★★ Same-Qi Period — Max vulnerability\nConstitutional organ at maximum stress\nPrepare 2 weeks in advance",a:"Tonify primary organ\nDrain excess with sedation points\nUse Yuan-Source points",h:"Consult segment-specific formula\nPrepare constitutional herbs 2 wks early"},
   双土:{w:"★ EXTREME DAMP 극습 — Both Guest & Host Qi are Earth\nHeavy rain · Flooding · Humid & oppressive",d:"★ DAMP-HEAT EPIDEMIC 습열 역병\nGastroenteritis · Food poisoning\nOedema 부종 · Skin infections 피부감염\nChronic digestive disorders · Fatigue syndrome",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, LI 11 曲池\nBL 20 脾俞, ST 36 足三里",h:"Huo Xiang Zheng Qi San 藿香正氣散\nSan Ren Tang 三仁湯\nHuo Xiang 藿香, Yi Yi Ren 薏苡仁\nHuang Lian 黃連, Bai Zhu 白朮"},
   同氣:{
     木:{w:"Wind amplified 봄바람 증폭. Wind dominant",d:"Liver & GB focus 肝膽\nDizziness · Irritability · Tendon issues\nEye disorders · Migraine",a:"LIV 3 太衝, LIV 8 曲泉\nGB 20 風池, GB 34 陽陵泉\nBL 18 肝俞",h:"Long Dan Xie Gan Tang 龍膽瀉肝湯\nGou Qi Zi 枸杞子, Bai Shao 白芍"},
@@ -159,11 +166,14 @@ function getCL(r,zq,kq){
 
 let Y=2026,H="N",D=null,SG=[];
 
-function gKQ(si){const i=SQ.indexOf(si);return Array.from({length:6},(_,j)=>SQ[(i-2+j+6)%6]);}
+const KO=["厥陰風木","少陰君火","太陰濕土","少陽相火","陽明燥金","太陽寒水"];
+function gKQ(si){const i=KO.indexOf(si);return Array.from({length:6},(_,j)=>KO[(i-2+j+6)%6]);}
 function gKY(e){let c=e;const r=[e];for(let i=1;i<5;i++){c=GN[c];r.push(c);}return r;}
 function jKZ(ke,zh){
   if(ke===zh)return(ke==="火"||ke==="相火")?"双火":ke==="土"?"双土":"同氣";
   const kb=ke==="相火"?"火":ke,zb=zh==="相火"?"火":zh;
+  if(kb===zb)return"双火";  // Minister Fire + Emperor Fire = Double Fire
+  if(kb===zb&&kb==="土")return"双土";
   if(GN[kb]===zb)return"顺";
   if(CT[zb]===kb||CT[kb]===zb)return"逆";
   return"顺";
@@ -180,14 +190,23 @@ function cy(y){
   else if(GN[de]===se){rel="Xiao Ni 小逆";rc="Yun generates Qi";}
   else if(CT[se]===de){rel="Tian Xing 天刑";rc="Qi controls Yun";}
   else if(CT[de]===se){rel="Bu He 不和";rc="Yun controls Qi";}
-  const TAIY=[1904, 1918, 1919, 1934, 1945, 1949, 1964, 1978, 1979, 1994, 2005, 2009, 2024, 2038, 2039, 2054, 2065, 2069, 2084, 2098, 2099, 2114],TTFU=[1900, 1902, 1930, 1932, 1960, 1962, 1990, 1992, 2020, 2022, 2050, 2052, 2080, 2082, 2110, 2112],TSGW=[1901, 1903, 1923, 1931, 1933, 1953, 1961, 1963, 1983, 1991, 1993, 2013, 2021, 2023, 2043, 2051, 2053, 2073, 2081, 2083, 2103],TFU=[1908, 1915, 1916, 1917, 1938, 1946, 1947, 1948, 1968, 1975, 1976, 1977, 1998, 2006, 2007, 2008, 2028, 2035, 2036, 2037, 2058, 2066, 2067, 2068, 2088, 2095, 2096, 2097],SHUI=[1927, 1936, 1987, 1996, 2047, 2056, 2107, 2116];
+  const TA=[2005,2009,2038,2039],TF2=[1990,1992,1994,2020,2022,2024],TF=[1998,2006,2007,2008,2028,2035,2036,2037],SH=[1987,1994,1996,2005,2009,2014,2024,2038];
   let sp="Ordinary year 平年",sc="";
-  if(TAIY.includes(y)){sp="★★★★★ Tai Yi Tian Fu 太乙天符";sc="Maximum severity";}
-  else if(TTFU.includes(y)){sp="★★★★ Tong Tian Fu 同天符";sc="Very high severity";}
-  else if(TSGW.includes(y)){sp="★★★ Tong Sui Hui 同歲會";sc="High severity";}
-  else if(TFU.includes(y)){sp="★★★ Tian Fu 天符";sc="High severity";}
-  else if(SHUI.includes(y)){sp="★★ Sui Hui 歲會";sc="Moderate";}
-  return{jiazi:s+b,s,b,dn,de,si,za,rel,rc,sp,sc,kq,ky};
+  if(TA.includes(y)){sp="★★★★★ Tai Yi Tian Fu 太乙天符";sc="Most extreme";}
+  else if(TF2.includes(y)){sp="★★★★ Tong Tian Fu 同天符";sc="Very extreme";}
+  else if(TF.includes(y)){sp="★★★ Tian Fu 天符";sc="Extreme";}
+  else if(SH.includes(y)){sp="★★ Sui Hui 歲會";sc="Mild";}
+  // Epidemic warnings — Liu Yuan Zheng Ji Da Lun Ch.71
+  const isExcess=(de===de&&["水","火","金","土","木"].includes(de))&&(["甲","丙","戊","庚","壬"].includes(s));
+  const isDefic=["乙","丁","己","辛","癸"].includes(s);
+  const epSegs={};
+  if(si==="少陰君火"&&isExcess){epSegs[8]="[!] Wen Bing 溫病 — 71 Pian: Emperor Fire Si Tian Excess, 5th Qi";epSegs[9]="[!] Wen Bing 溫病 — 71 Pian: Emperor Fire Si Tian Excess, 5th Qi";}
+  if(si==="少陽相火"&&isExcess){epSegs[0]="[!] Wen Bing 溫病 — 71 Pian: Minister Fire Si Tian Excess, 1st Qi";epSegs[1]="[!] Wen Bing 溫病 — 71 Pian: Minister Fire Si Tian Excess, 1st Qi";}
+  if(si==="太陽寒水"&&isExcess){epSegs[0]="[!] Yi+Wen Bing 疫+溫病 — 71 Pian: Cold-Water Si Tian Excess, 1st Qi";epSegs[1]="[!] Yi+Wen Bing 疫+溫病 — 71 Pian: Cold-Water Si Tian Excess, 1st Qi";}
+  if(si==="陽明燥金"&&isDefic){epSegs[2]="[!] Yi Bing 疫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 2nd Qi";epSegs[3]="[!] Yi Bing 疫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 2nd Qi";epSegs[9]="[!] Wen Bing 溫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 6th Qi";}
+  if(si==="太陰濕土"&&isDefic){epSegs[2]="[!] Wen Bing+Yi 溫病+疫 — 71 Pian: Damp-Earth Si Tian Deficiency, 2nd Qi";epSegs[3]="[!] Wen Bing+Yi 溫病+疫 — 71 Pian: Damp-Earth Si Tian Deficiency, 2nd Qi";}
+  if(si==="厥陰風木"&&isDefic){epSegs[9]="[!] Wen Yi 溫疫 — 71 Pian: Wind-Wood Si Tian Deficiency, 6th Qi";}
+  return{jiazi:s+b,s,b,dn,de,si,za,rel,rc,sp,sc,kq,ky,epSegs};
 }
 
 function sh(h){H=h;document.getElementById("bN").className="btn bn"+(h==="N"?" on":"");document.getElementById("bS").className="btn bn"+(h==="S"?" on":"");ra();}
@@ -200,7 +219,7 @@ function rb(r){const v=RS[r]||RS["顺"];return`<span class="rb" style="color:${v
 
 function rI(){
   const de=ES[D.de]||ES["水"],se=ES[QEL[D.si]]||ES["火"],ze=ES[QEL[D.za]]||ES["金"];
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆";});
+  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
   const rb2=D.rel.includes("不和")||D.rel.includes("天刑"),sb=D.sp.includes("太乙")||D.sp.includes("同天")||D.sp.includes("天符");
   document.getElementById("IG").innerHTML=[
     {l:"Year · Jia Zi 干支",v:`${Y} · ${D.jiazi}`,cn:"",bg:"#E8EEF8",c:"#1C2D58"},
@@ -230,13 +249,13 @@ function rT(){
     const bg=r==="双火"?"#FFF0EE":r==="双土"?"#FFF5EC":r==="逆"?"#FFFBE8":r==="同氣"?"#EEF4FF":i%2===0?"#FAFFFE":"white";
     const zyS=ES[s.zy]||ES["木"],kyS=ES[s.ky]||ES["木"],zqS=ES[QEL[s.zq]]||ES["木"],kqS=ES[QEL[s.kq]]||ES["木"];
     return`<tr style="background:${bg}">
-      <td><div style="font-weight:bold;color:${v.c};font-size:13px">${s.name}</div><div style="font-size:9px;color:#aaa">${s.sub}</div></td>
+      <td><div style="font-weight:bold;color:${v.c};font-size:13px">${s.name}</div><div style="font-size:9px;color:#aaa">${s.sub}</div>${D.epSegs&&D.epSegs[i]?`<div style="font-size:9px;color:#C84B30;font-weight:bold;margin-top:3px">[!] EPIDEMIC</div>`:""}</td>
       <td style="white-space:nowrap;color:#555">${H==="N"?s.dn:s.ds}</td>
       <td><span class="bdg" style="background:${zyS.b};border-color:${zyS.d};color:${zyS.t}">H:${s.zy}</span> <span class="bdg" style="background:${kyS.b};border-color:${kyS.d};color:${kyS.t}">G:${s.ky}</span><div style="font-size:9px;color:#888;margin-top:2px">${yr}</div></td>
       <td><span class="bdg" style="background:${zqS.b};border-color:${zqS.d};color:${zqS.t}">H:${QEN[s.zq]}</span><div style="font-size:9px;color:#aaa">${s.zq}</div><span class="bdg" style="background:${kqS.b};border-color:${kqS.d};color:${kqS.t}">G:${QEN[s.kq]}</span><div style="font-size:9px;color:#aaa">${s.kq}</div></td>
       <td style="text-align:center">${rb(r)}</td>
       <td style="color:#2E5F8A">${cl.w.replace(/\n/g,"<br>")}</td>
-      <td style="color:#C84B30">${cl.d.replace(/\n/g,"<br>")}</td>
+      <td style="color:#C84B30">${ep?`<div style="font-weight:bold;background:#FFF0EE;padding:2px 5px;border-radius:3px;border-left:3px solid #C84B30;margin-bottom:4px">${ep}</div>`:""}</div>${cl.d.replace(/\n/g,"<br>")}</td>
       <td style="color:#2D6A4F">${cl.a.replace(/\n/g,"<br>")}</td>
       <td style="color:#7A5A06">${cl.h.replace(/\n/g,"<br>")}</td>
     </tr>`;
@@ -244,7 +263,7 @@ function rT(){
 }
 
 function rR(){
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆";});
+  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
   const sec=document.getElementById("RS");
   if(!hr.length){sec.style.display="none";return;}
   sec.style.display="";
@@ -266,7 +285,7 @@ function rR(){
 let PS="";
 function pdf(){
   const hl=H==="N"?"Northern 北半球":"Southern 南半球/Sydney",dk=H==="N"?"dn":"ds";
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆";});
+  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
   const rows=SG.map((s,i)=>{
     const r=jKZ(QEL[s.kq],QEL[s.zq]),yr=jY(s.ky,s.zy),cl=getCL(r,s.zq,s.kq),v=RS[r]||RS["顺"];
     const bg=r==="双火"?"#FFF0EE":r==="双土"?"#FFF5EC":r==="逆"?"#FFFBE8":r==="同氣"?"#EEF4FF":i%2===0?"#FAFFFE":"white";
@@ -318,7 +337,17 @@ function pdf(){
 </tr></thead><tbody>${rows}</tbody></table></div></div>
 ${hr.length>0?`<div class="sec"><div class="sh" style="background:#C84B30">⚠️ ${Y} Epidemic &amp; Risk Periods — ${hr.length} segments</div><div class="rw">${cards}</div></div>`:""}
 <div style="text-align:center;color:#999;font-size:10px;padding:8px">© 2026 Blossom Skin &amp; Health Pty Ltd · Sang Hee Park, PhD · Educational purposes only</div>
-</div></body></html>`;
+</div>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("/sw.js")
+      .then(()=>console.log("SW registered"))
+      .catch(e=>console.log("SW error",e));
+  });
+}
+</script>
+</body></html>`;
   document.getElementById("MT").textContent=`📄 ${Y} ${D.jiazi} — Full Clinical PDF`;
   document.getElementById("PF").srcdoc=PS;
   document.getElementById("PM").className="modal show";
@@ -327,6 +356,16 @@ function pr(){const w=window.open("","_blank");w.document.write(PS);w.document.c
 function nt(){const w=window.open("","_blank");w.document.write(PS);w.document.close();}
 function cm(){document.getElementById("PM").className="modal";}
 ra();
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("/sw.js")
+      .then(()=>console.log("SW registered"))
+      .catch(e=>console.log("SW error",e));
+  });
+}
 </script>
 </body>
 </html>
