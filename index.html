@@ -33,9 +33,9 @@ input[type=number]{width:82px;padding:6px 8px;border-radius:6px;border:2px solid
 .bdg{border-radius:4px;padding:2px 7px;font-size:10px;font-weight:bold;white-space:nowrap;border:1px solid;display:inline-block}
 .sec{background:white;border-radius:8px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .sh{padding:9px 14px;font-weight:bold;font-size:13px;color:white}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{background:#F0F4FA;color:#1C2D58;font-weight:bold;font-size:10px;padding:7px 5px;text-align:left;border-bottom:2px solid #1C2D58;white-space:nowrap}
-td{padding:6px 5px;border-bottom:1px solid #E8E8E8;vertical-align:top}
+table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+th{background:#F0F4FA;color:#1C2D58;font-weight:bold;font-size:10px;padding:7px 5px;text-align:left;border-bottom:2px solid #1C2D58;white-space:nowrap;overflow:hidden}
+td{padding:6px 5px;border-bottom:1px solid #E8E8E8;vertical-align:top;overflow:hidden;word-break:break-word}
 .rb{border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold;white-space:nowrap;border:1.5px solid}
 .rcards{display:flex;gap:8px;flex-wrap:wrap;padding:12px}
 .rcard{border-radius:8px;padding:9px 12px;min-width:135px;border:1.5px solid}
@@ -46,14 +46,14 @@ td{padding:6px 5px;border-bottom:1px solid #E8E8E8;vertical-align:top}
 .mbar{background:#1C2D58;width:93%;max-width:980px;border-radius:8px 8px 0 0;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mbar span{color:white;font-weight:bold;font-size:13px;flex:1}
 iframe{width:93%;max-width:980px;height:80vh;border:none;background:white;border-radius:0 0 8px 8px}
-@media(max-width:640px){.qgrid{grid-template-columns:1fr}th,td{font-size:9px;padding:4px 3px}}
+@media(max-width:640px){.qgrid{grid-template-columns:1fr}th,td{font-size:8px;padding:3px 2px}table{font-size:9px}}
 </style>
 </head>
 <body>
 <div class="hdr">
   <div class="hdr-lbl">五運六氣 · YUN QI CLINICAL ANALYZER</div>
   <div class="hdr-ttl">Yun Qi 運氣 Full Clinical Analysis</div>
-  <div class="hdr-sub">Weather 기상 · Diseases 질병 · Acupuncture 침구 · Herbs 본초 · Based on 黃帝內經素問</div>
+  <div class="hdr-sub">Weather  · Diseases  · Acupuncture  · Herbs  · Based on 黃帝內經素問</div>
   <div class="ctrl">
     <input type="number" id="yIn" value="2026" min="1924" max="2103" onkeydown="if(event.key==='Enter')go()">
     <button class="btn bg" onclick="go()">Analyze</button>
@@ -65,16 +65,17 @@ iframe{width:93%;max-width:980px;height:80vh;border:none;background:white;border
 <div class="igrid" id="IG"></div>
 <div class="qgrid" id="QG"></div>
 <div class="sec"><div class="sh" id="TH" style="background:#1C2D58"></div>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
 <table><thead><tr>
-  <th>運氣<br>Segment</th><th>期間<br>Period</th>
-  <th>主運 Host Yun<br>客運 Guest Yun</th>
-  <th>主氣 Host Qi<br>客氣 Guest Qi</th>
-  <th>客主加臨<br>Ke-Zhu</th>
-  <th>🌤 氣象<br>Weather</th>
-  <th>🏥 疾病<br>Disease</th>
-  <th>📍 針灸<br>Acupuncture</th>
-  <th>🌿 本草<br>Herbs</th>
+  <th style="width:7%">運氣<br>Segment</th>
+  <th style="width:9%">Period<br>N / S</th>
+  <th style="width:8%">Host Yun<br>Guest Yun</th>
+  <th style="width:9%">Host Qi<br>Guest Qi</th>
+  <th style="width:8%">Ke-Zhu<br>客主加臨</th>
+  <th style="width:16%">🌤 Weather<br>Forecast</th>
+  <th style="width:18%">🏥 Disease<br>Prediction</th>
+  <th style="width:13%">📍 Acupuncture<br>Points</th>
+  <th style="width:12%">🌿 Herbs &amp;<br>Formulae</th>
 </tr></thead>
 <tbody id="TB"></tbody></table>
 </div></div>
@@ -83,7 +84,7 @@ iframe{width:93%;max-width:980px;height:80vh;border:none;background:white;border
   <div class="rcards" id="RC"></div>
 </div>
 <div class="sec">
-  <div class="sh" style="background:#444">Legend 범례</div>
+  <div class="sh" style="background:#444">Legend </div>
   <div class="lgnd">
     <span class="rb" style="color:#C84B30;border-color:#C84B30;background:#FFF0EE">★★ Double Fire 雙火 — Epidemic peak</span>
     <span class="rb" style="color:#E07030;border-color:#E07030;background:#FFF5EC">★ Double Earth 雙土 — Damp-Heat</span>
@@ -122,30 +123,30 @@ const YQP=[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[4,5]];
 // Clinical database
 const CL={
   顺:{
-    木:{w:"Mild spring winds. Seasonal breezes. 온화한 봄바람",d:"Allergies · Mild Liver Qi stagnation 간기울체\nEye dryness · Mild headaches",a:"LIV 3 太衝, GB 20 風池\nSP 6 三陰交, BL 18 肝俞",h:"Xiao Yao San 逍遙散\nChai Hu 柴胡, Bai Shao 白芍, Dang Gui 當歸"},
-    火:{w:"Warm & bright. Pleasant transition. 온난한 계절 전환",d:"Heat sensitivity · Mild Heart restlessness 심번\nSkin flushing",a:"HT 7 神門, PC 6 內關\nSP 6 三陰交, LI 11 曲池",h:"Yin Qiao San 銀翹散\nMai Dong 麥冬, Sheng Di 生地"},
-    相火:{w:"Warm summer onset. Seasonal heat. 여름철 온열",d:"Upper body heat · Mild fever · Throat dryness",a:"PC 6 內關, TB 5 外關\nLI 11 曲池, ST 44 內庭",h:"Qing Hao Bie Jia Tang 青蒿鱉甲湯\nQing Hao 青蒿, Zhi Mu 知母"},
-    土:{w:"Mild humidity. Late summer dampness. 습하지만 양호",d:"Mild digestive sluggishness · Slight heaviness 倦怠\nFood stagnation",a:"SP 3 太白, ST 36 足三里\nREN 12 中脘, BL 20 脾俞",h:"Shen Ling Bai Zhu San 參苓白朮散\nBai Zhu 白朮, Fu Ling 茯苓"},
-    金:{w:"Crisp autumn air. Dry & clear. 맑고 건조한 가을",d:"Mild dry cough 건해 · Slight skin dryness\nBowel irregularity",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交",h:"Bai He Gu Jin Tang 百合固金湯\nBai He 百合, Mai Dong 麥冬"},
-    水:{w:"Gentle cold. Normal winter. 일반적인 겨울 추위",d:"Mild lower back fatigue 요배피로\nSlight urinary frequency · Cold limbs",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門",h:"Jin Gui Shen Qi Wan 金匱腎氣丸\nShu Di 熟地, Du Zhong 杜仲"}
+    木:{w:"Mild spring winds. Seasonal breezes.",d:"Allergies · Mild Liver Qi stagnation\nEye dryness · Mild headaches",a:"LIV 3 太衝, GB 20 風池\nSP 6 三陰交, BL 18 肝俞",h:"Xiao Yao San 逍遙散\nChai Hu 柴胡, Bai Shao 白芍, Dang Gui 當歸"},
+    火:{w:"Warm & bright. Pleasant transition.",d:"Heat sensitivity · Mild Heart restlessness\nSkin flushing",a:"HT 7 神門, PC 6 內關\nSP 6 三陰交, LI 11 曲池",h:"Yin Qiao San 銀翹散\nMai Dong 麥冬, Sheng Di 生地"},
+    相火:{w:"Warm summer onset. Seasonal heat.",d:"Upper body heat · Mild fever · Throat dryness",a:"PC 6 內關, TB 5 外關\nLI 11 曲池, ST 44 內庭",h:"Qing Hao Bie Jia Tang 青蒿鱉甲湯\nQing Hao 青蒿, Zhi Mu 知母"},
+    土:{w:"Mild humidity. Late summer dampness.",d:"Mild digestive sluggishness · Slight heaviness\nFood stagnation",a:"SP 3 太白, ST 36 足三里\nREN 12 中脘, BL 20 脾俞",h:"Shen Ling Bai Zhu San 參苓白朮散\nBai Zhu 白朮, Fu Ling 茯苓"},
+    金:{w:"Crisp autumn air. Dry & clear.",d:"Mild dry cough · Slight skin dryness\nBowel irregularity",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交",h:"Bai He Gu Jin Tang 百合固金湯\nBai He 百合, Mai Dong 麥冬"},
+    水:{w:"Gentle cold. Normal winter.",d:"Mild lower back fatigue\nSlight urinary frequency · Cold limbs",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門",h:"Jin Gui Shen Qi Wan 金匱腎氣丸\nShu Di 熟地, Du Zhong 杜仲"}
   },
   逆:{
-    少陰君火:{w:"★ Spring cold suppresses Heart Fire\nUnseasonable cold snaps. 봄인데 한기 지속",d:"★ Cardiovascular surge 심혈관 급증\nAngina · Palpitations · Cold-induced fever\nSpring influenza with cardiac complications",a:"HT 7 神門, PC 6 內關\nREN 14 巨闕, BL 15 心俞\nKID 3 太谿, SP 6 三陰交",h:"Gui Zhi Fu Ling Wan 桂枝茯苓丸\nSheng Mai San 生脈散\nRen Shen 人參, Mai Dong 麥冬, Wu Wei Zi 五味子"},
-    少陽相火:{w:"★ Extreme heat & dryness 극열·건조\nEarly summer heat surge. Fire blazing",d:"★ Respiratory heat diseases 열성 호흡기\nBronchitis · Pneumonia · Throat infections\nSkin eruptions 피부발진 · Eye inflammation",a:"LU 5 尺澤, LI 11 曲池\nST 44 內庭, PC 8 勞宮\nDU 14 大椎, LI 4 合谷",h:"Ma Xing Shi Gan Tang 麻杏石甘湯\nYin Qiao San 銀翹散\nShi Gao 石膏, Zhi Mu 知母, Huang Qin 黃芩"},
-    陽明燥金:{w:"★ Fire overcomes Metal 火克金\nAutumn stays hot. Dry heat persists 건열 지속",d:"★ Lung & Large Intestine diseases\nDry cough · Pneumonia · Constipation\nSkin diseases · Haemorrhoids 치질",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交\nST 44 內庭, KID 6 照海",h:"Mai Men Dong Tang 麥門冬湯\nBai He Gu Jin Tang 百合固金湯\nBai He 百合, Sha Shen 沙參, Pi Pa Ye 枇杷葉"},
-    太陽寒水:{w:"★ Extreme cold 극한 지속\nFlooding · Frost · Cold Water adverse",d:"★ Cold diseases 한성 질환\nJoint pain · Diarrhoea · Lower back pain\nUrinary disorders · Fear & anxiety",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門\nST 36 足三里, SP 6 三陰交",h:"Si Ni Tang 四逆湯\nYou Gui Wan 右歸丸\nFu Zi 附子, Gan Jiang 乾薑, Gui Zhi 桂枝"},
-    厥陰風木:{w:"★ Strong erratic winds 강풍·불규칙 기상\nLate winter wind surge. Cold winds persist",d:"★ Wind diseases 풍성 질환\nHeadache · Dizziness · Liver Qi uprising\nCramps · Tremors · Emotional disorders",a:"LIV 3 太衝, GB 20 風池\nDU 20 百會, GB 34 陽陵泉\nSP 6 三陰交, LIV 8 曲泉",h:"Tian Ma Gou Teng Yin 天麻鉤藤飲\nTian Ma 天麻, Gou Teng 鉤藤\nBai Shao 白芍, Long Gu 龍骨"},
-    太陰濕土:{w:"★ Excessive damp 과습 극성\nHeavy rainfall · Flooding conditions",d:"★ Damp diseases 습성 질환\nOedema · Bloating · Heavy limbs\nCloudy thinking · Diarrhoea · Skin weeping",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, BL 20 脾俞\nSP 6 三陰交, ST 36 足三里",h:"Wu Ling San 五苓散\nSan Ren Tang 三仁湯\nYi Yi Ren 薏苡仁, Cang Zhu 蒼朮, Ze Xie 澤瀉"}
+    少陰君火:{w:"★ Spring cold suppresses Heart Fire\nUnseasonable cold snaps. ",d:"★ Cardiovascular surge \nAngina · Palpitations · Cold-induced fever\nSpring influenza with cardiac complications",a:"HT 7 神門, PC 6 內關\nREN 14 巨闕, BL 15 心俞\nKID 3 太谿, SP 6 三陰交",h:"Gui Zhi Fu Ling Wan 桂枝茯苓丸\nSheng Mai San 生脈散\nRen Shen 人參, Mai Dong 麥冬, Wu Wei Zi 五味子"},
+    少陽相火:{w:"★ Extreme heat & dryness \nEarly summer heat surge. Fire blazing",d:"★ Respiratory heat diseases\nBronchitis · Pneumonia · Throat infections\nSkin eruptions  · Eye inflammation",a:"LU 5 尺澤, LI 11 曲池\nST 44 內庭, PC 8 勞宮\nDU 14 大椎, LI 4 合谷",h:"Ma Xing Shi Gan Tang 麻杏石甘湯\nYin Qiao San 銀翹散\nShi Gao 石膏, Zhi Mu 知母, Huang Qin 黃芩"},
+    陽明燥金:{w:"★ Fire overcomes Metal 火克金\nAutumn stays hot. Dry heat persists ",d:"★ Lung & Large Intestine diseases\nDry cough · Pneumonia · Constipation\nSkin diseases · Haemorrhoids Haemorrhoids",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交\nST 44 內庭, KID 6 照海",h:"Mai Men Dong Tang 麥門冬湯\nBai He Gu Jin Tang 百合固金湯\nBai He 百合, Sha Shen 沙參, Pi Pa Ye 枇杷葉"},
+    太陽寒水:{w:"★ Extreme cold \nFlooding · Frost · Cold Water adverse",d:"★ Cold diseases Cold diseases\nJoint pain · Diarrhoea · Lower back pain\nUrinary disorders · Fear & anxiety",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門\nST 36 足三里, SP 6 三陰交",h:"Si Ni Tang 四逆湯\nYou Gui Wan 右歸丸\nFu Zi 附子, Gan Jiang 乾薑, Gui Zhi 桂枝"},
+    厥陰風木:{w:"★ Strong erratic winds \nLate winter wind surge. Cold winds persist",d:"★ Wind diseases Wind diseases\nHeadache · Dizziness · Liver Qi uprising\nCramps · Tremors · Emotional disorders",a:"LIV 3 太衝, GB 20 風池\nDU 20 百會, GB 34 陽陵泉\nSP 6 三陰交, LIV 8 曲泉",h:"Tian Ma Gou Teng Yin 天麻鉤藤飲\nTian Ma 天麻, Gou Teng 鉤藤\nBai Shao 白芍, Long Gu 龍骨"},
+    太陰濕土:{w:"★ Excessive damp \nHeavy rainfall · Flooding conditions",d:"★ Damp diseases Damp diseases\nOedema · Bloating · Heavy limbs\nCloudy thinking · Diarrhoea · Skin weeping",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, BL 20 脾俞\nSP 6 三陰交, ST 36 足三里",h:"Wu Ling San 五苓散\nSan Ren Tang 三仁湯\nYi Yi Ren 薏苡仁, Cang Zhu 蒼朮, Ze Xie 澤瀉"}
   },
-  双火:{w:"★★ EXTREME HEAT 극열 — Both Guest & Host Qi are Fire\nDrought · Heat waves · Very dry & hot",d:"★★ EPIDEMIC PEAK — Wen Bing 溫病\nAcute febrile illness · Cardiovascular emergency\nHeatstroke 열중증 · Cerebrovascular events\nSeasonal epidemic outbreaks 역병 최고조",a:"PC 6 內關, HT 8 少府\nKID 6 照海, LI 11 曲池\nSP 6 三陰交, DU 14 大椎\nST 44 內庭",h:"Huang Lian Jie Du Tang 黃連解毒湯\nBai Hu Tang 白虎湯\nShi Gao 石膏, Zhi Mu 知母, Huang Lian 黃連\nSheng Mai San 生脈散: Mai Dong 麥冬, Wu Wei Zi 五味子\n⚠️ Prepare 2–3 weeks BEFORE this period!"},
+  双火:{w:"★★ EXTREME HEAT — Both Guest & Host Qi are Fire\nDrought · Heat waves · Very dry & hot",d:"★★ EPIDEMIC PEAK — Wen Bing 溫病\nAcute febrile illness · Cardiovascular emergency\nHeatstroke Heatstroke · Cerebrovascular events\nSeasonal epidemic outbreaks epidemic peak",a:"PC 6 內關, HT 8 少府\nKID 6 照海, LI 11 曲池\nSP 6 三陰交, DU 14 大椎\nST 44 內庭",h:"Huang Lian Jie Du Tang 黃連解毒湯\nBai Hu Tang 白虎湯\nShi Gao 石膏, Zhi Mu 知母, Huang Lian 黃連\nSheng Mai San 生脈散: Mai Dong 麥冬, Wu Wei Zi 五味子\n⚠️ Prepare 2–3 weeks BEFORE this period!"},
   同氣:{w:"★★ EXTREME — Identical Qi amplified\nSame elemental force doubled\nClimate extremes amplified",d:"★★ Same-Qi Period — Max vulnerability\nConstitutional organ at maximum stress\nPrepare 2 weeks in advance",a:"Tonify primary organ\nDrain excess with sedation points\nUse Yuan-Source points",h:"Consult segment-specific formula\nPrepare constitutional herbs 2 wks early"},
-  双土:{w:"★ EXTREME DAMP 극습 — Both Guest & Host Qi are Earth\nHeavy rain · Flooding · Humid & oppressive",d:"★ DAMP-HEAT EPIDEMIC 습열 역병\nGastroenteritis · Food poisoning\nOedema 부종 · Skin infections 피부감염\nChronic digestive disorders · Fatigue syndrome",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, LI 11 曲池\nBL 20 脾俞, ST 36 足三里",h:"Huo Xiang Zheng Qi San 藿香正氣散\nSan Ren Tang 三仁湯\nHuo Xiang 藿香, Yi Yi Ren 薏苡仁\nHuang Lian 黃連, Bai Zhu 白朮"},
+  双土:{w:"★ EXTREME DAMP — Both Guest & Host Qi are Earth\nHeavy rain · Flooding · Humid & oppressive",d:"★ DAMP-HEAT EPIDEMIC Damp-Heat \nGastroenteritis · Food poisoning\nOedema  · Skin infections Skin infections\nChronic digestive disorders · Fatigue syndrome",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, LI 11 曲池\nBL 20 脾俞, ST 36 足三里",h:"Huo Xiang Zheng Qi San 藿香正氣散\nSan Ren Tang 三仁湯\nHuo Xiang 藿香, Yi Yi Ren 薏苡仁\nHuang Lian 黃連, Bai Zhu 白朮"},
   同氣:{
-    木:{w:"Wind amplified 봄바람 증폭. Wind dominant",d:"Liver & GB focus 肝膽\nDizziness · Irritability · Tendon issues\nEye disorders · Migraine",a:"LIV 3 太衝, LIV 8 曲泉\nGB 20 風池, GB 34 陽陵泉\nBL 18 肝俞",h:"Long Dan Xie Gan Tang 龍膽瀉肝湯\nGou Qi Zi 枸杞子, Bai Shao 白芍"},
-    火:{w:"Heat amplified 열기 증폭",d:"Heart & SI focus 心小腸\nPalpitations · Insomnia · Tongue sores",a:"HT 7 神門, HT 8 少府\nPC 6 內關, BL 15 心俞",h:"Huang Lian Jie Du Tang 黃連解毒湯\nLian Zi Xin 蓮子心, Sheng Di 生地"},
-    土:{w:"Damp amplified 습기 증폭",d:"Spleen & ST focus 脾胃\nBloating · Oedema · Heaviness",a:"SP 3 太白, SP 9 陰陵泉\nST 36 足三里, REN 12 中脘",h:"Ping Wei San 平胃散\nBai Zhu 白朮, Cang Zhu 蒼朮"},
-    金:{w:"Dryness amplified 건조 증폭",d:"Lung & LI focus 肺大腸\nDry cough · Skin dryness · Constipation",a:"LU 9 太淵, LU 7 列缺\nLI 4 合谷, BL 13 肺俞",h:"Bai He Gu Jin Tang 百合固金湯\nYu Zhu 玉竹, Sha Shen 沙參"},
-    水:{w:"Cold amplified 한기 증폭",d:"Kidney & BL focus 腎膀胱\nLower back pain · Urinary frequency · Fear",a:"KID 3 太谿, KID 7 復溜\nBL 23 腎俞, REN 4 關元",h:"Liu Wei Di Huang Wan 六味地黃丸\nShu Di 熟地, Shan Zhu Yu 山茱萸"}
+    木:{w:"Wind amplified. Wind dominant",d:"Liver & GB focus 肝膽\nDizziness · Irritability · Tendon issues\nEye disorders · Migraine",a:"LIV 3 太衝, LIV 8 曲泉\nGB 20 風池, GB 34 陽陵泉\nBL 18 肝俞",h:"Long Dan Xie Gan Tang 龍膽瀉肝湯\nGou Qi Zi 枸杞子, Bai Shao 白芍"},
+    火:{w:"Heat amplified",d:"Heart & SI focus 心小腸\nPalpitations · Insomnia · Tongue sores",a:"HT 7 神門, HT 8 少府\nPC 6 內關, BL 15 心俞",h:"Huang Lian Jie Du Tang 黃連解毒湯\nLian Zi Xin 蓮子心, Sheng Di 生地"},
+    土:{w:"Damp amplified",d:"Spleen & ST focus 脾胃\nBloating · Oedema · Heaviness",a:"SP 3 太白, SP 9 陰陵泉\nST 36 足三里, REN 12 中脘",h:"Ping Wei San 平胃散\nBai Zhu 白朮, Cang Zhu 蒼朮"},
+    金:{w:"Dryness amplified",d:"Lung & LI focus 肺大腸\nDry cough · Skin dryness · Constipation",a:"LU 9 太淵, LU 7 列缺\nLI 4 合谷, BL 13 肺俞",h:"Bai He Gu Jin Tang 百合固金湯\nYu Zhu 玉竹, Sha Shen 沙參"},
+    水:{w:"Cold amplified",d:"Kidney & BL focus 腎膀胱\nLower back pain · Urinary frequency · Fear",a:"KID 3 太谿, KID 7 復溜\nBL 23 腎俞, REN 4 關元",h:"Liu Wei Di Huang Wan 六味地黃丸\nShu Di 熟地, Shan Zhu Yu 山茱萸"}
   }
 };
 
@@ -227,8 +228,8 @@ function rI(){
     {l:"Si Tian 司天 Controlling Heaven",v:QEN[D.si],cn:D.si,bg:se.b,c:se.t},
     {l:"Zai Quan 在泉 At the Fountain",v:QEN[D.za],cn:D.za,bg:ze.b,c:ze.t},
     {l:"Yun-Qi 運氣 Relationship",v:D.rel,cn:D.rc,bg:rb2?"#FFF0EE":"#F0FBF5",c:rb2?"#C84B30":"#2D6A4F"},
-    {l:"Special Classification 특수",v:D.sp,cn:D.sc,bg:sb?"#FFF5EC":"#F5F5F5",c:sb?"#E07030":"#444"},
-    {l:"Risk Segments 위험구간",v:`${hr.length} / 10`,cn:"high-risk periods",bg:hr.length>=4?"#FFF0EE":"#F0FBF5",c:hr.length>=4?"#C84B30":"#2D6A4F"},
+    {l:"Special Classification",v:D.sp,cn:D.sc,bg:sb?"#FFF5EC":"#F5F5F5",c:sb?"#E07030":"#444"},
+    {l:"Risk Segments",v:`${hr.length} / 10`,cn:"high-risk periods",bg:hr.length>=4?"#FFF0EE":"#F0FBF5",c:hr.length>=4?"#C84B30":"#2D6A4F"},
   ].map(({l,v,cn,bg,c})=>`<div class="ic" style="background:${bg}"><div class="il">${l}</div><div class="iv" style="color:${c}">${v}</div>${cn?`<div class="icn">${cn}</div>`:""}</div>`).join("");
 }
 
@@ -245,6 +246,7 @@ function rT(){
   document.getElementById("TH").textContent=`📊 ${Y} Yun Qi Segment Analysis · ${H==="N"?"Northern 北半球":"Southern 南半球/Sydney"}`;
   document.getElementById("TB").innerHTML=SG.map((s,i)=>{
     const r=jKZ(QEL[s.kq],QEL[s.zq]),yr=jY(s.ky,s.zy),cl=getCL(r,s.zq,s.kq);
+    const ep=(D.epSegs&&D.epSegs[i])||"";
     const v=RS[r]||RS["顺"];
     const bg=r==="双火"?"#FFF0EE":r==="双土"?"#FFF5EC":r==="逆"?"#FFFBE8":r==="同氣"?"#EEF4FF":i%2===0?"#FAFFFE":"white";
     const zyS=ES[s.zy]||ES["木"],kyS=ES[s.ky]||ES["木"],zqS=ES[QEL[s.zq]]||ES["木"],kqS=ES[QEL[s.kq]]||ES["木"];
@@ -255,7 +257,7 @@ function rT(){
       <td><span class="bdg" style="background:${zqS.b};border-color:${zqS.d};color:${zqS.t}">H:${QEN[s.zq]}</span><div style="font-size:9px;color:#aaa">${s.zq}</div><span class="bdg" style="background:${kqS.b};border-color:${kqS.d};color:${kqS.t}">G:${QEN[s.kq]}</span><div style="font-size:9px;color:#aaa">${s.kq}</div></td>
       <td style="text-align:center">${rb(r)}</td>
       <td style="color:#2E5F8A">${cl.w.replace(/\n/g,"<br>")}</td>
-      <td style="color:#C84B30">${ep?`<div style="font-weight:bold;background:#FFF0EE;padding:2px 5px;border-radius:3px;border-left:3px solid #C84B30;margin-bottom:4px">${ep}</div>`:""}</div>${cl.d.replace(/\n/g,"<br>")}</td>
+      <td style="color:#C84B30">${(ep?"<div style='font-weight:bold;background:#FFF0EE;padding:2px 5px;border-radius:3px;border-left:3px solid #C84B30;margin-bottom:4px'>"+ep+"</div>":"")+cl.d.replace(/\n/g,"<br>")}</td>
       <td style="color:#2D6A4F">${cl.a.replace(/\n/g,"<br>")}</td>
       <td style="color:#7A5A06">${cl.h.replace(/\n/g,"<br>")}</td>
     </tr>`;
@@ -326,11 +328,11 @@ function pdf(){
   <div class="c" style="background:#FAEAE6"><small style="color:#888">Si Tian 司天</small><br><b style="color:#8B2A18;font-size:11px">${QEN[D.si]} ${D.si}</b></div>
   <div class="c" style="background:#EBEBEB"><small style="color:#888">Zai Quan 在泉</small><br><b style="font-size:11px">${QEN[D.za]} ${D.za}</b></div>
   <div class="c" style="background:#FFFBE8"><small style="color:#888">Yun-Qi 運氣</small><br><b style="color:#7A5A06;font-size:11px">${D.rel}</b><br><small style="color:#aaa">${D.rc}</small></div>
-  <div class="c" style="background:#F5F5F5"><small style="color:#888">Special 특수</small><br><b style="font-size:11px">${D.sp}</b></div>
+  <div class="c" style="background:#F5F5F5"><small style="color:#888">Special</small><br><b style="font-size:11px">${D.sp}</b></div>
   <div class="c" style="background:#FFF0EE"><small style="color:#888">Risk segments</small><br><b style="color:#C84B30;font-size:11px">${hr.length} / 10</b></div>
 </div></div>
 <div class="sec"><div class="sh" style="background:#1C2D58">📊 Yun Qi Segment Analysis · ${hl}</div>
-<div style="overflow-x:auto"><table><thead><tr>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr>
   <th>Segment</th><th>Dates</th><th>Host/Guest Yun 運</th><th>Host/Guest Qi 氣</th>
   <th>Ke-Zhu 客主加臨</th><th>🌤 Weather Forecast</th><th>🏥 Disease Prediction</th>
   <th>📍 Acupuncture Points</th><th>🌿 Herbs &amp; Formulae</th>
@@ -338,7 +340,7 @@ function pdf(){
 ${hr.length>0?`<div class="sec"><div class="sh" style="background:#C84B30">⚠️ ${Y} Epidemic &amp; Risk Periods — ${hr.length} segments</div><div class="rw">${cards}</div></div>`:""}
 <div style="text-align:center;color:#999;font-size:10px;padding:8px">© 2026 Blossom Skin &amp; Health Pty Ltd · Sang Hee Park, PhD · Educational purposes only</div>
 </div>
-<script>
+<scr'+'ipt>
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>{
     navigator.serviceWorker.register("/sw.js")
@@ -346,7 +348,7 @@ if("serviceWorker" in navigator){
       .catch(e=>console.log("SW error",e));
   });
 }
-</script>
+</scr'+'ipt>
 </body></html>`;
   document.getElementById("MT").textContent=`📄 ${Y} ${D.jiazi} — Full Clinical PDF`;
   document.getElementById("PF").srcdoc=PS;
