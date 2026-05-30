@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#1C2D58">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="運氣 Analyzer">
-<link rel="manifest" href="/manifest.json">
+
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yun Qi Analyzer — Sang Hee Park, PhD</title>
@@ -314,7 +317,10 @@ function pdf(){
       <span style="color:#7A5A06;font-size:10px">🌿 ${cl.h.split("\n")[0]}</span>
     </div>`;
   }).join("");
-  PS=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${Y} ${D.jiazi} Yun Qi Analysis</title>
+  PS=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><title>${Y} ${D.jiazi} Yun Qi Analysis</title>
 <style>body{font-family:'Segoe UI',sans-serif;background:#F5F3EE;margin:0;padding:16px;color:#222}table{width:100%;border-collapse:collapse}th{background:#1C2D58;color:white;padding:6px 8px;text-align:left;font-size:10px}.sec{background:white;border-radius:8px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}.sh{padding:8px 14px;font-weight:bold;font-size:12px;color:white}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;padding:12px}.c{border-radius:6px;padding:8px 10px}.rw{display:flex;gap:8px;flex-wrap:wrap;padding:12px}tr{border-bottom:1px solid #e8e8e8}@media print{body{background:white;padding:0}.np{display:none}}</style></head><body>
 <div style="max-width:1100px;margin:0 auto">
 <div class="np" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="background:#1C2D58;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-weight:bold">🖨️ Print / Save PDF</button></div>
@@ -340,15 +346,7 @@ function pdf(){
 ${hr.length>0?`<div class="sec"><div class="sh" style="background:#C84B30">⚠️ ${Y} Epidemic &amp; Risk Periods — ${hr.length} segments</div><div class="rw">${cards}</div></div>`:""}
 <div style="text-align:center;color:#999;font-size:10px;padding:8px">© 2026 Blossom Skin &amp; Health Pty Ltd · Sang Hee Park, PhD · Educational purposes only</div>
 </div>
-<scr'+'ipt>
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("/sw.js")
-      .then(()=>console.log("SW registered"))
-      .catch(e=>console.log("SW error",e));
-  });
-}
-</scr'+'ipt>
+
 </body></html>`;
   document.getElementById("MT").textContent=`📄 ${Y} ${D.jiazi} — Full Clinical PDF`;
   document.getElementById("PF").srcdoc=PS;
@@ -361,11 +359,11 @@ ra();
 </script>
 
 <script>
+// Service Worker disabled — prevents caching issues
+// Unregister any existing service workers
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("/sw.js")
-      .then(()=>console.log("SW registered"))
-      .catch(e=>console.log("SW error",e));
+  navigator.serviceWorker.getRegistrations().then(function(registrations){
+    for(let reg of registrations){ reg.unregister(); }
   });
 }
 </script>
