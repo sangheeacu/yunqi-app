@@ -53,6 +53,31 @@ iframe{width:93%;max-width:980px;height:80vh;border:none;background:white;border
 </style>
 </head>
 <body>
+<script>
+(function(){
+  // 1. Delete all caches
+  if('caches' in window){
+    caches.keys().then(function(names){
+      names.forEach(function(name){ caches.delete(name); });
+    });
+  }
+  // 2. Unregister service workers
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(reg){ reg.unregister(); });
+    });
+  }
+  // 3. Back/forward cache
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted){ window.location.reload(true); }
+  });
+  // 4. Version check — update v= when deploying
+  var V='20260530v4';
+  var s=sessionStorage.getItem('yq_v');
+  if(s && s!==V){ sessionStorage.setItem('yq_v',V); window.location.reload(true); }
+  else { sessionStorage.setItem('yq_v',V); }
+})();
+</script>
 <div class="hdr">
   <div class="hdr-lbl">五運六氣 · YUN QI CLINICAL ANALYZER</div>
   <div class="hdr-ttl">Yun Qi 運氣 Full Clinical Analysis</div>
