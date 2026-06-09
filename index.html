@@ -50,10 +50,8 @@ const RISK_S={雙火:{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color
 const LANGUAGES=[{v:"en",label:"English"},{v:"ko",label:"한국어 (Korean)"},{v:"zh",label:"中文 (Chinese)"},{v:"ja",label:"日本語 (Japanese)"},{v:"es",label:"Español (Spanish)"},{v:"fr",label:"Français (French)"},{v:"de",label:"Deutsch (German)"},{v:"id",label:"Bahasa Indonesia"},{v:"pt",label:"Português"},{v:"ar",label:"العربية (Arabic)"}];
 const HEALTH_CONDITIONS=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions (asthma/COPD)","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
 const SUPABASE_URL = "https://dqcxpevxkbgwqqzackjd.supabase.co";
-const SUPABASE_ANON_KEY = "%%NEXT_PUBLIC_SUPABASE_ANON_KEY%%";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY3hwZXZ4a2Jnd3FxemFja2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODQ2MjcsImV4cCI6MjA5NjU2MDYyN30.FzupfG-0YG30sUBVo3I7BO4y5S3QZwTOPmrDGWqSNYY";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const ANTHROPIC_KEY = "%%ANTHROPIC_API_KEY%%";
 
 function getKeQi(si){const i=SIX_QI.indexOf(si);return SIX_QI.map((_,j)=>SIX_QI[(i-2+j+6)%6]);}
 function getKeYun(e){const r=[e];let c=e;for(let i=1;i<5;i++){c=YUN_GEN[c];r.push(c);}return r;}
@@ -306,10 +304,18 @@ function App(){
     const userMsg={role:"user",content:input};
     setMsgs(m=>[...m,userMsg]);setInput("");setLoading(true);
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
+      const res=await fetch("/api/chat",{
         method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-calls":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})
+        headers:{"Content-Type":"application/json",
+        body:JSON.stringify({system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})
+});
+그리고 파일 맨 위의 이 두 줄도 삭제:
+javascriptconst SUPABASE_ANON_KEY = "%%NEXT_PUBLIC_SUPABASE_ANON_KEY%%";
+const ANTHROPIC_KEY = "%%ANTHROPIC_API_KEY%%";
+SUPABASE_ANON_KEY는 아래처럼 직접 값으로 바꾸세요:
+javascriptconst SUPABASE_ANON_KEY = "eyJhbGci...실제anon키...";
+Supabase anon key는 공개해도 안전합니다 (RLS 정책으로 보호됨).
+Commit changes 클릭 후 알려주세요!Sonnet 4.6 LowClaude is AI and can make mistakes. Please double-check responses.
       });
       const d=await res.json();
       setMsgs(m=>[...m,{role:"assistant",content:(d.content&&d.content[0]&&d.content[0].text)||"Error retrieving response."}]);
