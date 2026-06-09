@@ -37,22 +37,38 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const BOOKING="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
 
 async function sbSignUp(email,pw,name,dob,lang,conds){
-  const{data,error}=await sb.auth.signUp({email,password:pw});
+  const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name}}});
   if(error)throw error;
-  await sb.from("users").insert({id:data.user.id,email,name,dob:dob||null,pref_lang:lang,conditions:conds,plan:"free"});
-  return{id:data.user.id,email,name,dob,pref_lang:lang,conditions:conds,plan:"free"};
+  if(!data.user)throw new Error("Sign-up requires email confirmation. Please check your inbox.");
+  const uid=data.user.id;
+  const{error:ie}=await sb.from("users").upsert({id:uid,email,name,dob:dob||null,pref_lang:lang,conditions:conds||[],plan:"free"},{onConflict:"id"});
+  if(ie)console.warn("users insert warning:",ie.message);
+  return{id:uid,email,name,dob,pref_lang:lang,conditions:conds||[],plan:"free"};
 }
 async function sbSignIn(email,pw){
   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
   if(error)throw error;
-  const{data:p}=await sb.from("users").select("*").eq("id",data.user.id).single();
+  const{data:p,error:pe}=await sb.from("users").select("*").eq("id",data.user.id).single();
+  if(pe||!p){
+    // users 레코드 없으면 생성
+    const nm=data.user.user_metadata?.name||email.split("@")[0];
+    const{data:np}=await sb.from("users").upsert({id:data.user.id,email,name:nm,plan:"free"},{onConflict:"id"}).select().single();
+    return np||{id:data.user.id,email,name:nm,plan:"free"};
+  }
   return p;
 }
 async function sbSignOut(){await sb.auth.signOut();}
 async function sbSession(){
   const{data}=await sb.auth.getSession();
   if(!data.session)return null;
-  const{data:p}=await sb.from("users").select("*").eq("id",data.session.user.id).single();
+  const uid=data.session.user.id;
+  const{data:p,error:pe}=await sb.from("users").select("*").eq("id",uid).single();
+  if(pe||!p){
+    const email=data.session.user.email;
+    const nm=data.session.user.user_metadata?.name||email.split("@")[0];
+    const{data:np}=await sb.from("users").upsert({id:uid,email,name:nm,plan:"free"},{onConflict:"id"}).select().single();
+    return np||{id:uid,email,name:nm,plan:"free"};
+  }
   return p;
 }
 async function sbUpdate(uid,obj){const{error}=await sb.from("users").update(obj).eq("id",uid);if(error)throw error;}
@@ -77,17 +93,19 @@ const DS=["7.22~9.22","9.22~10.3","10.3~11.21","11.21~12.16","12.16~1.21","1.21~
 
 const SP={"\u4e01\u536f1987":"\u6b72\u6703","\u5e9a\u54481990":"\u540c\u5929\u7b26","\u8f9b\u672a1991":"\u540c\u6b72\u6703","\u58ec\u75331992":"\u540c\u5929\u7b26","\u7678\u914d1993":"\u540c\u6b72\u6703","\u7532\u620c1994":"\u540c\u5929\u7b26","\u4e19\u5b501996":"\u6b72\u6703","\u620a\u5bc51998":"\u5929\u7b26","\u4e59\u914d2005":"\u592a\u4e59\u5929\u7b26","\u4e19\u620c2006":"\u5929\u7b26","\u4e01\u4ea52007":"\u5929\u7b26","\u620a\u5b502008":"\u5929\u7b26","\u5df1\u4e112009":"\u592a\u4e59\u5929\u7b26","\u7532\u53482014":"\u6b72\u6703","\u5e9a\u5b502020":"\u540c\u5929\u7b26","\u8f9b\u4e112021":"\u540c\u6b72\u6703","\u58ec\u5bc52022":"\u540c\u5929\u7b26","\u7678\u536f2023":"\u540c\u6b72\u6703","\u7532\u8fb02024":"\u540c\u5929\u7b26","\u620a\u75332028":"\u5929\u7b26","\u8f9b\u4ea52031":"\u540c\u6b72\u6703","\u7678\u4e112033":"\u540c\u6b72\u6703","\u4e59\u536f2035":"\u5929\u7b26","\u4e19\u8fb02036":"\u5929\u7b26","\u4e01\u5df32037":"\u5929\u7b26","\u620a\u53482038":"\u592a\u4e59\u5929\u7b26","\u5df1\u672a2040":"\u592a\u4e59\u5929\u7b26"};
 
-const RS={"\u96d9\u706b":{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color:"#C84B30"},"\u96d9\u571f":{label:"★★ HIGH",bg:"#FFF5EC",border:"#E07030",color:"#E07030"},"\u9006":{label:"★ HIGH",bg:"#FFFBE8",border:"#B8860B",color:"#B8860B"},"\u9806":{label:"— OK",bg:"#F0FBF5",border:"#2D6A4F",color:"#2D6A4F"}};
+const RS={"雙火":{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color:"#C84B30"},"雙土":{label:"★★ HIGH",bg:"#FFF5EC",border:"#E07030",color:"#E07030"},"逆":{label:"★ HIGH",bg:"#FFFBE8",border:"#B8860B",color:"#B8860B"},"順":{label:"— OK",bg:"#F0FBF5",border:"#2D6A4F",color:"#2D6A4F"}};
 
 const LANGS=[{v:"en",l:"English"},{v:"ko",l:"Korean (한국어)"},{v:"zh",l:"Chinese (中文)"},{v:"ja",l:"Japanese (日本語)"},{v:"es",l:"Spanish (Español)"},{v:"fr",l:"French (Français)"},{v:"de",l:"German (Deutsch)"},{v:"id",l:"Bahasa Indonesia"},{v:"pt",l:"Portuguese"},{v:"ar",l:"Arabic (العربية)"}];
 const HC=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
 
 function judgeRisk(ke,zh){
-  if((ke==="\u706b"||ke==="\u76f8\u706b")&&(zh==="\u706b"||zh==="\u76f8\u706b"))return"\u96d9\u706b";
-  if(ke==="\u571f"&&zh==="\u571f")return"\u96d9\u571f";
-  const k={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
-  if(k[ke]===zh||k[zh]===ke)return"\u9006";
-  return"\u9806";
+  if((ke==="火"||ke==="相火")&&(zh==="火"||zh==="相火"))return"雙火";
+  if(ke==="土"&&zh==="土")return"雙土";
+  // 客克主 = 逆 (객기가 주기를 克할 때만)
+  const ctrl={"木":"土","土":"水","水":"火","火":"金","金":"木","相火":"金"};
+  const keBase=ke==="相火"?"火":ke;
+  if(ctrl[keBase]===zh)return"逆";
+  return"順";
 }
 
 function calcYear(yr){
@@ -99,9 +117,7 @@ function calcYear(yr){
   const keYun=(e=>{const r=[e];let c=e;for(let i=1;i<5;i++){c=YG[c];r.push(c);}return r;})(dyEl);
   const special=SP[jz+yr]||SP[jz]||"\u2014";
   const siEl=SQE[si];
-  const k2={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
-  const g2={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728","\u76f8\u706b":"\u571f"};
-  const yqr=siEl===dyEl?"\u9806\u5316":k2[dyEl]===siEl?"\u5929\u5211":g2[dyEl]===siEl?"\u5c0f\u9006":"\u4e0d\u548c";
+  const gen={木:"火",火:"土",土:"金",金:"水",水:"木",相火:"土"};const ctrl={木:"土",土:"水",水:"火",火:"金",金:"木",相火:"金"};const yqr=siEl===dyEl?"天符":gen[siEl]===dyEl?"氣生運(順化)":gen[dyEl]===siEl?"運生氣(小逆)":ctrl[siEl]===dyEl?"氣克運(天刑)":ctrl[dyEl]===siEl?"運克氣(不和)":"—";
   const segs=SL.map((name,i)=>{
     const yi=[0,0,1,1,2,2,3,3,4,4][i],qi=[0,1,1,2,2,3,3,4,4,5][i];
     const zYun=FY[yi],kYun=keYun[yi],zQi=SQ[qi],kQiName=keQi[qi];
@@ -114,7 +130,7 @@ function calcYear(yr){
 function getUpcoming(segs,hemi,yr){
   const now=new Date(),dates=hemi==="S"?DS:DN,out=[];
   segs.forEach((s,i)=>{
-    if(s.risk==="\u96d9\u706b"||s.risk==="\u96d9\u571f"||s.risk==="\u9006"){
+    if(s.risk==="雙火"||s.risk==="雙土"||s.risk==="逆"){
       const[ms,ds]=dates[i].split("~")[0].split(".").map(Number);
       const start=new Date(yr,ms-1,ds);
       const a0=new Date(start);a0.setDate(a0.getDate()-30);
@@ -128,10 +144,10 @@ function getUpcoming(segs,hemi,yr){
 }
 
 const CL={
-  "\u96d9\u706b":{w:"Both Qi are Fire — extreme heat, drought, sudden storms.",d:"Febrile epidemics · Cardiovascular crisis · Insomnia · Palpitations · Heat stroke",food:"Bitter melon · Lotus seed · Mung beans · Cucumber · Chrysanthemum tea · Green tea",tea:"Chrysanthemum & Wolfberry Tea: 10 flowers + 1 tsp goji berries, steep 5 min.\n\nLotus Seed & Lily Bulb Tea: 10g lotus seeds + 10g lily bulb, simmer 20 min, add honey.",lifestyle:"Avoid peak sun (11am-3pm) · Light cotton clothing · Cold foot bath before bed · Limit spicy & alcohol · Choose gentle walking or swimming",lay:"Heat peaks. Cool from the inside out. Hydrate constantly.",a:"HT 7 \u795e\u9580 · HT 8 \u5c11\u5e9c · PC 6 \u5185\u95dc · LI 11 \u66f2\u6c60 · BL 15 \u5fc3\u4fde · GV 14 \u5927\u690e",h:"Huang Lian Jie Du Tang \u9ec4\u8fde\u89e3\u6bd2\u6e6f · Zhu Ye Shi Gao Tang \u7af9\u8449\u77f3\u818f\u6e6f"},
-  "\u96d9\u571f":{w:"Both Qi are Earth — heavy rain, flooding, oppressive humidity.",d:"Damp-heat epidemic · Gastroenteritis · Oedema · Skin infections · Fatigue",food:"Barley (\u85a6\u82e1\u4ec1) · Adzuki beans · Pumpkin · Congee · Cooked ginger · Daikon",tea:"Ginger & Tangerine Peel Tea: 3 ginger slices + 5g dried peel (\u9673\u76ae), simmer 10 min.\n\nBarley & Red Bean Tea: 30g barley + 20g adzuki beans, soak 1hr, simmer 40 min. Drink warm.",lifestyle:"Avoid cold drinks & raw food · Keep spaces dry · Eat smaller meals · Morning walks · Gentle abdominal massage after meals",lay:"Dampness accumulates. Keep warm, eat cooked foods, avoid cold or heavy meals.",a:"SP 9 \u9670\u9675\u6cc9 · ST 40 \u8c50\u9686 · REN 9 \u6c34\u5206 · LI 11 \u66f2\u6c60 · BL 20 \u813e\u4fde · ST 36 \u8db3\u4e09\u91cc",h:"Huo Xiang Zheng Qi San \u85ff\u9999\u6b63\u6c23\u6563 · San Ren Tang \u4e09\u4ec1\u6e6f"},
-  "\u9006":{w:"Guest Qi overacts Host Qi — climate contradicts the season.",d:"Immune fluctuation · Seasonal allergies · Erratic symptoms · Infection risk",food:"Warming easy-to-digest foods · Ginger · Spring onion · Cooked garlic · Bone broth",tea:"Ginger, Spring Onion & Brown Sugar Tea: 3 ginger slices + 2 spring onion roots + 1 tsp brown sugar, simmer 10 min.\n\nCinnamon & Honey Tea: half tsp cinnamon in warm water + 1 tsp honey.",lifestyle:"Dress in layers · Keep neck & lower back warm · Adequate sleep · Reduce alcohol & sugar",lay:"Seasons clash. Dress warmly, eat simply, rest well.",a:"LI 4 \u5408\u8c37 · ST 36 \u8db3\u4e09\u91cc · LU 7 \u5217\u7f3a · BL 12 \u98a8\u9580 · GV 14 \u5927\u690e",h:"Yu Ping Feng San \u7389\u5c4f\u98a8\u6563 · Gui Zhi Tang \u6842\u679d\u6e6f"},
-  "\u9806":{w:"Qi harmonise — normal seasonal pattern.",d:"Mild seasonal patterns. Standard self-care applies.",food:"Spring=leafy greens, Summer=cooling fruits, Late summer=root vegetables, Autumn=pears, Winter=black foods & nuts",tea:"Seasonal tea: Spring=chrysanthemum; Summer=mint & honey; Autumn=pear & white fungus; Winter=cinnamon & goji.",lifestyle:"Regular sleep · Gentle seasonal exercise · Eat with the season · Spend time in nature",lay:"Harmonious period. Maintain regular routines.",a:"ST 36 \u8db3\u4e09\u91cc · SP 6 \u4e09\u9670\u4ea4 · LI 4 \u5408\u8c37 · BL 23 \u814e\u4fde",h:"Seasonal tonic formulas as appropriate"}
+  "雙火":{w:"Both Qi are Fire — extreme heat, drought, sudden storms.",d:"Febrile epidemics · Cardiovascular crisis · Insomnia · Palpitations · Heat stroke",food:"Bitter melon · Lotus seed · Mung beans · Cucumber · Chrysanthemum tea · Green tea",tea:"Chrysanthemum & Wolfberry Tea: 10 flowers + 1 tsp goji berries, steep 5 min.\n\nLotus Seed & Lily Bulb Tea: 10g lotus seeds + 10g lily bulb, simmer 20 min, add honey.",lifestyle:"Avoid peak sun (11am-3pm) · Light cotton clothing · Cold foot bath before bed · Limit spicy & alcohol · Choose gentle walking or swimming",lay:"Heat peaks. Cool from the inside out. Hydrate constantly.",a:"HT 7 神門 · HT 8 少府 · PC 6 內關 · LI 11 曲池 · BL 15 心俞 · GV 14 大椎",h:"Huang Lian Jie Du Tang 黃連解毒湯 · Zhu Ye Shi Gao Tang 竹葉石膏湯"},
+  "雙土":{w:"Both Qi are Earth — heavy rain, flooding, oppressive humidity.",d:"Damp-heat epidemic · Gastroenteritis · Oedema · Skin infections · Fatigue",food:"Barley (薏苡仁) · Adzuki beans · Pumpkin · Congee · Cooked ginger · Daikon",tea:"Ginger & Tangerine Peel Tea: 3 ginger slices + 5g dried peel (陳皮), simmer 10 min.\n\nBarley & Red Bean Tea: 30g barley + 20g adzuki beans, soak 1hr, simmer 40 min. Drink warm.",lifestyle:"Avoid cold drinks & raw food · Keep spaces dry · Eat smaller meals · Morning walks · Gentle abdominal massage after meals",lay:"Dampness accumulates. Keep warm, eat cooked foods, avoid cold or heavy meals.",a:"SP 9 陰陵泉 · ST 40 豐隆 · REN 9 水分 · LI 11 曲池 · BL 20 脾俞 · ST 36 足三里",h:"Huo Xiang Zheng Qi San 藿香正氣散 · San Ren Tang 三仁湯"},
+  "逆":{w:"Guest Qi overacts Host Qi — climate contradicts the season.",d:"Immune fluctuation · Seasonal allergies · Erratic symptoms · Infection risk",food:"Warming easy-to-digest foods · Ginger · Spring onion · Cooked garlic · Bone broth",tea:"Ginger, Spring Onion & Brown Sugar Tea: 3 ginger slices + 2 spring onion roots + 1 tsp brown sugar, simmer 10 min.\n\nCinnamon & Honey Tea: half tsp cinnamon in warm water + 1 tsp honey.",lifestyle:"Dress in layers · Keep neck & lower back warm · Adequate sleep · Reduce alcohol & sugar",lay:"Seasons clash. Dress warmly, eat simply, rest well.",a:"LI 4 合谷 · ST 36 足三里 · LU 7 列缺 · BL 12 風門 · GV 14 大椎",h:"Yu Ping Feng San 玉屏風散 · Gui Zhi Tang 桂枝湯"},
+  "順":{w:"Qi harmonise — normal seasonal pattern.",d:"Mild seasonal patterns. Standard self-care applies.",food:"Spring=leafy greens, Summer=cooling fruits, Late summer=root vegetables, Autumn=pears, Winter=black foods & nuts",tea:"Seasonal tea: Spring=chrysanthemum; Summer=mint & honey; Autumn=pear & white fungus; Winter=cinnamon & goji.",lifestyle:"Regular sleep · Gentle seasonal exercise · Eat with the season · Spend time in nature",lay:"Harmonious period. Maintain regular routines.",a:"ST 36 足三里 · SP 6 三陰交 · LI 4 合谷 · BL 23 腎俞",h:"Seasonal tonic formulas as appropriate"}
 };
 
 function buildSys(u){
@@ -197,8 +213,22 @@ function App(){
     setAuthErr("");
     if(authMode==="register"){
       if(!email||!pw||!nm){setAuthErr("Please fill in all required fields.");return;}
-      try{const p=await sbSignUp(email,pw,nm,dob,lang,conds);setUser(p);setObConds(conds);setObStep(1);}
-      catch(e){setAuthErr(e.message||"Registration failed.");}
+      if(pw.length<6){setAuthErr("Password must be at least 6 characters.");return;}
+      try{
+        const p=await sbSignUp(email,pw,nm,dob,lang,conds);
+        setUser(p);setObConds(conds);setObStep(1);
+      }catch(e){
+        const msg=e.message||"";
+        if(msg.includes("confirmation")||msg.includes("confirm")||msg.includes("verify")){
+          setAuthErr("Account created! Please check your email to confirm, then sign in.");
+          setAuthMode("login");
+        } else if(msg.includes("already registered")||msg.includes("already exists")){
+          setAuthErr("Email already registered. Please sign in.");
+          setAuthMode("login");
+        } else {
+          setAuthErr(msg||"Registration failed.");
+        }
+      }
     }else{
       try{const p=await sbSignIn(email,pw);setUser(p);}
       catch(e){setAuthErr("Incorrect email or password.");}
@@ -255,9 +285,17 @@ function App(){
         body:JSON.stringify({system:buildSys(user),messages:[...msgs,uMsg].map(m=>({role:m.role,content:m.content}))})
       });
       const d=await res.json();
-      setMsgs(m=>[...m,{role:"assistant",content:(d.content&&d.content[0]&&d.content[0].text)||"Error retrieving response."}]);
+      // Anthropic 에러 응답 처리
+      if(d.error){
+        const errMsg=typeof d.error==="object"?d.error.message:d.error;
+        setMsgs(m=>[...m,{role:"assistant",content:"Service error: "+errMsg+". Please try again."}]);
+      } else if(d.content&&d.content[0]&&d.content[0].text){
+        setMsgs(m=>[...m,{role:"assistant",content:d.content[0].text}]);
+      } else {
+        setMsgs(m=>[...m,{role:"assistant",content:"Unexpected response. Please try again."}]);
+      }
     }catch(e){
-      setMsgs(m=>[...m,{role:"assistant",content:"An error occurred. Please try again."}]);
+      setMsgs(m=>[...m,{role:"assistant",content:"Connection error. Please check your network and try again."}]);
     }
     setLoading(false);
   }
@@ -285,11 +323,11 @@ function App(){
   const riskModal=rModal&&(
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.65)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:C.white,borderRadius:12,padding:0,maxWidth:500,width:"100%",maxHeight:"92vh",overflowY:"auto"}}>
-        <div style={{background:rModal.risk==="\u96d9\u706b"?C.red:rModal.risk==="\u96d9\u571f"?C.orange:C.darkGold,borderRadius:"12px 12px 0 0",padding:"16px 20px",color:C.white}}>
+        <div style={{background:rModal.risk==="雙火"?C.red:rModal.risk==="雙土"?C.orange:C.darkGold,borderRadius:"12px 12px 0 0",padding:"16px 20px",color:C.white}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
               <div style={{fontSize:11,opacity:0.85,marginBottom:3}}>{RS[rModal.risk].label} · {rModal.name}</div>
-              <div style={{fontWeight:"bold",fontSize:17,marginBottom:2}}>{rModal.risk==="\u96d9\u706b"?"Double Fire":rModal.risk==="\u96d9\u571f"?"Double Earth":"High-Risk"} Period</div>
+              <div style={{fontWeight:"bold",fontSize:17,marginBottom:2}}>{rModal.risk==="雙火"?"Double Fire":rModal.risk==="雙土"?"Double Earth":"High-Risk"} Period</div>
               <div style={{fontSize:12,opacity:0.9}}>{rModal.daysUntil>0?"Starts in "+rModal.daysUntil+" days":"Currently active"} · {rModal.dateStr} ({hemi==="S"?"Southern":"Northern"} Hemisphere)</div>
             </div>
             <button onClick={()=>setRModal(null)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:6,color:C.white,cursor:"pointer",padding:"4px 8px",fontSize:14,marginLeft:8}}>X</button>
@@ -303,7 +341,7 @@ function App(){
               <div style={{fontWeight:"bold",color:C.red,fontSize:12,marginBottom:6}}>Your Conditions & This Period</div>
               <div style={{color:"#555",fontSize:12,lineHeight:1.7,marginBottom:8}}>
                 You have noted: <strong>{uConds.join(", ")}</strong>.<br/><br/>
-                {rModal.risk==="\u96d9\u706b"?"Fire periods place extra stress on the cardiovascular system and nervous system.":rModal.risk==="\u96d9\u571f"?"Earth periods stress the digestive system. Damp accumulation may worsen symptoms.":"Climate mismatch can trigger immune fluctuation and aggravate existing conditions."}
+                {rModal.risk==="雙火"?"Fire periods place extra stress on the cardiovascular system and nervous system.":rModal.risk==="雙土"?"Earth periods stress the digestive system. Damp accumulation may worsen symptoms.":"Climate mismatch can trigger immune fluctuation and aggravate existing conditions."}
               </div>
               <div style={{background:C.white,borderRadius:6,padding:"10px 12px",border:"1px solid #FABFB0",fontSize:11,color:"#555",lineHeight:1.7}}>
                 Because you have existing conditions, please consult Sang Hee for a personalised treatment plan ideally 2-4 weeks before this period.
@@ -334,16 +372,16 @@ function App(){
   const rBanners=upcoming.length>0&&(
     <div style={{marginBottom:12}}>
       {upcoming.map((s,i)=>(
-        <div key={i} style={{background:s.risk==="\u96d9\u706b"?"#FFF0EE":s.risk==="\u96d9\u571f"?"#FFF5EC":"#FFFBE8",border:"1px solid "+(s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold),borderRadius:8,padding:"12px 14px",marginBottom:8,display:"flex",gap:10,alignItems:"flex-start"}}>
-          <div style={{fontSize:22,flexShrink:0}}>{s.risk==="\u96d9\u706b"?"!":s.risk==="\u96d9\u571f"?"~":"?"}</div>
+        <div key={i} style={{background:s.risk==="雙火"?"#FFF0EE":s.risk==="雙土"?"#FFF5EC":"#FFFBE8",border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),borderRadius:8,padding:"12px 14px",marginBottom:8,display:"flex",gap:10,alignItems:"flex-start"}}>
+          <div style={{fontSize:22,flexShrink:0}}>{s.risk==="雙火"?"!":s.risk==="雙土"?"~":"?"}</div>
           <div style={{flex:1}}>
-            <div style={{fontWeight:"bold",color:s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold,fontSize:12,marginBottom:2}}>{RS[s.risk].label} · {s.name} · {s.dateStr}</div>
+            <div style={{fontWeight:"bold",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontSize:12,marginBottom:2}}>{RS[s.risk].label} · {s.name} · {s.dateStr}</div>
             <div style={{color:"#555",fontSize:11,lineHeight:1.5,marginBottom:8}}>
               {s.daysUntil>0?"Starting in "+s.daysUntil+" day"+(s.daysUntil===1?"":"s")+" — ":"Currently active — "}
-              {s.risk==="\u96d9\u706b"?"Extreme fire period. Cardiovascular risk elevated.":s.risk==="\u96d9\u571f"?"Damp-heat period. Digestive & immune vulnerability.":"Climate mismatch. Immune fluctuation risk."}
+              {s.risk==="雙火"?"Extreme fire period. Cardiovascular risk elevated.":s.risk==="雙土"?"Damp-heat period. Digestive & immune vulnerability.":"Climate mismatch. Immune fluctuation risk."}
               {uConds.length>0&&" Relevant to your health profile."}
             </div>
-            <button onClick={()=>setRModal(s)} style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"1px solid "+(s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold),background:C.white,cursor:"pointer",color:s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold,fontWeight:"bold",marginRight:6}}>Read More</button>
+            <button onClick={()=>setRModal(s)} style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),background:C.white,cursor:"pointer",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontWeight:"bold",marginRight:6}}>Read More</button>
             <a href={BOOKING} target="_blank" rel="noopener noreferrer" style={{fontSize:11,padding:"5px 12px",borderRadius:6,background:C.navy,color:C.white,fontWeight:"bold",textDecoration:"none",display:"inline-block"}}>Book with Sang Hee</a>
           </div>
         </div>
@@ -457,7 +495,7 @@ function App(){
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(108px,1fr))",gap:8,marginBottom:12}}>
         {[{l:"Year",v:yr+" "+data.jz,bg:"#E8EEF8",tc:C.ink},{l:"Da Yun",v:data.dyName,e:data.dyEl},{l:"Si Tian",v:data.si,e:data.siEl},{l:"Zai Quan",v:data.zai,e:SQE[data.zai]},
-          {l:"Yun Qi Rel",v:data.yqr,bg:(data.yqr.includes("\u4e0d\u548c")||data.yqr.includes("\u5929\u5211"))?"#FFF0EE":"#F0FBF5",tc:(data.yqr.includes("\u4e0d\u548c")||data.yqr.includes("\u5929\u5211"))?C.red:C.green},
+          {l:"Yun Qi Rel",v:data.yqr,bg:(data.yqr.includes("不和")||data.yqr.includes("天刑"))?"#FFF0EE":"#F0FBF5",tc:(data.yqr.includes("不和")||data.yqr.includes("天刑"))?C.red:C.green},
           {l:"Special Year",v:data.special,bg:data.special==="\u592a\u4e59\u5929\u7b26"?"#FFF0EE":data.special==="\u5929\u7b26"?"#FFF5EC":data.special==="\u6b72\u6703"?"#F0FBF5":"#F5F5F5",tc:data.special.includes("\u592a\u4e59")?C.red:data.special.includes("\u5929\u7b26")?C.orange:data.special==="\u6b72\u6703"?C.green:C.navy}
         ].map((item,i)=>{const col=item.e?ec(item.e):{bg:item.bg,border:"#ddd",text:item.tc};return(
           <div key={i} style={{borderRadius:8,padding:"9px 11px",background:col.bg,border:"1px solid "+col.border}}>
@@ -480,9 +518,9 @@ function App(){
             </tr></thead>
             <tbody>
               {data.segs.map((s,i)=>{
-                const ri=RS[s.risk]||RS["\u9806"];
+                const ri=RS[s.risk]||RS["順"];
                 const dates=hemi==="N"?DN:DS;
-                const cl=CL[s.risk]||CL["\u9806"];
+                const cl=CL[s.risk]||CL["順"];
                 const zYC=ec(s.zYun),kYC=ec(s.kYun),zQC=ec(s.zQiEl),kQC=ec(s.kQiEl);
                 return(
                   <tr key={i} style={{background:i%2===0?"#FAFAFA":"#FFF",borderLeft:"3px solid "+ri.border,verticalAlign:"top"}}>
