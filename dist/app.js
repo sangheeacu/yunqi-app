@@ -53,7 +53,15 @@ const EC = {
 const ec = e => EC[e] || EC["\u571f"];
 const SUPABASE_URL = "https://dqcxpevxkbgwqqzackjd.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY3hwZXZ4a2Jnd3FxemFja2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODQ2MjcsImV4cCI6MjA5NjU2MDYyN30.FzupfG-0YG30sUBVo3I7BO4y5S3QZwTOPmrDGWqSNYY";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    storageKey: "yunqi-auth",
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 const BOOKING = "https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
 async function sbSignUp(email, pw, name, dob, lang, conds) {
   const {
