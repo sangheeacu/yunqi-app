@@ -1,13 +1,13 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="運氣 Analyzer"/>
+  <meta name="apple-mobile-web-app-title" content="Yun Qi Analyzer"/>
   <meta name="theme-color" content="#12243B"/>
-  <title>Yun Qi 運氣 Analyzer — Sang Hee Park PhD</title>
+  <title>Yun Qi Analyzer — Sang Hee Park PhD</title>
   <link rel="manifest" href="/manifest.json"/>
   <link rel="apple-touch-icon" href="/icon-192.png"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -20,444 +20,365 @@
     ::-webkit-scrollbar{width:4px;height:4px;}
     ::-webkit-scrollbar-thumb{background:#C49A48;border-radius:2px;}
     input,select{font-family:inherit;}
-    a{cursor:pointer;}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
+const{useState,useRef,useEffect}=React;
 
 const C={navy:"#12243B",gold:"#C49A48",goldLight:"#F5E9C8",ink:"#1C2D58",blue:"#2A4178",bgPage:"#F5F3EE",white:"#FFFFFF",gray:"#8CA0C8",lightGray:"#F0F4FA",red:"#C84B30",orange:"#E07030",green:"#2D6A4F",darkGold:"#B98A3A"};
-const EC={木:{bg:"#D0EAD8",border:"#4A8C6A",text:"#2D5A3D"},火:{bg:"#FAEAE6",border:"#C84B30",text:"#8B2A18"},相火:{bg:"#FAEEE0",border:"#E07030",text:"#8B4010"},土:{bg:"#FDF3DC",border:"#B8860B",text:"#7A5A06"},金:{bg:"#EBEBEB",border:"#6B7A6A",text:"#3A4A3A"},水:{bg:"#DCE8F5",border:"#2E5F8A",text:"#1A3A5A"}};
-const ec=e=>EC[e]||EC["土"];
+const EC={"\u6728":{bg:"#D0EAD8",border:"#4A8C6A",text:"#2D5A3D"},"\u706b":{bg:"#FAEAE6",border:"#C84B30",text:"#8B2A18"},"\u76f8\u706b":{bg:"#FAEEE0",border:"#E07030",text:"#8B4010"},"\u571f":{bg:"#FDF3DC",border:"#B8860B",text:"#7A5A06"},"\u91d1":{bg:"#EBEBEB",border:"#6B7A6A",text:"#3A4A3A"},"\u6c34":{bg:"#DCE8F5",border:"#2E5F8A",text:"#1A3A5A"}};
+const ec=e=>EC[e]||EC["\u571f"];
 
-const STEMS=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
-const BRANCHES=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-const JIAZI=["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
-const STEM_DAYUN={甲:["土運太過","土"],乙:["金運不及","金"],丙:["水運太過","水"],丁:["木運不及","木"],戊:["火運太過","火"],己:["土運不及","土"],庚:["金運太過","金"],辛:["水運不及","水"],壬:["木運太過","木"],癸:["火運不及","火"]};
-const BRANCH_QI={子:{si:"少陰君火",zai:"陽明燥金"},午:{si:"少陰君火",zai:"陽明燥金"},丑:{si:"太陰濕土",zai:"太陽寒水"},未:{si:"太陰濕土",zai:"太陽寒水"},寅:{si:"少陽相火",zai:"厥陰風木"},申:{si:"少陽相火",zai:"厥陰風木"},卯:{si:"陽明燥金",zai:"少陰君火"},酉:{si:"陽明燥金",zai:"少陰君火"},辰:{si:"太陽寒水",zai:"太陰濕土"},戌:{si:"太陽寒水",zai:"太陰濕土"},巳:{si:"厥陰風木",zai:"少陽相火"},亥:{si:"厥陰風木",zai:"少陽相火"}};
-const SIX_QI=["厥陰風木","少陰君火","少陽相火","太陰濕土","陽明燥金","太陽寒水"];
-const SIX_QI_ELEM={"厥陰風木":"木","少陰君火":"火","少陽相火":"相火","太陰濕土":"土","陽明燥金":"金","太陽寒水":"水"};
-const FIVE_YUN=["木","火","土","金","水"];
-const YUN_GEN={木:"火",火:"土",土:"金",金:"水",水:"木"};
-const SEG_LABELS=["1運1氣","1運2氣","2運2氣","2運3氣","3運3氣","3運4氣","4運4氣","4運5氣","5運5氣","5運6氣"];
-const DATES_N=["1.20~3.21","3.21~4.3","4.3~5.21","5.21~6.16","6.16~7.22","7.22~8.29","8.29~9.22","9.22~11.11","11.11~11.22","11.22~1.20"];
-const DATES_S=["7.22~9.22","9.22~10.3","10.3~11.21","11.21~12.16","12.16~1.21","1.21~2.28","2.28~3.21","3.21~5.11","5.11~5.21","5.21~7.22"];
-const SPECIAL={"丁卯1987":"歲會","庚午1990":"同天符","辛未1991":"同歲會","壬申1992":"同天符","癸酉1993":"同歲會","甲戌1994":"同天符","丙子1996":"歲會","戊寅1998":"天符","乙酉2005":"太乙天符","丙戌2006":"天符","丁亥2007":"天符","戊子2008":"天符","己丑2009":"太乙天符","甲午2014":"歲會","庚子2020":"同天符","辛丑2021":"同歲會","壬寅2022":"同天符","癸卯2023":"同歲會","甲辰2024":"同天符","戊申2028":"天符","辛亥2031":"同歲會","癸丑2033":"同歲會","乙卯2035":"天符","丙辰2036":"天符","丁巳2037":"天符","戊午2038":"太乙天符","己未2040":"太乙天符"};
-const RISK_S={雙火:{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color:"#C84B30"},雙土:{label:"★★ HIGH",bg:"#FFF5EC",border:"#E07030",color:"#E07030"},逆:{label:"★ HIGH",bg:"#FFFBE8",border:"#B8860B",color:"#B8860B"},順:{label:"— OK",bg:"#F0FBF5",border:"#2D6A4F",color:"#2D6A4F"}};
+const SUPABASE_URL="https://dqcxpevxkbgwqqzackjd.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY3hwZXZ4a2Jnd3FxemFja2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODQ2MjcsImV4cCI6MjA5NjU2MDYyN30.FzupfG-0YG30sUBVo3I7BO4y5S3QZwTOPmrDGWqSNYY";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const BOOKING="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
 
-const LANGUAGES=[{v:"en",label:"English"},{v:"ko",label:"한국어 (Korean)"},{v:"zh",label:"中文 (Chinese)"},{v:"ja",label:"日本語 (Japanese)"},{v:"es",label:"Español (Spanish)"},{v:"fr",label:"Français (French)"},{v:"de",label:"Deutsch (German)"},{v:"id",label:"Bahasa Indonesia"},{v:"pt",label:"Português"},{v:"ar",label:"العربية (Arabic)"}];
-const HEALTH_CONDITIONS=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions (asthma/COPD)","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
-const SUPABASE_URL = "https://dqcxpevxkbgwqqzackjd.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY3hwZXZ4a2Jnd3FxemFja2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODQ2MjcsImV4cCI6MjA5NjU2MDYyN30.FzupfG-0YG30sUBVo3I7BO4y5S3QZwTOPmrDGWqSNYY";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-function getKeQi(si){const i=SIX_QI.indexOf(si);return SIX_QI.map((_,j)=>SIX_QI[(i-2+j+6)%6]);}
-function getKeYun(e){const r=[e];let c=e;for(let i=1;i<5;i++){c=YUN_GEN[c];r.push(c);}return r;}
-function judgeRisk(ke,zh){
-  if((ke==="火"||ke==="相火")&&(zh==="火"||zh==="相火"))return"雙火";
-  if(ke==="土"&&zh==="土")return"雙土";
-  const k={木:"土",火:"金",土:"水",金:"木",水:"火",相火:"金"};
-  if(k[ke]===zh||k[zh]===ke)return"逆";
-  return"順";
+async function sbSignUp(email,pw,name,dob,lang,conds){
+  const{data,error}=await sb.auth.signUp({email,password:pw});
+  if(error)throw error;
+  await sb.from("users").insert({id:data.user.id,email,name,dob:dob||null,pref_lang:lang,conditions:conds,plan:"free"});
+  return{id:data.user.id,email,name,dob,pref_lang:lang,conditions:conds,plan:"free"};
 }
+async function sbSignIn(email,pw){
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error)throw error;
+  const{data:p}=await sb.from("users").select("*").eq("id",data.user.id).single();
+  return p;
+}
+async function sbSignOut(){await sb.auth.signOut();}
+async function sbSession(){
+  const{data}=await sb.auth.getSession();
+  if(!data.session)return null;
+  const{data:p}=await sb.from("users").select("*").eq("id",data.session.user.id).single();
+  return p;
+}
+async function sbUpdate(uid,obj){const{error}=await sb.from("users").update(obj).eq("id",uid);if(error)throw error;}
+async function sbForgot(email){const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});if(error)throw error;}
+async function sbChangePw(pw){const{error}=await sb.auth.updateUser({password:pw});if(error)throw error;}
+
+const STEMS=["\u7532","\u4e59","\u4e19","\u4e01","\u620a","\u5df1","\u5e9a","\u8f9b","\u58ec","\u7678"];
+const BRANCHES=["\u5b50","\u4e11","\u5bc5","\u536f","\u8fb0","\u5df3","\u5348","\u672a","\u7533","\u9149","\u620c","\u4ea5"];
+const JIAZI=["\u7532\u5b50","\u4e59\u4e11","\u4e19\u5bc5","\u4e01\u536f","\u620a\u8fb0","\u5df1\u5df3","\u5e9a\u5348","\u8f9b\u672a","\u58ec\u7533","\u7678\u9149","\u7532\u620c","\u4e59\u4ea5","\u4e19\u5b50","\u4e01\u4e11","\u620a\u5bc5","\u5df1\u536f","\u5e9a\u8fb0","\u8f9b\u5df3","\u58ec\u5348","\u7678\u672a","\u7532\u7533","\u4e59\u9149","\u4e19\u620c","\u4e01\u4ea5","\u620a\u5b50","\u5df1\u4e11","\u5e9a\u5bc5","\u8f9b\u536f","\u58ec\u8fb0","\u7678\u5df3","\u7532\u5348","\u4e59\u672a","\u4e19\u7533","\u4e01\u9149","\u620a\u620c","\u5df1\u4ea5","\u5e9a\u5b50","\u8f9b\u4e11","\u58ec\u5bc5","\u7678\u536f","\u7532\u8fb0","\u4e59\u5df3","\u4e19\u5348","\u4e01\u672a","\u620a\u7533","\u5df1\u9149","\u5e9a\u620c","\u8f9b\u4ea5","\u58ec\u5b50","\u7678\u4e11","\u7532\u5bc5","\u4e59\u536f","\u4e19\u8fb0","\u4e01\u5df3","\u620a\u5348","\u5df1\u672a","\u5e9a\u7533","\u8f9b\u9149","\u58ec\u620c","\u7678\u4ea5"];
+
+const SY={"\u7532":["\u571f\u904b\u592a\u904e","\u571f"],"\u4e59":["\u91d1\u904b\u4e0d\u53ca","\u91d1"],"\u4e19":["\u6c34\u904b\u592a\u904e","\u6c34"],"\u4e01":["\u6728\u904b\u4e0d\u53ca","\u6728"],"\u620a":["\u706b\u904b\u592a\u904e","\u706b"],"\u5df1":["\u571f\u904b\u4e0d\u53ca","\u571f"],"\u5e9a":["\u91d1\u904b\u592a\u904e","\u91d1"],"\u8f9b":["\u6c34\u904b\u4e0d\u53ca","\u6c34"],"\u58ec":["\u6728\u904b\u592a\u904e","\u6728"],"\u7678":["\u706b\u904b\u4e0d\u53ca","\u706b"]};
+
+const BQ={"\u5b50":{si:"\u5c11\u9670\u541b\u706b",zai:"\u967d\u660e\u71e5\u91d1"},"\u5348":{si:"\u5c11\u9670\u541b\u706b",zai:"\u967d\u660e\u71e5\u91d1"},"\u4e11":{si:"\u592a\u9670\u6e7f\u571f",zai:"\u592a\u9633\u5bd2\u6c34"},"\u672a":{si:"\u592a\u9670\u6e7f\u571f",zai:"\u592a\u9633\u5bd2\u6c34"},"\u5bc5":{si:"\u5c11\u9633\u76f8\u706b",zai:"\u5a25\u9670\u98a8\u6728"},"\u7533":{si:"\u5c11\u9633\u76f8\u706b",zai:"\u5a25\u9670\u98a8\u6728"},"\u536f":{si:"\u967d\u660e\u71e5\u91d1",zai:"\u5c11\u9670\u541b\u706b"},"\u9149":{si:"\u967d\u660e\u71e5\u91d1",zai:"\u5c11\u9670\u541b\u706b"},"\u8fb0":{si:"\u592a\u9633\u5bd2\u6c34",zai:"\u592a\u9670\u6e7f\u571f"},"\u620c":{si:"\u592a\u9633\u5bd2\u6c34",zai:"\u592a\u9670\u6e7f\u571f"},"\u5df3":{si:"\u5a25\u9670\u98a8\u6728",zai:"\u5c11\u9633\u76f8\u706b"},"\u4ea5":{si:"\u5a25\u9670\u98a8\u6728",zai:"\u5c11\u9633\u76f8\u706b"}};
+
+const SQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u5c11\u9633\u76f8\u706b","\u592a\u9670\u6e7f\u571f","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
+const SQE={"\u5a25\u9670\u98a8\u6728":"\u6728","\u5c11\u9670\u541b\u706b":"\u706b","\u5c11\u9633\u76f8\u706b":"\u76f8\u706b","\u592a\u9670\u6e7f\u571f":"\u571f","\u967d\u660e\u71e5\u91d1":"\u91d1","\u592a\u9633\u5bd2\u6c34":"\u6c34"};
+const FY=["\u6728","\u706b","\u571f","\u91d1","\u6c34"];
+const YG={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728"};
+const SL=["\u4e00\u904b\u4e00\u6c23","\u4e00\u904b\u4e8c\u6c23","\u4e8c\u904b\u4e8c\u6c23","\u4e8c\u904b\u4e09\u6c23","\u4e09\u904b\u4e09\u6c23","\u4e09\u904b\u56db\u6c23","\u56db\u904b\u56db\u6c23","\u56db\u904b\u4e94\u6c23","\u4e94\u904b\u4e94\u6c23","\u4e94\u904b\u516d\u6c23"];
+const DN=["1.20~3.21","3.21~4.3","4.3~5.21","5.21~6.16","6.16~7.22","7.22~8.29","8.29~9.22","9.22~11.11","11.11~11.22","11.22~1.20"];
+const DS=["7.22~9.22","9.22~10.3","10.3~11.21","11.21~12.16","12.16~1.21","1.21~2.28","2.28~3.21","3.21~5.11","5.11~5.21","5.21~7.22"];
+
+const SP={"\u4e01\u536f1987":"\u6b72\u6703","\u5e9a\u54481990":"\u540c\u5929\u7b26","\u8f9b\u672a1991":"\u540c\u6b72\u6703","\u58ec\u75331992":"\u540c\u5929\u7b26","\u7678\u914d1993":"\u540c\u6b72\u6703","\u7532\u620c1994":"\u540c\u5929\u7b26","\u4e19\u5b501996":"\u6b72\u6703","\u620a\u5bc51998":"\u5929\u7b26","\u4e59\u914d2005":"\u592a\u4e59\u5929\u7b26","\u4e19\u620c2006":"\u5929\u7b26","\u4e01\u4ea52007":"\u5929\u7b26","\u620a\u5b502008":"\u5929\u7b26","\u5df1\u4e112009":"\u592a\u4e59\u5929\u7b26","\u7532\u53482014":"\u6b72\u6703","\u5e9a\u5b502020":"\u540c\u5929\u7b26","\u8f9b\u4e112021":"\u540c\u6b72\u6703","\u58ec\u5bc52022":"\u540c\u5929\u7b26","\u7678\u536f2023":"\u540c\u6b72\u6703","\u7532\u8fb02024":"\u540c\u5929\u7b26","\u620a\u75332028":"\u5929\u7b26","\u8f9b\u4ea52031":"\u540c\u6b72\u6703","\u7678\u4e112033":"\u540c\u6b72\u6703","\u4e59\u536f2035":"\u5929\u7b26","\u4e19\u8fb02036":"\u5929\u7b26","\u4e01\u5df32037":"\u5929\u7b26","\u620a\u53482038":"\u592a\u4e59\u5929\u7b26","\u5df1\u672a2040":"\u592a\u4e59\u5929\u7b26"};
+
+const RS={"\u96d9\u706b":{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color:"#C84B30"},"\u96d9\u571f":{label:"★★ HIGH",bg:"#FFF5EC",border:"#E07030",color:"#E07030"},"\u9006":{label:"★ HIGH",bg:"#FFFBE8",border:"#B8860B",color:"#B8860B"},"\u9806":{label:"— OK",bg:"#F0FBF5",border:"#2D6A4F",color:"#2D6A4F"}};
+
+const LANGS=[{v:"en",l:"English"},{v:"ko",l:"Korean (한국어)"},{v:"zh",l:"Chinese (中文)"},{v:"ja",l:"Japanese (日本語)"},{v:"es",l:"Spanish (Español)"},{v:"fr",l:"French (Français)"},{v:"de",l:"German (Deutsch)"},{v:"id",l:"Bahasa Indonesia"},{v:"pt",l:"Portuguese"},{v:"ar",l:"Arabic (العربية)"}];
+const HC=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
+
+function judgeRisk(ke,zh){
+  if((ke==="\u706b"||ke==="\u76f8\u706b")&&(zh==="\u706b"||zh==="\u76f8\u706b"))return"\u96d9\u706b";
+  if(ke==="\u571f"&&zh==="\u571f")return"\u96d9\u571f";
+  const k={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
+  if(k[ke]===zh||k[zh]===ke)return"\u9006";
+  return"\u9806";
+}
+
 function calcYear(yr){
   const idx=((yr-1984)%60+60)%60;
   const jz=JIAZI[idx],stem=STEMS[idx%10],branch=BRANCHES[idx%12];
-  const [dayunName,dayunElem]=STEM_DAYUN[stem];
-  const{si,zai}=BRANCH_QI[branch];
-  const keQi=getKeQi(si),keYun=getKeYun(dayunElem);
-  const special=SPECIAL[jz+yr]||SPECIAL[jz]||"—";
-  const siElem=SIX_QI_ELEM[si];
-  const k={木:"土",火:"金",土:"水",金:"木",水:"火",相火:"金"};
-  const g={木:"火",火:"土",土:"金",金:"水",水:"木",相火:"土"};
-  const yunQiRel=siElem===dayunElem?"順化":k[dayunElem]===siElem?"天刑":g[dayunElem]===siElem?"小逆":"不和";
-  const segs=SEG_LABELS.map((name,i)=>{
+  const[dyName,dyEl]=SY[stem];
+  const{si,zai}=BQ[branch];
+  const keQi=SQ.map((_,j)=>SQ[(SQ.indexOf(si)-2+j+6)%6]);
+  const keYun=(e=>{const r=[e];let c=e;for(let i=1;i<5;i++){c=YG[c];r.push(c);}return r;})(dyEl);
+  const special=SP[jz+yr]||SP[jz]||"\u2014";
+  const siEl=SQE[si];
+  const k2={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
+  const g2={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728","\u76f8\u706b":"\u571f"};
+  const yqr=siEl===dyEl?"\u9806\u5316":k2[dyEl]===siEl?"\u5929\u5211":g2[dyEl]===siEl?"\u5c0f\u9006":"\u4e0d\u548c";
+  const segs=SL.map((name,i)=>{
     const yi=[0,0,1,1,2,2,3,3,4,4][i],qi=[0,1,1,2,2,3,3,4,4,5][i];
-    const zYun=FIVE_YUN[yi],kYun=keYun[yi],zQi=SIX_QI[qi],kQiName=keQi[qi];
-    const kQiEl=SIX_QI_ELEM[kQiName],zQiEl=SIX_QI_ELEM[zQi];
+    const zYun=FY[yi],kYun=keYun[yi],zQi=SQ[qi],kQiName=keQi[qi];
+    const kQiEl=SQE[kQiName],zQiEl=SQE[zQi];
     return{name,zYun,kYun,zQi,kQiName,kQiEl,zQiEl,risk:judgeRisk(kQiEl,zQiEl)};
   });
-  return{jz,stem,branch,dayunName,dayunElem,si,zai,keQi,keYun,special,yunQiRel,segs,siElem};
+  return{jz,dyName,dyEl,si,zai,special,yqr,segs,siEl};
 }
 
-function parseSegDate(dateStr,yr){
-  const[startStr]=dateStr.split("~");
-  const[m,d]=startStr.split(".").map(Number);
-  return new Date(yr,m-1,d);
-}
-function getUpcomingRiskSegs(segs,hemi,yr){
-  const now=new Date();
-  const upcoming=[];
-  const dates=hemi==="S"?DATES_S:DATES_N;
+function getUpcoming(segs,hemi,yr){
+  const now=new Date(),dates=hemi==="S"?DS:DN,out=[];
   segs.forEach((s,i)=>{
-    if(s.risk==="雙火"||s.risk==="雙土"||s.risk==="逆"){
-      const startDate=parseSegDate(dates[i],yr);
-      const alertStart=new Date(startDate);alertStart.setDate(alertStart.getDate()-30);
-      const alertEnd=new Date(startDate);alertEnd.setDate(alertEnd.getDate()+14);
-      if(now>=alertStart&&now<=alertEnd){
-        const daysUntil=Math.ceil((startDate-now)/(1000*60*60*24));
-        upcoming.push({...s,segIdx:i,startDate,daysUntil,dateStr:dates[i]});
+    if(s.risk==="\u96d9\u706b"||s.risk==="\u96d9\u571f"||s.risk==="\u9006"){
+      const[ms,ds]=dates[i].split("~")[0].split(".").map(Number);
+      const start=new Date(yr,ms-1,ds);
+      const a0=new Date(start);a0.setDate(a0.getDate()-30);
+      const a1=new Date(start);a1.setDate(a1.getDate()+14);
+      if(now>=a0&&now<=a1){
+        out.push({...s,start,daysUntil:Math.ceil((start-now)/86400000),dateStr:dates[i]});
       }
     }
   });
-  return upcoming;
+  return out;
 }
 
 const CL={
-  雙火:{
-    w:"Both Guest & Host Qi are Fire — extreme heat, drought, sudden storms. Temperature spikes, erratic weather patterns, risk of heatwave conditions.",
-    d:"Febrile epidemics · Cardiovascular crisis · Insomnia · Bleeding disorders · Emotional agitation · Palpitations · Heat stroke risk",
-    food:"Bitter melon (苦瓜) · Lotus seed (蓮子) · Mung beans (綠豆) · Cucumber · Watermelon · Chrysanthemum tea · Green tea · Celery · Tofu · Peppermint tea",
-    tea:"Chrysanthemum & Wolfberry Tea: steep 10 dried chrysanthemum flowers + 1 tsp goji berries in hot water 5 min. Cool slightly before drinking.\n\nLotus Seed & Lily Bulb Tea: 10g lotus seeds + 10g dried lily bulb, simmer 20 min. Add a little honey. Calms the heart, clears heat.",
-    lifestyle:"Avoid peak sun hours (11am–3pm) · Stay indoors during hottest part of day · Light cotton clothing · Cold foot bath before bed · Limit spicy, fried, and alcohol · Reduce screen time in evening · Prioritise 7–8hrs sleep · Avoid intense exercise — choose gentle walking or swimming",
-    lay:"Heat peaks this period. Your body's fire energy is already elevated — adding more through spicy food, alcohol, overwork, or sun exposure can push it over the edge. Focus on cooling down from the inside out.",
-    a:"HT 7 神門 · HT 8 少府 · PC 6 內關 · LI 11 曲池 · BL 15 心俞 · GV 14 大椎",
-    h:"Huang Lian Jie Du Tang 黃連解毒湯 · Zhu Ye Shi Gao Tang 竹葉石膏湯 · Lian Zi Xin 蓮子心",
-  },
-  雙土:{
-    w:"Both Guest & Host Qi are Earth — heavy rain, flooding, oppressive humidity. Damp, heavy air and unsettled digestive conditions throughout the environment.",
-    d:"Damp-heat epidemic · Gastroenteritis · Oedema · Skin infections · Chronic digestive disorders · Fatigue · Muscle heaviness",
-    food:"Barley (薏苡仁) · Adzuki beans (赤豆) · Pumpkin · Sweet potato · Cooked ginger · Lightly cooked greens · Congee · Daikon radish · Job's tears soup",
-    tea:"Ginger & Tangerine Peel Tea: 3 slices fresh ginger + 5g dried tangerine peel (陳皮), simmer 10 min. Warms and dries dampness.\n\nBarley & Red Bean Tea: 30g barley + 20g adzuki beans, soak 1hr, simmer 40 min. Classic damp-draining drink — drink warm.",
-    lifestyle:"Avoid cold drinks and raw food · Keep living spaces dry and ventilated · Avoid sitting on damp ground · Eat smaller, more frequent meals · Morning walks in fresh air · Avoid overthinking · Gentle abdominal massage after meals",
-    lay:"Dampness accumulates in the body this period. Your digestion and energy levels are most at risk. Keep warm, eat cooked foods, and avoid anything cold or heavy.",
-    a:"SP 9 陰陵泉 · ST 40 豐隆 · REN 9 水分 · LI 11 曲池 · BL 20 脾俞 · ST 36 足三里",
-    h:"Huo Xiang Zheng Qi San 藿香正氣散 · San Ren Tang 三仁湯 · Yi Yi Ren 薏苡仁",
-  },
-  逆:{
-    w:"Guest Qi overacts Host Qi — climate contradicts the season. Unexpected temperature swings, unseasonable weather conditions.",
-    d:"Immune fluctuation · Seasonal allergies · Erratic symptom patterns · Increased infection risk · Digestive irregularity",
-    food:"Warming and easily digestible foods · Ginger · Spring onion · Garlic (cooked) · Bone broth · Lightly cooked seasonal vegetables",
-    tea:"Ginger, Spring Onion & Brown Sugar Tea: 3 slices ginger + 2 spring onion roots + 1 tsp brown sugar, simmer 10 min. Classic warming tea for weather transitions.\n\nCinnamon & Honey Tea: ½ tsp cinnamon powder in warm water + 1 tsp honey. Warms the interior, supports immunity.",
-    lifestyle:"Dress in layers — temperature swings are unpredictable · Keep neck and lower back warm · Get adequate sleep · Reduce alcohol and sugar · Be cautious with dietary extremes",
-    lay:"The seasons are clashing. Your body has to work harder to adapt. Be conservative — dress warmly, eat simply, rest well.",
-    a:"LI 4 合谷 · ST 36 足三里 · LU 7 列缺 · BL 12 風門 · GV 14 大椎",
-    h:"Yu Ping Feng San 玉屏風散 · Gui Zhi Tang 桂枝湯 · Huang Qi 黃耆",
-  },
-  順:{
-    w:"Guest and Host Qi harmonise — normal seasonal pattern, weather follows expected rhythms.",
-    d:"Mild seasonal patterns. No elevated disease risk. Standard seasonal self-care applies.",
-    food:"Follow seasonal foods naturally: spring=leafy greens, summer=cooling fruits, late summer=root vegetables, autumn=pears, winter=warming black foods & nuts",
-    tea:"Seasonal wellness tea: Spring=chrysanthemum; Summer=mint & honey; Late summer=ginger & tangerine peel; Autumn=pear & white fungus; Winter=cinnamon & goji berry.",
-    lifestyle:"Maintain regular sleep and wake times · Gentle seasonal exercise · Eat with the season · Spend time in nature",
-    lay:"This is a harmonious period. Energy flows naturally. Maintain your regular routines and enjoy the season.",
-    a:"ST 36 足三里 · SP 6 三陰交 · LI 4 合谷 · BL 23 腎俞",
-    h:"Seasonal tonic formulas as appropriate to individual constitution",
-  }
+  "\u96d9\u706b":{w:"Both Qi are Fire — extreme heat, drought, sudden storms.",d:"Febrile epidemics · Cardiovascular crisis · Insomnia · Palpitations · Heat stroke",food:"Bitter melon · Lotus seed · Mung beans · Cucumber · Chrysanthemum tea · Green tea",tea:"Chrysanthemum & Wolfberry Tea: 10 flowers + 1 tsp goji berries, steep 5 min.\n\nLotus Seed & Lily Bulb Tea: 10g lotus seeds + 10g lily bulb, simmer 20 min, add honey.",lifestyle:"Avoid peak sun (11am-3pm) · Light cotton clothing · Cold foot bath before bed · Limit spicy & alcohol · Choose gentle walking or swimming",lay:"Heat peaks. Cool from the inside out. Hydrate constantly.",a:"HT 7 \u795e\u9580 · HT 8 \u5c11\u5e9c · PC 6 \u5185\u95dc · LI 11 \u66f2\u6c60 · BL 15 \u5fc3\u4fde · GV 14 \u5927\u690e",h:"Huang Lian Jie Du Tang \u9ec4\u8fde\u89e3\u6bd2\u6e6f · Zhu Ye Shi Gao Tang \u7af9\u8449\u77f3\u818f\u6e6f"},
+  "\u96d9\u571f":{w:"Both Qi are Earth — heavy rain, flooding, oppressive humidity.",d:"Damp-heat epidemic · Gastroenteritis · Oedema · Skin infections · Fatigue",food:"Barley (\u85a6\u82e1\u4ec1) · Adzuki beans · Pumpkin · Congee · Cooked ginger · Daikon",tea:"Ginger & Tangerine Peel Tea: 3 ginger slices + 5g dried peel (\u9673\u76ae), simmer 10 min.\n\nBarley & Red Bean Tea: 30g barley + 20g adzuki beans, soak 1hr, simmer 40 min. Drink warm.",lifestyle:"Avoid cold drinks & raw food · Keep spaces dry · Eat smaller meals · Morning walks · Gentle abdominal massage after meals",lay:"Dampness accumulates. Keep warm, eat cooked foods, avoid cold or heavy meals.",a:"SP 9 \u9670\u9675\u6cc9 · ST 40 \u8c50\u9686 · REN 9 \u6c34\u5206 · LI 11 \u66f2\u6c60 · BL 20 \u813e\u4fde · ST 36 \u8db3\u4e09\u91cc",h:"Huo Xiang Zheng Qi San \u85ff\u9999\u6b63\u6c23\u6563 · San Ren Tang \u4e09\u4ec1\u6e6f"},
+  "\u9006":{w:"Guest Qi overacts Host Qi — climate contradicts the season.",d:"Immune fluctuation · Seasonal allergies · Erratic symptoms · Infection risk",food:"Warming easy-to-digest foods · Ginger · Spring onion · Cooked garlic · Bone broth",tea:"Ginger, Spring Onion & Brown Sugar Tea: 3 ginger slices + 2 spring onion roots + 1 tsp brown sugar, simmer 10 min.\n\nCinnamon & Honey Tea: half tsp cinnamon in warm water + 1 tsp honey.",lifestyle:"Dress in layers · Keep neck & lower back warm · Adequate sleep · Reduce alcohol & sugar",lay:"Seasons clash. Dress warmly, eat simply, rest well.",a:"LI 4 \u5408\u8c37 · ST 36 \u8db3\u4e09\u91cc · LU 7 \u5217\u7f3a · BL 12 \u98a8\u9580 · GV 14 \u5927\u690e",h:"Yu Ping Feng San \u7389\u5c4f\u98a8\u6563 · Gui Zhi Tang \u6842\u679d\u6e6f"},
+  "\u9806":{w:"Qi harmonise — normal seasonal pattern.",d:"Mild seasonal patterns. Standard self-care applies.",food:"Spring=leafy greens, Summer=cooling fruits, Late summer=root vegetables, Autumn=pears, Winter=black foods & nuts",tea:"Seasonal tea: Spring=chrysanthemum; Summer=mint & honey; Autumn=pear & white fungus; Winter=cinnamon & goji.",lifestyle:"Regular sleep · Gentle seasonal exercise · Eat with the season · Spend time in nature",lay:"Harmonious period. Maintain regular routines.",a:"ST 36 \u8db3\u4e09\u91cc · SP 6 \u4e09\u9670\u4ea4 · LI 4 \u5408\u8c37 · BL 23 \u814e\u4fde",h:"Seasonal tonic formulas as appropriate"}
 };
-function getCL(risk){return CL[risk]||CL["順"];}
 
-function buildSysPrompt(u){
-  const lang=u&&u.prefLang?LANGUAGES.find(l=>l.v===u.prefLang):null;
-  const langNote=lang?"Preferred language: "+lang.label+". Default to this language if ambiguous.":"";
-  const dob=u&&u.dob?"\nDate of birth: "+u.dob:"";
+function buildSys(u){
+  const lang=u&&u.pref_lang?LANGS.find(l=>l.v===u.pref_lang):null;
   const conds=u&&u.conditions&&u.conditions.length>0?"\nHealth conditions: "+u.conditions.join(", "):"";
-  const profile=(dob||conds)?"\nUSER HEALTH PROFILE:"+dob+conds+"\nPersonalise responses to this profile where relevant.":"";
-  return"You are the Wu Yun Liu Qi (五運六氣) expert health assistant for Sang Hee Park, PhD — AHPRA registered acupuncturist, Doctor of TCM, Blossom Skin & Health, Wahroonga NSW Australia.\n\nAdapt tone: clinical depth for professional questions, plain warm language for wellness questions. Always explain Chinese terms simply.\n"+langNote+profile+"\n\nCRITICAL LANGUAGE RULE: Always reply in the same language as the user's question.\n\nKNOWLEDGE BASE:\nHeavenly Stems: 甲=土太過|乙=金不及|丙=水太過|丁=木不及|戊=火太過|己=土不及|庚=金太過|辛=水不及|壬=木太過|癸=火不及\nBranches: 子午=少陰君火/陽明燥金|丑未=太陰濕土/太陽寒水|寅申=少陽相火/厥陰風木|卯酉=陽明燥金/少陰君火|辰戌=太陽寒水/太陰濕土|巳亥=厥陰風木/少陽相火\nSix Qi: 厥陰風木=Wood/Liver-GB|少陰君火=Fire/Heart|少陽相火=MinFire/SJ|太陰濕土=Earth/SP|陽明燥金=Metal/LU|太陽寒水=Water/KID\nRisk: 雙火=EXTREME cardiovascular/febrile|雙土=HIGH damp-heat digestive|逆=HIGH immune discord|順=manageable\n2026: 水太過, 少陰君火 Si Tian, KID-HT axis\n2027: 木不及, 太陰濕土 Si Tian, digestive watch\nSeasonal foods: Wood=leafy greens|Fire=bitter melon,lotus|Earth=congee,pumpkin,ginger|Metal=pear,daikon|Water=black sesame,walnut\n\nRULES:\n1. Reply in same language as question.\n2. Personalise to health profile when relevant.\n3. For existing health conditions: always recommend consulting a qualified TCM practitioner for diagnosis-based treatment.\n4. End every answer: '⚠️ Educational purposes only. Consult a qualified practitioner for personal health advice. Book with Sang Hee: "+BOOKING_URL+"'\n5. Never diagnose or recommend stopping medication.";
+  const dob=u&&u.dob?"\nDOB: "+u.dob:"";
+  const profile=conds||dob?"\nUSER PROFILE:"+dob+conds:"";
+  return"You are the Wu Yun Liu Qi (五運六氣) expert health assistant for Sang Hee Park, PhD — AHPRA registered acupuncturist, Doctor of TCM, Blossom Skin & Health, Wahroonga NSW Australia.\n"+(lang?"Default reply language: "+lang.l+". ":"")+profile+"\nCRITICAL: Always reply in the same language as the user's question.\nFor existing health conditions: always recommend consulting a qualified TCM practitioner.\nKnowledge base: 甲=土太過|乙=金不及|丙=水太過|丁=木不及|戊=火太過|己=土不及|庚=金太過|辛=水不及|壬=木太過|癸=火不及. 子午=少陰君火/陽明燥金|丑未=太陰濕土/太陽寒水|寅申=少陽相火/厥陰風木|卯酉=陽明燥金/少陰君火|辰戌=太陽寒水/太陰濕土|巳亥=厥陰風木/少陽相火. 2026:水太過,少陰君火 Si Tian,KID-HT axis. 2027:木不及,太陰濕土 Si Tian,digestive watch.\nEnd every answer: 'Educational purposes only. Consult a qualified practitioner. Book: "+BOOKING+"'";
 }
 
 const iS={display:"block",width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid #ddd",fontSize:12,marginBottom:8,outline:"none",boxSizing:"border-box"};
-const USER_DB={};
 
-const FREE_FEATURES=[
-  {icon:"📊",title:"Yun Qi Analyser",desc:"Annual Da Yun · Si Tian · Zai Quan · Special classification for any year 1924–2103"},
-  {icon:"🗓️",title:"10-Segment Calendar",desc:"Full year risk calendar · colour-coded · North & South hemisphere dates"},
-  {icon:"🌏",title:"Hemisphere Toggle",desc:"Automatic date adjustment for Southern Hemisphere (Australia/NZ) and Northern"},
-  {icon:"⚠️",title:"Risk Classification",desc:"★★ EXTREME · ★ HIGH · OK per segment with clinical significance"},
-  {icon:"🧮",title:"Special Year Lookup",desc:"天符 · 歲會 · 太乙天符 · 同天符 · 同歲會 instant identification"},
-  {icon:"📱",title:"PWA — Install on Phone",desc:"Works on any device · No download · Add to home screen"},
-];
-const PAID_FEATURES=[
-  {icon:"💬",title:"Unlimited Q&A Chat",desc:"Ask anything about Wu Yun Liu Qi — theory, calculations, clinical application"},
-  {icon:"🌐",title:"All Languages",desc:"Korean · English · Chinese · Japanese · Spanish · French · any language"},
-  {icon:"📚",title:"Dr Park's Own Materials",desc:"Answers from Su Wen Ch.66–74, course modules, terminology glossary & clinical handouts"},
-  {icon:"⏰",title:"30-Day Advance Risk Alerts",desc:"Personalised alerts 30 days before high-risk segments — matched to your health profile"},
-  {icon:"🏥",title:"Clinical Guidance",desc:"Herbal protocols · Acupuncture points · Segment-specific treatment strategies"},
-  {icon:"❤️",title:"Personalised Health Guidance",desc:"Answers tailored to your date of birth, health conditions & preferred language"},
-  {icon:"🔄",title:"Auto-renewing",desc:"Cancel anytime · Instant access · New year profiles added automatically"},
-];
+function Sec({title,bg,tc,pre,children}){
+  return <div style={{marginBottom:14}}>
+    <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:6}}>{title}</div>
+    <div style={{color:tc||"#444",fontSize:12,lineHeight:1.7,background:bg||"#F5F5F5",borderRadius:8,padding:"10px 12px",whiteSpace:pre?"pre-line":"normal"}}>{children}</div>
+  </div>;
+}
 
 function App(){
-  const isMobile=window.innerWidth<=600;
-  const [tab,setTab]=useState("features");
-  const [year,setYear]=useState(2026);
-  const [hemi,setHemi]=useState("S");
-  const [data,setData]=useState(()=>calcYear(2026));
-  const [authMode,setAuthMode]=useState("login");
-  const [email,setEmail]=useState("");
-  const [pwV,setPwV]=useState("");
-  const [nameV,setNameV]=useState("");
-  const [user,setUser]=useState(null);
-  const [authErr,setAuthErr]=useState("");
-  const [signupDob,setSignupDob]=useState("");
-  const [signupLang,setSignupLang]=useState("en");
-  const [signupConds,setSignupConds]=useState([]);
-  const [onboardStep,setOnboardStep]=useState(0);
-  const [obConds,setObConds]=useState([]);
-  const [acctSection,setAcctSection]=useState("main");
-  const [editName,setEditName]=useState("");
-  const [editEmail,setEditEmail]=useState("");
-  const [oldPw,setOldPw]=useState("");
-  const [newPw,setNewPw]=useState("");
-  const [newPw2,setNewPw2]=useState("");
-  const [acctMsg,setAcctMsg]=useState({text:"",ok:true});
-  const [forgotSent,setForgotSent]=useState(false);
-  const [forgotEmail,setForgotEmail]=useState("");
-  const [msgs,setMsgs]=useState([{role:"assistant",content:"Hello! I'm the Wu Yun Liu Qi (五運六氣) health assistant.\n\n🌐 Ask in any language — I'll reply in your language.\n📅 Answers personalised to your health profile once you sign up.\n\nWhat would you like to know?"}]);
-  const [input,setInput]=useState("");
-  const [loading,setLoading]=useState(false);
-  const [riskModal,setRiskModal]=useState(null);
-  const [initLoading,setInitLoading]=useState(true);
+  const mob=window.innerWidth<=600;
+  const[tab,setTab]=useState("features");
+  const[yr,setYr]=useState(2026);
+  const[hemi,setHemi]=useState("S");
+  const[data,setData]=useState(()=>calcYear(2026));
+  const[user,setUser]=useState(null);
+  const[ready,setReady]=useState(false);
+  const[authMode,setAuthMode]=useState("login");
+  const[email,setEmail]=useState("");
+  const[pw,setPw]=useState("");
+  const[nm,setNm]=useState("");
+  const[dob,setDob]=useState("");
+  const[lang,setLang]=useState("en");
+  const[conds,setConds]=useState([]);
+  const[authErr,setAuthErr]=useState("");
+  const[acctSec,setAcctSec]=useState("main");
+  const[editNm,setEditNm]=useState("");
+  const[editEm,setEditEm]=useState("");
+  const[nPw,setNPw]=useState("");
+  const[nPw2,setNPw2]=useState("");
+  const[acctMsg,setAcctMsg]=useState({t:"",ok:true});
+  const[fgEmail,setFgEmail]=useState("");
+  const[fgSent,setFgSent]=useState(false);
+  const[obConds,setObConds]=useState([]);
+  const[obStep,setObStep]=useState(0);
+  const[msgs,setMsgs]=useState([{role:"assistant",content:"Hello! I am the Wu Yun Liu Qi (五運六氣) health assistant.\n\n🌐 Ask in any language — I reply in your language.\n📅 Sign up for personalised seasonal health guidance.\n\nWhat would you like to know?"}]);
+  const[inp,setInp]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[rModal,setRModal]=useState(null);
   const chatRef=useRef(null);
 
-  // 세션 복원
-  useEffect(()=>{
-    sbGetSession().then(profile=>{
-      if(profile)setUser(profile);
-      setInitLoading(false);
-    });
-  },[]);
-
+  useEffect(()=>{sbSession().then(p=>{if(p)setUser(p);setReady(true);});},[]);
   useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[msgs]);
 
-  // Forgot password — 실제 이메일 발송
-  async function handleForgotPassword(){
-    if(!forgotEmail.trim()){return;}
-    try{
-      await sbForgotPassword(forgotEmail);
-      setForgotSent(true);
-    }catch(e){setForgotSent(true);} // 보안상 항상 성공 표시
-  }
+  const isPaid=user&&user.plan==="paid";
+  const uConds=(user&&user.conditions)||[];
+  const uPT=user&&(user.plan_type||user.planType);
+  const upcoming=isPaid?getUpcoming(data.segs,hemi,yr):[];
 
-  // Sign out
-  async function handleSignOut(){
-    await sbSignOut();
-    setUser(null);setAcctSection("main");
-  }
-
-  if(initLoading){
-    return(
-      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bgPage}}>
-        <div style={{color:C.navy,fontSize:14,fontFamily:"sans-serif"}}>⟳ Loading…</div>
-      </div>
-    );
-  }
-  const upcomingRisks=isPaid?getUpcomingRiskSegs(data.segs,hemi,year):[];
-
-  function toggleCond(c){setSignupConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
-  function toggleObCond(c){setObConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
+  function tog(c,arr,set){set(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
 
   async function handleAuth(){
     setAuthErr("");
     if(authMode==="register"){
-      if(!email||!pwV||!nameV){setAuthErr("Please fill in all required fields.");return;}
-      try{
-        const u=await sbSignUp(email,pwV,nameV,signupDob,signupLang,signupConds);
-        const profile={id:u.id,email,name:nameV,dob:signupDob,pref_lang:signupLang,conditions:signupConds,plan:"free"};
-        setUser(profile);setObConds(signupConds);setOnboardStep(1);
-      }catch(e){setAuthErr(e.message||"Registration failed.");}
+      if(!email||!pw||!nm){setAuthErr("Please fill in all required fields.");return;}
+      try{const p=await sbSignUp(email,pw,nm,dob,lang,conds);setUser(p);setObConds(conds);setObStep(1);}
+      catch(e){setAuthErr(e.message||"Registration failed.");}
     }else{
-      try{
-        const profile=await sbSignIn(email,pwV);
-        setUser(profile);
-      }catch(e){setAuthErr("Incorrect email or password.");}
+      try{const p=await sbSignIn(email,pw);setUser(p);}
+      catch(e){setAuthErr("Incorrect email or password.");}
     }
   }
 
-  function finishOnboard(){
-    const updated={...user,conditions:obConds,onboarded:true};
-    USER_DB[user.email]=updated;setUser(updated);setOnboardStep(0);setTab("qa");
+  async function finishOnboard(){
+    try{await sbUpdate(user.id,{conditions:obConds});}catch(e){}
+    setUser(u=>({...u,conditions:obConds}));
+    setObStep(0);setTab("qa");
   }
 
-  function handleSubscribe(planType){
+  async function handleSub(planType){
     if(!user){setAuthMode("register");setTab("account");return;}
-    const u={...user,plan:"paid",planType,paidSince:new Date().toISOString()};
-    USER_DB[user.email]=u;setUser(u);setTab("qa");
+    try{await sbUpdate(user.id,{plan:"paid",plan_type:planType});}catch(e){}
+    setUser(u=>({...u,plan:"paid",plan_type:planType}));
+    setTab("qa");
   }
 
-  function saveProfile(){
-    if(!editName.trim()||!editEmail.trim()){setAcctMsg({text:"Name and email required.",ok:false});return;}
-    const updated={...user,name:editName,email:editEmail};
-    if(USER_DB[user.email])delete USER_DB[user.email];
-    USER_DB[editEmail]=updated;setUser(updated);
-    setAcctMsg({text:"✅ Profile updated.",ok:true});
-    setTimeout(()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});},1200);
+  async function saveProfile(){
+    if(!editNm.trim()||!editEm.trim()){setAcctMsg({t:"Name and email required.",ok:false});return;}
+    try{
+      await sbUpdate(user.id,{name:editNm,email:editEm});
+      setUser(u=>({...u,name:editNm,email:editEm}));
+      setAcctMsg({t:"Profile updated.",ok:true});
+      setTimeout(()=>{setAcctSec("main");setAcctMsg({t:"",ok:true});},1200);
+    }catch(e){setAcctMsg({t:"Update failed.",ok:false});}
   }
-  function savePw(){
-    if(oldPw!==user.pw){setAcctMsg({text:"Current password incorrect.",ok:false});return;}
-    if(newPw.length<6){setAcctMsg({text:"New password must be at least 6 characters.",ok:false});return;}
-    if(newPw!==newPw2){setAcctMsg({text:"New passwords do not match.",ok:false});return;}
-    const updated={...user,pw:newPw};
-    USER_DB[user.email]=updated;setUser(updated);
-    setAcctMsg({text:"✅ Password changed.",ok:true});
-    setTimeout(()=>{setAcctSection("main");setOldPw("");setNewPw("");setNewPw2("");setAcctMsg({text:"",ok:true});},1200);
+
+  async function savePw(){
+    if(nPw.length<6){setAcctMsg({t:"Password must be at least 6 characters.",ok:false});return;}
+    if(nPw!==nPw2){setAcctMsg({t:"Passwords do not match.",ok:false});return;}
+    try{
+      await sbChangePw(nPw);
+      setAcctMsg({t:"Password changed.",ok:true});
+      setTimeout(()=>{setAcctSec("main");setNPw("");setNPw2("");setAcctMsg({t:"",ok:true});},1200);
+    }catch(e){setAcctMsg({t:"Failed: "+e.message,ok:false});}
   }
-  function cancelSub(){
-    const u={...user,plan:"free",planType:null};
-    USER_DB[user.email]=u;setUser(u);setAcctSection("main");
+
+  async function cancelSub(){
+    try{await sbUpdate(user.id,{plan:"free",plan_type:null});}catch(e){}
+    setUser(u=>({...u,plan:"free",plan_type:null}));
+    setAcctSec("main");
   }
 
   async function sendMsg(){
-    if(!input.trim()||loading)return;
-    const userMsg={role:"user",content:input};
-    setMsgs(m=>[...m,userMsg]);setInput("");setLoading(true);
+    if(!inp.trim()||loading)return;
+    const uMsg={role:"user",content:inp};
+    setMsgs(m=>[...m,uMsg]);setInp("");setLoading(true);
     try{
       const res=await fetch("/api/chat",{
         method:"POST",
-        headers:{"Content-Type":"application/json",
-        body:JSON.stringify({system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})
-});
-그리고 파일 맨 위의 이 두 줄도 삭제:
-javascriptconst SUPABASE_ANON_KEY = "%%NEXT_PUBLIC_SUPABASE_ANON_KEY%%";
-const ANTHROPIC_KEY = "%%ANTHROPIC_API_KEY%%";
-SUPABASE_ANON_KEY는 아래처럼 직접 값으로 바꾸세요:
-javascriptconst SUPABASE_ANON_KEY = "eyJhbGci...실제anon키...";
-Supabase anon key는 공개해도 안전합니다 (RLS 정책으로 보호됨).
-Commit changes 클릭 후 알려주세요!Sonnet 4.6 LowClaude is AI and can make mistakes. Please double-check responses.
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({system:buildSys(user),messages:[...msgs,uMsg].map(m=>({role:m.role,content:m.content}))})
       });
       const d=await res.json();
       setMsgs(m=>[...m,{role:"assistant",content:(d.content&&d.content[0]&&d.content[0].text)||"Error retrieving response."}]);
-    }catch(e){setMsgs(m=>[...m,{role:"assistant",content:"An error occurred. Please try again."}]);}
+    }catch(e){
+      setMsgs(m=>[...m,{role:"assistant",content:"An error occurred. Please try again."}]);
+    }
     setLoading(false);
   }
 
-  // ── 온보딩 모달 ───────────────────────────────────────────────
-  const onboardModal=onboardStep>0&&(
+  if(!ready)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bgPage}}><div style={{color:C.navy,fontSize:14}}>Loading...</div></div>;
+
+  const obModal=obStep>0&&(
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.65)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:C.white,borderRadius:12,padding:20,maxWidth:460,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{color:C.gold,fontSize:11,letterSpacing:1,marginBottom:4}}>ALMOST DONE</div>
-        <div style={{fontWeight:"bold",color:C.ink,fontSize:15,marginBottom:4}}>Any health conditions to note?</div>
-        <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>This helps us alert you when upcoming seasons may affect your health. Completely optional — update anytime in My Account.</div>
+        <div style={{fontWeight:"bold",color:C.ink,fontSize:15,marginBottom:4}}>Any health conditions?</div>
+        <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>Optional — helps us send personalised seasonal alerts. Update anytime in My Account.</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16}}>
-          {HEALTH_CONDITIONS.map(c=>(
-            <div key={c} onClick={()=>toggleObCond(c)} style={{border:"1.5px solid "+(obConds.includes(c)?C.gold:"#eee"),borderRadius:6,padding:"7px 10px",cursor:"pointer",background:obConds.includes(c)?C.goldLight:"#FAFAFA",fontSize:11,color:obConds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:5}}>
-              <span style={{color:obConds.includes(c)?C.gold:"#ddd",fontSize:13,flexShrink:0}}>✓</span>{c}
-            </div>
-          ))}
+          {HC.map(c=><div key={c} onClick={()=>tog(c,obConds,setObConds)} style={{border:"1.5px solid "+(obConds.includes(c)?C.gold:"#eee"),borderRadius:6,padding:"7px 10px",cursor:"pointer",background:obConds.includes(c)?C.goldLight:"#FAFAFA",fontSize:11,color:obConds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:5}}>
+            <span style={{color:obConds.includes(c)?C.gold:"#ddd",fontSize:13,flexShrink:0}}>✓</span>{c}
+          </div>)}
         </div>
         <button onClick={finishOnboard} style={{width:"100%",padding:"10px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.navy,color:C.white,fontWeight:"bold",fontSize:12}}>
-          {obConds.length>0?"Save & Go to Q&A →":"Skip & Go to Q&A →"}
+          {obConds.length>0?"Save & Go to Q&A":"Skip & Go to Q&A"}
         </button>
       </div>
     </div>
   );
 
-  // ── 위험구간 상세 모달 ────────────────────────────────────────
-  const riskDetailModal=riskModal&&(
+  const riskModal=rModal&&(
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.65)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:C.white,borderRadius:12,padding:0,maxWidth:500,width:"100%",maxHeight:"92vh",overflowY:"auto"}}>
-        <div style={{background:riskModal.risk==="雙火"?C.red:riskModal.risk==="雙土"?C.orange:C.darkGold,borderRadius:"12px 12px 0 0",padding:"16px 20px",color:C.white}}>
+        <div style={{background:rModal.risk==="\u96d9\u706b"?C.red:rModal.risk==="\u96d9\u571f"?C.orange:C.darkGold,borderRadius:"12px 12px 0 0",padding:"16px 20px",color:C.white}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
-              <div style={{fontSize:11,opacity:0.85,marginBottom:3}}>{RISK_S[riskModal.risk]&&RISK_S[riskModal.risk].label} · {riskModal.name}</div>
-              <div style={{fontWeight:"bold",fontSize:17,marginBottom:2}}>{riskModal.risk==="雙火"?"⚡ Double Fire Period":riskModal.risk==="雙土"?"💧 Double Earth Period":"⚠️ High-Risk Period"}</div>
-              <div style={{fontSize:12,opacity:0.9}}>{riskModal.daysUntil>0?"Starts in "+riskModal.daysUntil+" days · ":"Currently active · "}{riskModal.dateStr} ({hemi==="S"?"Southern":"Northern"} Hemisphere)</div>
+              <div style={{fontSize:11,opacity:0.85,marginBottom:3}}>{RS[rModal.risk].label} · {rModal.name}</div>
+              <div style={{fontWeight:"bold",fontSize:17,marginBottom:2}}>{rModal.risk==="\u96d9\u706b"?"Double Fire":rModal.risk==="\u96d9\u571f"?"Double Earth":"High-Risk"} Period</div>
+              <div style={{fontSize:12,opacity:0.9}}>{rModal.daysUntil>0?"Starts in "+rModal.daysUntil+" days":"Currently active"} · {rModal.dateStr} ({hemi==="S"?"Southern":"Northern"} Hemisphere)</div>
             </div>
-            <button onClick={()=>setRiskModal(null)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:6,color:C.white,cursor:"pointer",padding:"4px 8px",fontSize:14,flexShrink:0,marginLeft:8}}>✕</button>
+            <button onClick={()=>setRModal(null)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:6,color:C.white,cursor:"pointer",padding:"4px 8px",fontSize:14,marginLeft:8}}>X</button>
           </div>
         </div>
         <div style={{padding:20}}>
-          <Section title="🌤 Climate Forecast" bg={C.lightGray}>{getCL(riskModal.risk).w}</Section>
-          <Section title="🏥 General Health Risks" bg="#FFF8F0">{getCL(riskModal.risk).d}</Section>
-          {user&&user.conditions&&user.conditions.length>0?(
+          <Sec title="Climate Forecast" bg={C.lightGray}>{CL[rModal.risk].w}</Sec>
+          <Sec title="General Health Risks" bg="#FFF8F0">{CL[rModal.risk].d}</Sec>
+          {uConds.length>0?(
             <div style={{marginBottom:14,background:"#FFF0EE",borderRadius:8,padding:"12px 14px",border:"1px solid #FABFB0"}}>
-              <div style={{fontWeight:"bold",color:C.red,fontSize:12,marginBottom:6}}>⚠️ Your Conditions & This Period</div>
-              <div style={{color:"#555",fontSize:12,lineHeight:1.7,marginBottom:10}}>
-                You have noted: <strong>{user.conditions.join(", ")}</strong>.<br/><br/>
-                {riskModal.risk==="雙火"?"Fire periods place extra stress on the cardiovascular system, heart, and nervous system. Extra vigilance required."
-                  :riskModal.risk==="雙土"?"Earth periods place extra stress on the digestive system and immune response. Damp accumulation may worsen symptoms."
-                  :"Climate mismatch periods can trigger immune fluctuation and aggravate existing conditions."}
+              <div style={{fontWeight:"bold",color:C.red,fontSize:12,marginBottom:6}}>Your Conditions & This Period</div>
+              <div style={{color:"#555",fontSize:12,lineHeight:1.7,marginBottom:8}}>
+                You have noted: <strong>{uConds.join(", ")}</strong>.<br/><br/>
+                {rModal.risk==="\u96d9\u706b"?"Fire periods place extra stress on the cardiovascular system and nervous system.":rModal.risk==="\u96d9\u571f"?"Earth periods stress the digestive system. Damp accumulation may worsen symptoms.":"Climate mismatch can trigger immune fluctuation and aggravate existing conditions."}
               </div>
-              <div style={{background:C.white,borderRadius:6,padding:"10px 12px",border:"1px solid #FABFB0"}}>
-                <div style={{fontWeight:"bold",color:C.ink,fontSize:11,marginBottom:4}}>📋 Recommendation</div>
-                <div style={{color:"#555",fontSize:11,lineHeight:1.7}}>Because you have existing health conditions, please consult Sang Hee for a <strong>diagnosis-based treatment plan</strong> tailored to you — ideally 2–4 weeks before this period begins.</div>
+              <div style={{background:C.white,borderRadius:6,padding:"10px 12px",border:"1px solid #FABFB0",fontSize:11,color:"#555",lineHeight:1.7}}>
+                Because you have existing conditions, please consult Sang Hee for a personalised treatment plan ideally 2-4 weeks before this period.
               </div>
             </div>
           ):(
-            <div style={{marginBottom:14,background:C.lightGray,borderRadius:8,padding:"10px 12px"}}>
-              <div style={{color:"#666",fontSize:11,lineHeight:1.6}}>💡 <strong>No health conditions listed.</strong> Add your health conditions in My Account to receive personalised guidance.</div>
+            <div style={{marginBottom:14,background:C.lightGray,borderRadius:8,padding:"10px 12px",fontSize:11,color:"#666",lineHeight:1.6}}>
+              Add your health conditions in My Account for personalised guidance.
             </div>
           )}
-          <Section title="🍽️ Recommended Foods" bg="#F0FBF5" tc="#2D5A3D">{getCL(riskModal.risk).food}</Section>
-          <Section title="🚶 Lifestyle & Habits to Watch" bg="#F8F6F0">{getCL(riskModal.risk).lifestyle}</Section>
-          <Section title="🍵 Home Teas You Can Make" bg="#FDFAF0" pre>{getCL(riskModal.risk).tea}</Section>
-          <Section title="✅ Key Takeaway" bg="#F0F4FA">{getCL(riskModal.risk).lay}</Section>
+          <Sec title="Recommended Foods" bg="#F0FBF5" tc="#2D5A3D">{CL[rModal.risk].food}</Sec>
+          <Sec title="Lifestyle & Habits" bg="#F8F6F0">{CL[rModal.risk].lifestyle}</Sec>
+          <Sec title="Home Teas to Make" bg="#FDFAF0" pre>{CL[rModal.risk].tea}</Sec>
+          <Sec title="Key Takeaway" bg="#F0F4FA">{CL[rModal.risk].lay}</Sec>
           <div style={{background:C.navy,borderRadius:10,padding:16,textAlign:"center"}}>
             <div style={{color:C.gold,fontWeight:"bold",fontSize:14,marginBottom:4}}>Prepare before this period</div>
             <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>
-              {user&&user.conditions&&user.conditions.length>0
-                ?"With your health conditions, a personalised treatment plan with Sang Hee 2–4 weeks before this period is strongly recommended."
-                :"A preventive acupuncture session before high-risk periods helps your body adapt."}
+              {uConds.length>0?"With your conditions, a personalised plan 2-4 weeks ahead is strongly recommended.":"A preventive session before high-risk periods helps your body adapt."}
             </div>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{display:"block",padding:"12px 0",borderRadius:8,background:C.gold,color:C.white,fontWeight:"bold",fontSize:14,textDecoration:"none",marginBottom:8}}>📅 Book with Sang Hee →</a>
-            <button onClick={()=>{setRiskModal(null);setTab("qa");setInput("What should I do to prepare for this "+riskModal.risk+" period?");}} style={{width:"100%",padding:"9px 0",borderRadius:8,border:"1px solid "+C.gray,background:"transparent",color:C.gray,fontSize:12,cursor:"pointer"}}>Ask Q&A for more advice</button>
+            <a href={BOOKING} target="_blank" rel="noopener noreferrer" style={{display:"block",padding:"12px 0",borderRadius:8,background:C.gold,color:C.white,fontWeight:"bold",fontSize:14,textDecoration:"none",marginBottom:8}}>Book with Sang Hee</a>
+            <button onClick={()=>{setRModal(null);setTab("qa");setInp("What should I do to prepare for this period?");}} style={{width:"100%",padding:"9px 0",borderRadius:8,border:"1px solid "+C.gray,background:"transparent",color:C.gray,fontSize:12,cursor:"pointer"}}>Ask Q&A for advice</button>
           </div>
         </div>
       </div>
     </div>
   );
 
-  // ── 위험 배너 ─────────────────────────────────────────────────
-  const riskBanners=upcomingRisks.length>0&&(
+  const rBanners=upcoming.length>0&&(
     <div style={{marginBottom:12}}>
-      {upcomingRisks.map((s,i)=>(
-        <div key={i} style={{background:s.risk==="雙火"?"#FFF0EE":s.risk==="雙土"?"#FFF5EC":"#FFFBE8",border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),borderRadius:8,padding:"12px 14px",marginBottom:8,display:"flex",gap:10,alignItems:"flex-start"}}>
-          <div style={{fontSize:22,flexShrink:0}}>{s.risk==="雙火"?"⚡":s.risk==="雙土"?"💧":"⚠️"}</div>
+      {upcoming.map((s,i)=>(
+        <div key={i} style={{background:s.risk==="\u96d9\u706b"?"#FFF0EE":s.risk==="\u96d9\u571f"?"#FFF5EC":"#FFFBE8",border:"1px solid "+(s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold),borderRadius:8,padding:"12px 14px",marginBottom:8,display:"flex",gap:10,alignItems:"flex-start"}}>
+          <div style={{fontSize:22,flexShrink:0}}>{s.risk==="\u96d9\u706b"?"!":s.risk==="\u96d9\u571f"?"~":"?"}</div>
           <div style={{flex:1}}>
-            <div style={{fontWeight:"bold",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontSize:12,marginBottom:2}}>{RISK_S[s.risk].label} · {s.name} · {s.dateStr}</div>
+            <div style={{fontWeight:"bold",color:s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold,fontSize:12,marginBottom:2}}>{RS[s.risk].label} · {s.name} · {s.dateStr}</div>
             <div style={{color:"#555",fontSize:11,lineHeight:1.5,marginBottom:8}}>
               {s.daysUntil>0?"Starting in "+s.daysUntil+" day"+(s.daysUntil===1?"":"s")+" — ":"Currently active — "}
-              {s.risk==="雙火"?"Extreme heat/fire period. Cardiovascular & febrile disease risk.":s.risk==="雙土"?"Damp-heat period. Digestive & immune vulnerability.":"Climate mismatch period. Immune fluctuation risk."}
-              {user&&user.conditions&&user.conditions.length>0&&" ⚠️ Relevant to your health profile."}
+              {s.risk==="\u96d9\u706b"?"Extreme fire period. Cardiovascular risk elevated.":s.risk==="\u96d9\u571f"?"Damp-heat period. Digestive & immune vulnerability.":"Climate mismatch. Immune fluctuation risk."}
+              {uConds.length>0&&" Relevant to your health profile."}
             </div>
-            <button onClick={()=>setRiskModal(s)} style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),background:C.white,cursor:"pointer",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontWeight:"bold",marginRight:6}}>Read More →</button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"none",background:C.navy,cursor:"pointer",color:C.white,fontWeight:"bold",textDecoration:"none",display:"inline-block"}}>📅 Book with Sang Hee</a>
+            <button onClick={()=>setRModal(s)} style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"1px solid "+(s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold),background:C.white,cursor:"pointer",color:s.risk==="\u96d9\u706b"?C.red:s.risk==="\u96d9\u571f"?C.orange:C.darkGold,fontWeight:"bold",marginRight:6}}>Read More</button>
+            <a href={BOOKING} target="_blank" rel="noopener noreferrer" style={{fontSize:11,padding:"5px 12px",borderRadius:6,background:C.navy,color:C.white,fontWeight:"bold",textDecoration:"none",display:"inline-block"}}>Book with Sang Hee</a>
           </div>
         </div>
       ))}
     </div>
   );
 
-  // ── NAV ───────────────────────────────────────────────────────
-  const NAV=[
-    {t:"features",label:"Home",icon:"🏠"},
-    {t:"analyzer",label:"Analyser",icon:"📊",badge:"FREE"},
-    {t:"qa",label:"Q&A",icon:"💬"},
-    {t:"subscribe",label:"Subscribe",icon:"💎"},
-    {t:"account",label:"My Account",icon:"👤"},
-    {t:"booking",label:"Book Now",icon:"📅",ext:true},
-  ];
+  const NAV=[{t:"features",l:"Home",ic:"Home"},{t:"analyzer",l:"Analyser",ic:"Chart",badge:"FREE"},{t:"qa",l:"Q&A",ic:"Chat"},{t:"subscribe",l:"Subscribe",ic:"Star"},{t:"account",l:"My Account",ic:"User"},{t:"book",l:"Book Now",ic:"Cal",ext:true}];
 
   const hdr=(
     <div style={{background:C.navy,borderRadius:10,padding:"12px 16px 0 16px",marginBottom:12}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div style={{color:C.gold,fontSize:10,letterSpacing:2}}>五運六氣 · WU YUN LIU QI</div>
-          <div style={{color:C.white,fontSize:isMobile?16:20,fontWeight:"bold",margin:"2px 0"}}>運氣 Analyzer</div>
+          <div style={{color:C.white,fontSize:mob?16:20,fontWeight:"bold",margin:"2px 0"}}>Yun Qi Analyzer</div>
           <div style={{color:C.gray,fontSize:10}}>Sang Hee Park, PhD · sangheeparkacupuncture.com</div>
         </div>
-        {user&&<div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold",marginTop:4}}>{isPaid?"💎 Pro":"Free"}</div>}
+        {user&&<div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold",marginTop:4}}>{isPaid?"Pro":"Free"}</div>}
       </div>
       <div style={{display:"flex",marginTop:10,borderTop:"1px solid rgba(255,255,255,0.1)",overflowX:"auto"}}>
-        {NAV.map(({t,label,icon,badge,ext})=>ext
-          ?<a key={t} href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{flex:1,minWidth:isMobile?50:68,padding:isMobile?"8px 2px":"9px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:C.gold,fontSize:isMobile?9:11,fontWeight:"bold",textDecoration:"none",borderBottom:"2px solid "+C.gold}}>
-            <span style={{fontSize:isMobile?14:13}}>{icon}</span>
-            <span style={{whiteSpace:"nowrap"}}>{label}</span>
+        {NAV.map(({t,l,badge,ext})=>ext
+          ?<a key={t} href={BOOKING} target="_blank" rel="noopener noreferrer" style={{flex:1,minWidth:mob?50:68,padding:mob?"8px 2px":"9px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:C.gold,fontSize:mob?9:11,fontWeight:"bold",textDecoration:"none",borderBottom:"2px solid "+C.gold}}>
+            <span style={{fontSize:mob?14:13}}>📅</span><span style={{whiteSpace:"nowrap"}}>{l}</span>
           </a>
-          :<button key={t} onClick={()=>setTab(t)} style={{flex:1,minWidth:isMobile?50:68,padding:isMobile?"8px 2px":"9px 4px",border:"none",cursor:"pointer",background:"transparent",color:tab===t?C.gold:C.gray,borderBottom:tab===t?"2px solid "+C.gold:"2px solid transparent",fontWeight:tab===t?"bold":"normal",fontSize:isMobile?9:11,display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}>
-            <span style={{fontSize:isMobile?14:13}}>{icon}</span>
-            <span style={{whiteSpace:"nowrap"}}>{label}</span>
-            {badge&&<span style={{position:"absolute",top:3,right:isMobile?0:4,background:C.green,color:C.white,fontSize:7,fontWeight:"bold",padding:"1px 4px",borderRadius:6}}>{badge}</span>}
+          :<button key={t} onClick={()=>setTab(t)} style={{flex:1,minWidth:mob?50:68,padding:mob?"8px 2px":"9px 4px",border:"none",cursor:"pointer",background:"transparent",color:tab===t?C.gold:C.gray,borderBottom:tab===t?"2px solid "+C.gold:"2px solid transparent",fontWeight:tab===t?"bold":"normal",fontSize:mob?9:11,display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}>
+            <span style={{fontSize:mob?14:13}}>{t==="features"?"🏠":t==="analyzer"?"📊":t==="qa"?"💬":t==="subscribe"?"💎":"👤"}</span>
+            <span style={{whiteSpace:"nowrap"}}>{l}</span>
+            {badge&&<span style={{position:"absolute",top:3,right:mob?0:4,background:C.green,color:C.white,fontSize:7,fontWeight:"bold",padding:"1px 4px",borderRadius:6}}>{badge}</span>}
           </button>
         )}
       </div>
     </div>
   );
 
-  // ── HOME ──────────────────────────────────────────────────────
-  const featuresTab=(
+  const homeTab=(
     <div>
       <div style={{background:"linear-gradient(135deg,"+C.navy+","+C.ink+")",borderRadius:10,padding:20,marginBottom:14,textAlign:"center"}}>
         <div style={{color:C.gold,fontSize:22,fontWeight:"bold",marginBottom:4}}>五運六氣 · Wu Yun Liu Qi</div>
@@ -465,98 +386,79 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
         <div style={{color:C.gray,fontSize:11}}>Sang Hee Park, PhD · AHPRA Registered Acupuncturist · Liaoning University of TCM</div>
       </div>
       <div style={{background:C.white,borderRadius:10,padding:16,marginBottom:12,border:"1px solid #ddd"}}>
-        <div style={{background:C.lightGray,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.ink,display:"inline-block",marginBottom:12}}>🆓 FREE — No sign-in required</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8}}>
-          {FREE_FEATURES.map((f,i)=>(
+        <div style={{background:C.lightGray,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.ink,display:"inline-block",marginBottom:12}}>FREE — No sign-in required</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:8}}>
+          {[{ic:"📊",t:"Yun Qi Analyser",d:"Da Yun, Si Tian, Zai Quan, Special classification, any year 1924-2103"},{ic:"🗓️",t:"10-Segment Calendar",d:"Full risk calendar, colour-coded, North and South hemisphere dates"},{ic:"🌏",t:"Hemisphere Toggle",d:"Auto date shift for Southern Hemisphere (Australia/NZ)"},{ic:"⚠️",t:"Risk Classification",d:"Extreme, High, OK per segment with clinical significance"},{ic:"🧮",t:"Special Year Lookup",d:"天符 · 歲會 · 太乙天符 · 同天符 · 同歲會"},{ic:"📱",t:"PWA",d:"Install on phone, works on any device"}].map((f,i)=>
             <div key={i} style={{background:"#FAFAF8",borderRadius:8,padding:12,border:"1px solid #eee"}}>
-              <div style={{fontSize:20,marginBottom:4}}>{f.icon}</div>
-              <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:3}}>{f.title}</div>
-              <div style={{color:"#666",fontSize:11,lineHeight:1.5}}>{f.desc}</div>
+              <div style={{fontSize:20,marginBottom:4}}>{f.ic}</div>
+              <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:3}}>{f.t}</div>
+              <div style={{color:"#666",fontSize:11,lineHeight:1.5}}>{f.d}</div>
             </div>
-          ))}
+          )}
         </div>
-        <button onClick={()=>setTab("analyzer")} style={{width:"100%",marginTop:12,padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Try Analyser Free →</button>
+        <button onClick={()=>setTab("analyzer")} style={{width:"100%",marginTop:12,padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Try Analyser Free</button>
       </div>
       <div style={{background:"linear-gradient(135deg,#1a2f50,"+C.navy+")",borderRadius:10,padding:16,marginBottom:12,border:"2px solid "+C.gold}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:6}}>
-          <div style={{background:C.gold,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.white}}>💎 PRO SUBSCRIPTION</div>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:6}}>
+          <div style={{background:C.gold,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.white}}>PRO SUBSCRIPTION</div>
           <div style={{color:C.gold,fontWeight:"bold",fontSize:13}}>$8/mo · $50/yr</div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8,marginBottom:14}}>
-          {PAID_FEATURES.map((f,i)=>(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:8,marginBottom:14}}>
+          {[{ic:"💬",t:"Unlimited Q&A",d:"Ask anything — theory, calculations, clinical application"},{ic:"🌐",t:"All Languages",d:"Korean, English, Chinese, Japanese, Spanish, French and more"},{ic:"📚",t:"Dr Park's Materials",d:"Answers from Su Wen Ch.66-74, course modules and clinical handouts"},{ic:"⏰",t:"30-Day Risk Alerts",d:"Personalised alerts 30 days before high-risk segments"},{ic:"❤️",t:"Personalised Guidance",d:"Tailored to your date of birth, conditions and preferred language"},{ic:"🔄",t:"Auto-renewing",d:"Cancel anytime, new year profiles added automatically"}].map((f,i)=>
             <div key={i} style={{background:"rgba(255,255,255,0.07)",borderRadius:8,padding:12,border:"1px solid rgba(196,154,72,0.3)"}}>
-              <div style={{fontSize:20,marginBottom:4}}>{f.icon}</div>
-              <div style={{fontWeight:"bold",color:C.gold,fontSize:12,marginBottom:3}}>{f.title}</div>
-              <div style={{color:C.gray,fontSize:11,lineHeight:1.5}}>{f.desc}</div>
+              <div style={{fontSize:20,marginBottom:4}}>{f.ic}</div>
+              <div style={{fontWeight:"bold",color:C.gold,fontSize:12,marginBottom:3}}>{f.t}</div>
+              <div style={{color:C.gray,fontSize:11,lineHeight:1.5}}>{f.d}</div>
             </div>
-          ))}
+          )}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Monthly $8 →</button>
-          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Annual $50 — Best Value →</button>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Monthly $8</button>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Annual $50 — Best Value</button>
         </div>
       </div>
       <div style={{background:"linear-gradient(135deg,#1a3a1a,#2D5A3D)",borderRadius:10,padding:16,marginBottom:12,border:"1px solid #4A8C6A"}}>
-        <div style={{color:"#A8D8A8",fontSize:11,letterSpacing:1,marginBottom:4}}>🌿 NOT JUST FOR PRACTITIONERS</div>
+        <div style={{color:"#A8D8A8",fontSize:11,letterSpacing:1,marginBottom:4}}>NOT JUST FOR PRACTITIONERS</div>
         <div style={{color:C.white,fontWeight:"bold",fontSize:15,marginBottom:6}}>For Everyone Who Wants to Live in Harmony with the Seasons</div>
-        <div style={{color:"#c8e6c8",fontSize:12,lineHeight:1.7,marginBottom:12}}>You don't need to be a doctor to benefit. This 2,000-year-old system tells you exactly <strong style={{color:C.white}}>when to rest, what to eat, and how to protect your health</strong> — based on the season's energy.</div>
-        <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"10px 0",borderRadius:6,border:"1px solid #4A8C6A",cursor:"pointer",background:"rgba(255,255,255,0.1)",color:C.white,fontWeight:"bold",fontSize:12}}>Start Your Seasonal Health Journey →</button>
+        <div style={{color:"#c8e6c8",fontSize:12,lineHeight:1.7,marginBottom:12}}>You do not need to be a doctor to benefit. This 2,000-year-old system tells you when to rest, what to eat, and how to protect your health — based on the season's energy.</div>
+        <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"10px 0",borderRadius:6,border:"1px solid #4A8C6A",cursor:"pointer",background:"rgba(255,255,255,0.1)",color:C.white,fontWeight:"bold",fontSize:12}}>Start Your Seasonal Health Journey</button>
       </div>
       <div style={{background:C.white,borderRadius:10,overflow:"hidden",marginBottom:12,border:"1px solid #eee"}}>
         <div style={{background:C.navy,padding:"10px 14px",color:C.white,fontWeight:"bold",fontSize:12}}>Feature Comparison</div>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
-          <thead>
-            <tr style={{background:C.lightGray}}>
-              <th style={{padding:"8px 10px",textAlign:"left",color:C.ink}}>Feature</th>
-              <th style={{padding:"8px 6px",textAlign:"center",color:C.ink}}>🆓 Free</th>
-              <th style={{padding:"8px 6px",textAlign:"center",color:C.orange}}>💎 Monthly<br/><span style={{fontWeight:"normal",fontSize:10}}>$8/mo</span></th>
-              <th style={{padding:"8px 6px",textAlign:"center",color:C.gold}}>⭐ Annual<br/><span style={{fontWeight:"normal",fontSize:10}}>$50/yr</span></th>
-            </tr>
-          </thead>
+          <thead><tr style={{background:C.lightGray}}>
+            <th style={{padding:"8px 10px",textAlign:"left",color:C.ink}}>Feature</th>
+            <th style={{padding:"8px 6px",textAlign:"center",color:C.ink}}>Free</th>
+            <th style={{padding:"8px 6px",textAlign:"center",color:C.orange}}>Monthly $8/mo</th>
+            <th style={{padding:"8px 6px",textAlign:"center",color:C.gold}}>Annual $50/yr</th>
+          </tr></thead>
           <tbody>
-            {[
-              ["Yun Qi Analyser (any year)","✅","✅","✅"],
-              ["10-Segment Calendar + Clinical Data","✅","✅","✅"],
-              ["N & S Hemisphere","✅","✅","✅"],
-              ["Unlimited Q&A (all languages)","—","✅","✅"],
-              ["Dr Park's Materials as Source","—","✅","✅"],
-              ["30-Day Advance Risk Alerts","—","✅","✅"],
-              ["Personalised Health Profile","—","✅","✅"],
-              ["New Year Profiles","—","Current year","✅ All years"],
-              ["Price","Free","$8/month","$50/year · Save $46"],
-            ].map(([f,fr,mo,an],i)=>(
+            {[["Yun Qi Analyser (any year)","Y","Y","Y"],["10-Segment Calendar + Clinical Data","Y","Y","Y"],["N & S Hemisphere","Y","Y","Y"],["Unlimited Q&A (all languages)","—","Y","Y"],["Dr Park's Materials as Source","—","Y","Y"],["30-Day Advance Risk Alerts","—","Y","Y"],["Personalised Health Profile","—","Y","Y"],["New Year Profiles","—","Current year","All years"],["Price","Free","$8/month","$50/year (Save $46)"]].map(([f,fr,mo,an],i)=>(
               <tr key={i} style={{borderBottom:"1px solid #f0f0f0",background:i%2===0?"#FAFAFA":"#FFF"}}>
                 <td style={{padding:"7px 10px",color:"#333"}}>{f}</td>
-                <td style={{padding:"7px 6px",textAlign:"center",color:fr==="✅"?C.green:fr==="—"?"#ccc":C.ink,fontWeight:"bold"}}>{fr}</td>
-                <td style={{padding:"7px 6px",textAlign:"center",color:mo==="✅"?C.orange:mo==="—"?"#ccc":C.orange,fontWeight:"bold"}}>{mo}</td>
-                <td style={{padding:"7px 6px",textAlign:"center",color:an==="✅"?C.gold:an==="—"?"#ccc":C.gold,fontWeight:"bold"}}>{an}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:fr==="Y"?C.green:fr==="—"?"#ccc":C.ink,fontWeight:"bold"}}>{fr==="Y"?"✅":fr}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:mo==="Y"?C.orange:mo==="—"?"#ccc":C.orange,fontWeight:"bold"}}>{mo==="Y"?"✅":mo}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:an==="Y"?C.gold:an==="—"?"#ccc":C.gold,fontWeight:"bold"}}>{an==="Y"?"✅":an}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div style={{fontSize:10,color:"#999",textAlign:"center",paddingBottom:16}}>Educational purposes only · © Blossom Skin & Health Pty Ltd</div>
+      <div style={{fontSize:10,color:"#999",textAlign:"center",paddingBottom:16}}>Educational purposes only · Blossom Skin & Health Pty Ltd</div>
     </div>
   );
 
-  // ── ANALYSER ──────────────────────────────────────────────────
-  const analyzerTab=(
+  const analyserTab=(
     <div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:12}}>
-        <input type="number" value={year} onChange={e=>setYear(+e.target.value)} style={{width:80,padding:"6px 8px",borderRadius:6,border:"2px solid "+C.gold,background:C.blue,color:C.white,fontSize:15,fontWeight:"bold",textAlign:"center"}}/>
-        {["N","S"].map(h=>(
-          <button key={h} onClick={()=>setHemi(h)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:hemi===h?C.gold:C.blue,color:C.white}}>{h==="N"?"🌏 Northern":"🌏 Southern"}</button>
-        ))}
-        <button onClick={()=>setData(calcYear(year))} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:C.red,color:C.white}}>Analyze</button>
+        <input type="number" value={yr} onChange={e=>setYr(+e.target.value)} style={{width:80,padding:"6px 8px",borderRadius:6,border:"2px solid "+C.gold,background:C.blue,color:C.white,fontSize:15,fontWeight:"bold",textAlign:"center"}}/>
+        {["N","S"].map(h=><button key={h} onClick={()=>setHemi(h)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:hemi===h?C.gold:C.blue,color:C.white}}>{h==="N"?"Northern":"Southern"}</button>)}
+        <button onClick={()=>setData(calcYear(yr))} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:C.red,color:C.white}}>Analyze</button>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(108px,1fr))",gap:8,marginBottom:12}}>
-        {[
-          {l:"Year · 干支",v:year+"년 "+data.jz,bg:"#E8EEF8",tc:C.ink},
-          {l:"大運 Dà Yùn",v:data.dayunName,e:data.dayunElem},
-          {l:"司天 Sī Tiān",v:data.si,e:data.siElem},
-          {l:"在泉 Zài Quán",v:data.zai,e:SIX_QI_ELEM[data.zai]},
-          {l:"運氣相合",v:data.yunQiRel,bg:(data.yunQiRel.includes("不和")||data.yunQiRel.includes("天刑"))?"#FFF0EE":"#F0FBF5",tc:(data.yunQiRel.includes("不和")||data.yunQiRel.includes("天刑"))?C.red:C.green},
-          {l:"特殊分類",v:data.special,bg:data.special==="太乙天符"?"#FFF0EE":data.special==="天符"?"#FFF5EC":data.special==="歲會"?"#F0FBF5":"#F5F5F5",tc:data.special.includes("太乙")?C.red:data.special.includes("天符")?C.orange:data.special==="歲會"?C.green:C.navy},
+        {[{l:"Year",v:yr+" "+data.jz,bg:"#E8EEF8",tc:C.ink},{l:"Da Yun",v:data.dyName,e:data.dyEl},{l:"Si Tian",v:data.si,e:data.siEl},{l:"Zai Quan",v:data.zai,e:SQE[data.zai]},
+          {l:"Yun Qi Rel",v:data.yqr,bg:(data.yqr.includes("\u4e0d\u548c")||data.yqr.includes("\u5929\u5211"))?"#FFF0EE":"#F0FBF5",tc:(data.yqr.includes("\u4e0d\u548c")||data.yqr.includes("\u5929\u5211"))?C.red:C.green},
+          {l:"Special Year",v:data.special,bg:data.special==="\u592a\u4e59\u5929\u7b26"?"#FFF0EE":data.special==="\u5929\u7b26"?"#FFF5EC":data.special==="\u6b72\u6703"?"#F0FBF5":"#F5F5F5",tc:data.special.includes("\u592a\u4e59")?C.red:data.special.includes("\u5929\u7b26")?C.orange:data.special==="\u6b72\u6703"?C.green:C.navy}
         ].map((item,i)=>{const col=item.e?ec(item.e):{bg:item.bg,border:"#ddd",text:item.tc};return(
           <div key={i} style={{borderRadius:8,padding:"9px 11px",background:col.bg,border:"1px solid "+col.border}}>
             <div style={{fontSize:9,color:"#888",marginBottom:2}}>{item.l}</div>
@@ -565,38 +467,36 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
         );})}
       </div>
       <div style={{background:C.white,borderRadius:8,overflow:"hidden",marginBottom:4,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
-        <div style={{padding:"9px 14px",background:C.navy,color:C.white,fontWeight:"bold",fontSize:13}}>十節段 · Ten Segments · {hemi==="S"?"Southern":"Northern"} Hemisphere</div>
+        <div style={{padding:"9px 14px",background:C.navy,color:C.white,fontWeight:"bold",fontSize:13}}>Ten Segments (十節段) · {hemi==="S"?"Southern":"Northern"} Hemisphere</div>
         <div style={{background:"#FFFBE8",borderLeft:"4px solid "+C.darkGold,padding:"10px 14px",fontSize:11,color:"#5A4A00",lineHeight:1.6}}>
-          <strong>📍 Acupuncture Points & 🌿 Herbal Formulas</strong> shown here are general climate-based recommendations from Su Wen Ch.66–74 — not personalised to any individual. If you have existing health conditions, please consult a qualified TCM practitioner for a diagnosis-based treatment plan.
+          Acupuncture Points and Herbal Formulas shown below are general climate-based seasonal recommendations from Su Wen Ch.66-74. They are NOT personalised to any individual's constitution or health conditions. If you have existing health conditions, please consult a qualified TCM practitioner for a diagnosis-based treatment plan.
         </div>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,minWidth:800}}>
-            <thead>
-              <tr style={{background:C.lightGray}}>
-                {["Segment","Date","主運","客運","主氣","客氣","Risk","🌤 Climate","🏥 Disease","📍 Acu","🌿 Herbs"].map(h=>(
-                  <th key={h} style={{padding:"5px 7px",textAlign:"left",color:C.ink,borderBottom:"1px solid #ddd",whiteSpace:"nowrap",fontSize:10}}>{h}</th>
-                ))}
-              </tr>
-            </thead>
+            <thead><tr style={{background:C.lightGray}}>
+              {["Segment","Date","Zhu Yun","Ke Yun","Zhu Qi","Ke Qi","Risk","Climate","Disease","Acu Points","Herbs"].map(h=>
+                <th key={h} style={{padding:"5px 7px",textAlign:"left",color:C.ink,borderBottom:"1px solid #ddd",whiteSpace:"nowrap",fontSize:10}}>{h}</th>
+              )}
+            </tr></thead>
             <tbody>
               {data.segs.map((s,i)=>{
-                const ri=RISK_S[s.risk]||RISK_S["順"];
-                const dates=hemi==="N"?DATES_N:DATES_S;
-                const cl=getCL(s.risk);
+                const ri=RS[s.risk]||RS["\u9806"];
+                const dates=hemi==="N"?DN:DS;
+                const cl=CL[s.risk]||CL["\u9806"];
                 const zYC=ec(s.zYun),kYC=ec(s.kYun),zQC=ec(s.zQiEl),kQC=ec(s.kQiEl);
                 return(
                   <tr key={i} style={{background:i%2===0?"#FAFAFA":"#FFF",borderLeft:"3px solid "+ri.border,verticalAlign:"top"}}>
-                    <td style={{padding:"6px 7px",fontWeight:"bold",color:C.navy,whiteSpace:"nowrap"}}>{SEG_LABELS[i]}</td>
+                    <td style={{padding:"6px 7px",fontWeight:"bold",color:C.navy,whiteSpace:"nowrap"}}>{SL[i]}</td>
                     <td style={{padding:"6px 7px",color:"#555",whiteSpace:"nowrap"}}>{dates[i]}</td>
                     <td style={{padding:"6px 7px"}}><span style={{background:zYC.bg,color:zYC.text,border:"1px solid "+zYC.border,borderRadius:4,padding:"1px 5px",fontWeight:"bold"}}>{s.zYun}</span></td>
                     <td style={{padding:"6px 7px"}}><span style={{background:kYC.bg,color:kYC.text,border:"1px solid "+kYC.border,borderRadius:4,padding:"1px 5px",fontWeight:"bold"}}>{s.kYun}</span></td>
                     <td style={{padding:"6px 7px",color:zQC.text,whiteSpace:"nowrap",fontSize:9}}>{s.zQi}</td>
                     <td style={{padding:"6px 7px",color:kQC.text,whiteSpace:"nowrap",fontSize:9}}>{s.kQiName}</td>
                     <td style={{padding:"6px 7px"}}><span style={{background:ri.bg,color:ri.color,border:"1px solid "+ri.border,borderRadius:4,padding:"2px 6px",fontWeight:"bold",fontSize:9,whiteSpace:"nowrap",display:"block"}}>{ri.label}</span></td>
-                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:120}}>{cl.w.split("—")[0]}</td>
-                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:140}}>{cl.d}</td>
-                    <td style={{padding:"6px 7px",fontSize:9,color:C.ink,lineHeight:1.6,minWidth:130}}>{cl.a}</td>
-                    <td style={{padding:"6px 7px",fontSize:9,color:"#2D5A3D",lineHeight:1.5,minWidth:130}}>{cl.h}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:100}}>{cl.w}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:120}}>{cl.d}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:C.ink,lineHeight:1.6,minWidth:110}}>{cl.a}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#2D5A3D",lineHeight:1.5,minWidth:110}}>{cl.h}</td>
                   </tr>
                 );
               })}
@@ -608,13 +508,12 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
     </div>
   );
 
-  // ── SUBSCRIBE ─────────────────────────────────────────────────
-  const subscribeTab=(
+  const subTab=(
     <div>
       <div style={{background:"linear-gradient(135deg,"+C.navy+","+C.ink+")",borderRadius:10,padding:16,marginBottom:14,textAlign:"center",border:"2px solid "+C.gold}}>
         <div style={{color:C.gold,fontSize:18,fontWeight:"bold"}}>Upgrade to Pro</div>
         <div style={{color:C.white,fontSize:12,marginTop:4}}>Unlimited Q&A · 30-Day Risk Alerts · Personalised Health Guidance</div>
-        <div style={{color:C.gray,fontSize:11,marginTop:3}}>Based on Dr Sang Hee Park's own Su Wen translations & course materials</div>
+        <div style={{color:C.gray,fontSize:11,marginTop:3}}>Based on Dr Sang Hee Park's Su Wen translations and course materials</div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
         <div style={{background:C.white,borderRadius:10,padding:16,border:"2px solid "+C.blue}}>
@@ -622,47 +521,39 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
           <div style={{color:C.red,fontSize:30,fontWeight:"bold",margin:"6px 0"}}>$8</div>
           <div style={{color:C.gray,fontSize:11,marginBottom:10}}>/month</div>
           <div style={{background:C.lightGray,borderRadius:6,padding:"8px 10px",fontSize:11,color:C.ink,lineHeight:1.8,marginBottom:10}}>
-            ✔ Unlimited Q&A<br/>✔ All languages<br/>✔ 30-day risk alerts<br/>✔ Personal health profile<br/>✔ Current year profile<br/>✔ Cancel anytime
+            Unlimited Q&A<br/>All languages<br/>30-day risk alerts<br/>Personal health profile<br/>Current year profile<br/>Cancel anytime
           </div>
           <div style={{fontSize:10,color:"#aaa",marginBottom:10}}>New year profiles: current year only</div>
-          <button onClick={()=>handleSubscribe("monthly")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Start Monthly</button>
+          <button onClick={()=>handleSub("monthly")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Start Monthly</button>
         </div>
         <div style={{background:C.navy,borderRadius:10,padding:16,border:"2px solid "+C.gold,position:"relative"}}>
           <div style={{position:"absolute",top:-10,right:10,background:C.gold,color:C.white,fontSize:9,fontWeight:"bold",padding:"3px 8px",borderRadius:10}}>BEST VALUE</div>
           <div style={{color:C.gold,fontWeight:"bold",fontSize:13}}>Annual</div>
           <div style={{color:C.white,fontSize:30,fontWeight:"bold",margin:"6px 0"}}>$50</div>
-          <div style={{color:C.gray,fontSize:11,marginBottom:6}}>/year <span style={{color:C.gold,fontWeight:"bold"}}>· Save $46</span></div>
+          <div style={{color:C.gray,fontSize:11,marginBottom:6}}>/year — Save $46</div>
           <div style={{background:"rgba(196,154,72,0.15)",borderRadius:6,padding:"8px 10px",border:"1px solid rgba(196,154,72,0.3)",fontSize:11,color:C.gray,lineHeight:1.8,marginBottom:6}}>
-            ✔ Everything in Monthly<br/>
-            <span style={{color:C.gold,fontWeight:"bold"}}>✔ ALL future year profiles<br/>✔ 12 months full access<br/>✔ Priority knowledge updates</span>
+            Everything in Monthly<br/>ALL future year profiles<br/>12 months full access<br/>Priority knowledge updates
           </div>
-          <div style={{fontSize:10,color:C.gold,marginBottom:10,fontWeight:"bold"}}>≈ $4.17/month</div>
-          <button onClick={()=>handleSubscribe("annual")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Start Annual →</button>
+          <div style={{fontSize:10,color:C.gold,marginBottom:10,fontWeight:"bold"}}>approx $4.17/month</div>
+          <button onClick={()=>handleSub("annual")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Start Annual</button>
         </div>
       </div>
       {!user&&(
         <div style={{background:C.white,borderRadius:8,padding:14,border:"1px solid #ddd"}}>
           <div style={{fontWeight:"bold",color:C.ink,marginBottom:10,fontSize:12}}>Create Account to Subscribe</div>
-          <input placeholder="Full name *" value={nameV} onChange={e=>setNameV(e.target.value)} style={iS}/>
+          <input placeholder="Full name *" value={nm} onChange={e=>setNm(e.target.value)} style={iS}/>
           <input placeholder="Email *" value={email} onChange={e=>setEmail(e.target.value)} style={iS}/>
-          <input placeholder="Password *" type="password" value={pwV} onChange={e=>setPwV(e.target.value)} style={iS}/>
+          <input placeholder="Password *" type="password" value={pw} onChange={e=>setPw(e.target.value)} style={iS}/>
           {authErr&&<div style={{color:C.red,fontSize:11,marginBottom:8}}>{authErr}</div>}
-          <button onClick={()=>{setAuthMode("register");handleAuth();}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Create Account & Subscribe</button>
+          <button onClick={()=>{setAuthMode("register");handleAuth();}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Create Account and Subscribe</button>
         </div>
       )}
-      <div style={{fontSize:9,color:"#999",textAlign:"center",marginTop:8,paddingBottom:16}}>Stripe integration · Educational only · Blossom Skin & Health Pty Ltd</div>
+      <div style={{fontSize:9,color:"#999",textAlign:"center",marginTop:8,paddingBottom:16}}>Stripe integration coming · Educational only · Blossom Skin & Health Pty Ltd</div>
     </div>
   );
 
-  // ── Q&A ───────────────────────────────────────────────────────
-  const langEx=[
-    {flag:"🇰🇷",lang:"한국어",q:"2026년 가장 위험한 구간은?"},
-    {flag:"🇬🇧",lang:"English",q:"What should I eat this season?"},
-    {flag:"🇨🇳",lang:"中文",q:"天符年的临床意义是什么？"},
-    {flag:"🇯🇵",lang:"日本語",q:"今の季節に何を食べればいいですか？"},
-    {flag:"🇪🇸",lang:"Español",q:"¿Qué debo comer esta temporada?"},
-    {flag:"🇫🇷",lang:"Français",q:"Comment me préparer pour la période à risque?"},
-  ];
+  const langEx=[{f:"KR",l:"Korean",q:"\uc624\ub298 \uc2dc\uc4f0\uae30\uc5d0 \ub300\ud574 \uc124\uba85\ud574\uc918"},{f:"EN",l:"English",q:"What should I eat this season?"},{f:"CN",l:"Chinese",q:"\u5929\u7b26\u5e74\u7684\u4e34\u5e8a\u610f\u4e49\u662f\u4ec0\u4e48\uff1f"},{f:"JP",l:"Japanese",q:"\u4eca\u306e\u5b63\u7bc0\u306b\u4f55\u3092\u98df\u3079\u308c\u3070\u3044\u3044\u3067\u3059\u304b\uff1f"},{f:"ES",l:"Spanish",q:"\xbfQu\xe9 debo comer esta temporada?"},{f:"FR",l:"French",q:"Comment me pr\xe9parer pour la p\xe9riode \xe0 risque?"}];
+
   const qaTab=(
     <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 220px)",minHeight:380}}>
       {!user?(
@@ -683,13 +574,11 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
       ):(
         <>
           <div style={{background:C.navy,borderRadius:"8px 8px 0 0",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
-            <div style={{color:C.gold,fontWeight:"bold",fontSize:12}}>五運六氣 Q&A</div>
-            <div style={{color:C.gray,fontSize:10}}>🌐 All Languages · Dr Park's Materials</div>
+            <div style={{color:C.gold,fontWeight:"bold",fontSize:12}}>Wu Yun Liu Qi Q&A</div>
+            <div style={{color:C.gray,fontSize:10}}>All Languages · Dr Park's Materials</div>
           </div>
           <div style={{background:"#F8F6F2",padding:"6px 10px",display:"flex",gap:5,flexWrap:"wrap",borderBottom:"1px solid #eee"}}>
-            {langEx.map((l,i)=>(
-              <button key={i} onClick={()=>setInput(l.q)} style={{fontSize:10,padding:"2px 8px",borderRadius:10,border:"1px solid #ddd",background:C.white,cursor:"pointer",color:C.ink}}>{l.flag} {l.lang}</button>
-            ))}
+            {langEx.map((l,i)=><button key={i} onClick={()=>setInp(l.q)} style={{fontSize:10,padding:"2px 8px",borderRadius:10,border:"1px solid #ddd",background:C.white,cursor:"pointer",color:C.ink}}>{l.f} {l.l}</button>)}
           </div>
           <div ref={chatRef} style={{flex:1,overflowY:"auto",padding:12,background:"#FAFAF8",display:"flex",flexDirection:"column",gap:10}}>
             {msgs.map((m,i)=>(
@@ -697,82 +586,68 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
                 <div style={{maxWidth:"85%",padding:"10px 13px",borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:m.role==="user"?C.blue:C.white,color:m.role==="user"?C.white:"#222",fontSize:12,lineHeight:1.6,boxShadow:"0 1px 3px rgba(0,0,0,.08)",whiteSpace:"pre-wrap"}}>{m.content}</div>
               </div>
             ))}
-            {loading&&(
-              <div style={{display:"flex",justifyContent:"flex-start"}}>
-                <div style={{background:C.white,borderRadius:"12px 12px 12px 2px",padding:"10px 14px",boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>
-                  <span style={{color:C.gray,fontSize:12}}>⟳ Searching knowledge base…</span>
-                </div>
-              </div>
-            )}
+            {loading&&<div style={{display:"flex",justifyContent:"flex-start"}}><div style={{background:C.white,borderRadius:"12px 12px 12px 2px",padding:"10px 14px",boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}><span style={{color:C.gray,fontSize:12}}>Searching knowledge base...</span></div></div>}
           </div>
           <div style={{padding:10,background:C.white,borderTop:"1px solid #eee",borderRadius:"0 0 8px 8px",display:"flex",gap:8}}>
-            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendMsg()} placeholder="Ask in any language…" style={{flex:1,padding:"8px 10px",borderRadius:6,border:"1px solid #ddd",fontSize:12,outline:"none"}}/>
-            <button onClick={sendMsg} disabled={loading} style={{padding:"8px 14px",borderRadius:6,border:"none",cursor:"pointer",background:loading?C.gray:C.gold,color:C.white,fontWeight:"bold",fontSize:13}}>→</button>
+            <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendMsg()} placeholder="Ask in any language..." style={{flex:1,padding:"8px 10px",borderRadius:6,border:"1px solid #ddd",fontSize:12,outline:"none"}}/>
+            <button onClick={sendMsg} disabled={loading} style={{padding:"8px 14px",borderRadius:6,border:"none",cursor:"pointer",background:loading?C.gray:C.gold,color:C.white,fontWeight:"bold",fontSize:13}}>Send</button>
           </div>
         </>
       )}
     </div>
   );
 
-  // ── ACCOUNT ───────────────────────────────────────────────────
-  const msgBox=acctMsg.text&&(
-    <div style={{padding:"8px 12px",borderRadius:6,marginBottom:8,fontSize:11,background:acctMsg.ok?"#F0FBF5":"#FFF0EE",color:acctMsg.ok?C.green:C.red,border:"1px solid "+(acctMsg.ok?C.green:C.red)}}>{acctMsg.text}</div>
-  );
-  const accountTab=(
+  const aMsg=acctMsg.t&&<div style={{padding:"8px 12px",borderRadius:6,marginBottom:8,fontSize:11,background:acctMsg.ok?"#F0FBF5":"#FFF0EE",color:acctMsg.ok?C.green:C.red,border:"1px solid "+(acctMsg.ok?C.green:C.red)}}>{acctMsg.t}</div>;
+
+  const acctTab=(
     <div style={{paddingBottom:24}}>
       {!user?(
         <div style={{background:C.white,borderRadius:8,padding:16}}>
-          {acctSection==="forgot"?(
+          {acctSec==="forgot"?(
             <div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-                <button onClick={()=>{setAcctSection("main");setForgotSent(false);setForgotEmail("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+                <button onClick={()=>{setAcctSec("main");setFgSent(false);setFgEmail("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
                 <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Reset Password</div>
               </div>
-              {forgotSent?(
+              {fgSent?(
                 <div style={{textAlign:"center",padding:"16px 8px"}}>
                   <div style={{fontSize:40,marginBottom:10}}>📧</div>
                   <div style={{fontWeight:"bold",color:C.ink,fontSize:13,marginBottom:6}}>Check your inbox</div>
                   <div style={{color:C.gray,fontSize:12,lineHeight:1.6,marginBottom:4}}>A reset link has been sent to:</div>
-                  <div style={{color:C.ink,fontWeight:"bold",fontSize:12,marginBottom:12}}>{forgotEmail}</div>
-                  <div style={{color:C.gray,fontSize:11,lineHeight:1.6,marginBottom:16}}>Link expires in 15 minutes. Check your spam folder.</div>
-                  <button onClick={()=>{setAcctSection("main");setForgotSent(false);setForgotEmail("");}} style={{padding:"8px 24px",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Back to Sign In</button>
+                  <div style={{color:C.ink,fontWeight:"bold",fontSize:12,marginBottom:12}}>{fgEmail}</div>
+                  <div style={{color:C.gray,fontSize:11,marginBottom:16}}>Link expires in 15 minutes. Check spam folder.</div>
+                  <button onClick={()=>{setAcctSec("main");setFgSent(false);setFgEmail("");}} style={{padding:"8px 24px",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Back to Sign In</button>
                 </div>
               ):(
                 <div>
-                  <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>Enter your email and we'll send a password reset link.</div>
-                  <input placeholder="your@email.com" value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)} style={iS}/>
-                  <button onClick={handleForgotPassword} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Send Reset Link</button>
-                  <div style={{fontSize:10,color:"#aaa",textAlign:"center"}}>※ Requires Supabase Auth backend to activate email sending.</div>
+                  <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>Enter your email and we will send a password reset link.</div>
+                  <input placeholder="your@email.com" value={fgEmail} onChange={e=>setFgEmail(e.target.value)} style={iS}/>
+                  <button onClick={async()=>{if(fgEmail.trim()){try{await sbForgot(fgEmail);}catch(e){}setFgSent(true);}}} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Send Reset Link</button>
+                  <div style={{fontSize:10,color:"#aaa",textAlign:"center"}}>Email sending powered by Supabase Auth.</div>
                 </div>
               )}
             </div>
           ):(
             <div>
               <div style={{fontWeight:"bold",color:C.ink,marginBottom:12,fontSize:13}}>{authMode==="register"?"Create Account":"Sign In"}</div>
-              {authMode==="register"&&(
-                <div>
-                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Full Name *</div>
-                  <input placeholder="Your name" value={nameV} onChange={e=>setNameV(e.target.value)} style={iS}/>
-                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Date of Birth</div>
-                  <input type="date" value={signupDob} onChange={e=>setSignupDob(e.target.value)} style={iS}/>
-                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Preferred Language</div>
-                  <select value={signupLang} onChange={e=>setSignupLang(e.target.value)} style={{...iS,cursor:"pointer"}}>
-                    {LANGUAGES.map(l=><option key={l.v} value={l.v}>{l.label}</option>)}
-                  </select>
-                  <div style={{fontSize:11,color:C.gray,marginBottom:6}}>Health Conditions <span style={{color:"#aaa"}}>(optional — for personalised alerts)</span></div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10,maxHeight:200,overflowY:"auto",padding:4,border:"1px solid #eee",borderRadius:6}}>
-                    {HEALTH_CONDITIONS.map(c=>(
-                      <div key={c} onClick={()=>toggleCond(c)} style={{border:"1.5px solid "+(signupConds.includes(c)?C.gold:"#eee"),borderRadius:5,padding:"6px 8px",cursor:"pointer",background:signupConds.includes(c)?C.goldLight:"#FAFAFA",fontSize:10,color:signupConds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:4}}>
-                        <span style={{color:signupConds.includes(c)?C.gold:"#ddd",fontSize:12,flexShrink:0}}>✓</span>{c}
-                      </div>
-                    ))}
-                  </div>
+              {authMode==="register"&&<div>
+                <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Full Name *</div>
+                <input placeholder="Your name" value={nm} onChange={e=>setNm(e.target.value)} style={iS}/>
+                <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Date of Birth</div>
+                <input type="date" value={dob} onChange={e=>setDob(e.target.value)} style={iS}/>
+                <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Preferred Language</div>
+                <select value={lang} onChange={e=>setLang(e.target.value)} style={{...iS,cursor:"pointer"}}>{LANGS.map(l=><option key={l.v} value={l.v}>{l.l}</option>)}</select>
+                <div style={{fontSize:11,color:C.gray,marginBottom:6}}>Health Conditions (optional)</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10,maxHeight:200,overflowY:"auto",padding:4,border:"1px solid #eee",borderRadius:6}}>
+                  {HC.map(c=><div key={c} onClick={()=>tog(c,conds,setConds)} style={{border:"1.5px solid "+(conds.includes(c)?C.gold:"#eee"),borderRadius:5,padding:"6px 8px",cursor:"pointer",background:conds.includes(c)?C.goldLight:"#FAFAFA",fontSize:10,color:conds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:4}}>
+                    <span style={{color:conds.includes(c)?C.gold:"#ddd",fontSize:12,flexShrink:0}}>✓</span>{c}
+                  </div>)}
                 </div>
-              )}
+              </div>}
               <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Email *</div>
               <input placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} style={iS}/>
               <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Password *</div>
-              <input placeholder="Password" type="password" value={pwV} onChange={e=>setPwV(e.target.value)} style={iS}/>
+              <input placeholder="Password" type="password" value={pw} onChange={e=>setPw(e.target.value)} style={iS}/>
               {authErr&&<div style={{color:C.red,fontSize:11,marginBottom:8}}>{authErr}</div>}
               <button onClick={handleAuth} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:10}}>
                 {authMode==="register"?"Create Account":"Sign In"}
@@ -781,48 +656,44 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
                 <div style={{fontSize:11,color:C.gray,cursor:"pointer"}} onClick={()=>setAuthMode(authMode==="register"?"login":"register")}>
                   {authMode==="register"?"Already have an account? Sign in":"No account? Register free"}
                 </div>
-                {authMode==="login"&&(
-                  <div style={{fontSize:11,color:C.blue,cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setAcctSection("forgot");setForgotEmail(email);}}>Forgot password?</div>
-                )}
+                {authMode==="login"&&<div style={{fontSize:11,color:C.blue,cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setAcctSec("forgot");setFgEmail(email);}}>Forgot password?</div>}
               </div>
             </div>
           )}
         </div>
-      ):acctSection==="editProfile"?(
+      ):acctSec==="editProfile"?(
         <div style={{background:C.white,borderRadius:8,padding:16}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-            <button onClick={()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+            <button onClick={()=>{setAcctSec("main");setAcctMsg({t:"",ok:true});}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
             <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Edit Profile</div>
           </div>
-          {msgBox}
+          {aMsg}
           <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Name</div>
-          <input value={editName} onChange={e=>setEditName(e.target.value)} style={iS}/>
+          <input value={editNm} onChange={e=>setEditNm(e.target.value)} style={iS}/>
           <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Email</div>
-          <input value={editEmail} onChange={e=>setEditEmail(e.target.value)} style={iS}/>
+          <input value={editEm} onChange={e=>setEditEm(e.target.value)} style={iS}/>
           <button onClick={saveProfile} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Save Changes</button>
         </div>
-      ):acctSection==="editPw"?(
+      ):acctSec==="editPw"?(
         <div style={{background:C.white,borderRadius:8,padding:16}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
-            <button onClick={()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});setOldPw("");setNewPw("");setNewPw2("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+            <button onClick={()=>{setAcctSec("main");setAcctMsg({t:"",ok:true});setNPw("");setNPw2("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
             <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Change Password</div>
           </div>
-          {msgBox}
-          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Current Password</div>
-          <input type="password" value={oldPw} onChange={e=>setOldPw(e.target.value)} style={iS}/>
-          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>New Password (min. 6 characters)</div>
-          <input type="password" value={newPw} onChange={e=>setNewPw(e.target.value)} style={iS}/>
+          {aMsg}
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>New Password (min 6 characters)</div>
+          <input type="password" value={nPw} onChange={e=>setNPw(e.target.value)} style={iS}/>
           <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Confirm New Password</div>
-          <input type="password" value={newPw2} onChange={e=>setNewPw2(e.target.value)} style={iS}/>
+          <input type="password" value={nPw2} onChange={e=>setNPw2(e.target.value)} style={iS}/>
           <button onClick={savePw} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Update Password</button>
         </div>
-      ):acctSection==="cancelConfirm"?(
+      ):acctSec==="cancelConfirm"?(
         <div style={{background:C.white,borderRadius:8,padding:20,textAlign:"center"}}>
           <div style={{fontSize:36,marginBottom:8}}>⚠️</div>
           <div style={{fontWeight:"bold",color:C.ink,fontSize:13,marginBottom:6}}>Cancel Subscription?</div>
-          <div style={{color:C.gray,fontSize:12,marginBottom:16,lineHeight:1.6}}>Q&A access and risk alerts will be removed immediately.<br/>You can re-subscribe at any time.</div>
+          <div style={{color:C.gray,fontSize:12,marginBottom:16,lineHeight:1.6}}>Q&A access and risk alerts will be removed. You can re-subscribe at any time.</div>
           <button onClick={cancelSub} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.red,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Yes, Cancel</button>
-          <button onClick={()=>setAcctSection("main")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Keep Subscription</button>
+          <button onClick={()=>setAcctSec("main")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Keep Subscription</button>
         </div>
       ):(
         <div>
@@ -834,82 +705,57 @@ Commit changes 클릭 후 알려주세요!Sonnet 4.6 Low
                   <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>{user.name}</div>
                   <div style={{color:C.gray,fontSize:11}}>{user.email}</div>
                   {user.dob&&<div style={{color:C.gray,fontSize:10}}>DOB: {user.dob}</div>}
-                  {user.prefLang&&<div style={{color:C.gray,fontSize:10}}>Language: {(LANGUAGES.find(l=>l.v===user.prefLang)||{}).label}</div>}
+                  {user.pref_lang&&<div style={{color:C.gray,fontSize:10}}>Language: {(LANGS.find(l=>l.v===user.pref_lang)||{}).l}</div>}
                 </div>
               </div>
-              <div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold"}}>{isPaid?"💎 "+(userPlanType==="annual"?"Annual":"Monthly"):"Free"}</div>
+              <div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold"}}>{isPaid?"Pro "+(uPT==="annual"?"Annual":"Monthly"):"Free"}</div>
             </div>
-            {userConditions.length>0&&(
-              <div style={{fontSize:11,color:C.gray,marginBottom:8,background:C.lightGray,borderRadius:6,padding:"6px 10px"}}>
-                <span style={{fontWeight:"bold",color:C.ink}}>Health conditions: </span>{userConditions.join(", ")}
-                <span style={{color:C.blue,cursor:"pointer",marginLeft:6}} onClick={()=>setOnboardStep(1)}>(update)</span>
-              </div>
-            )}
-            <button onClick={()=>{setEditName(user.name);setEditEmail(user.email);setAcctSection("editProfile");}} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12,marginBottom:6}}>✏️ Edit Profile</button>
-            <button onClick={()=>setAcctSection("editPw")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12}}>🔑 Change Password</button>
+            {uConds.length>0&&<div style={{fontSize:11,color:C.gray,marginBottom:8,background:C.lightGray,borderRadius:6,padding:"6px 10px"}}>
+              <span style={{fontWeight:"bold",color:C.ink}}>Health conditions: </span>{uConds.join(", ")}
+              <span style={{color:C.blue,cursor:"pointer",marginLeft:6}} onClick={()=>setObStep(1)}>(update)</span>
+            </div>}
+            <button onClick={()=>{setEditNm(user.name||"");setEditEm(user.email||"");setAcctSec("editProfile");}} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12,marginBottom:6}}>Edit Profile</button>
+            <button onClick={()=>setAcctSec("editPw")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12}}>Change Password</button>
           </div>
           <div style={{background:C.white,borderRadius:8,padding:14,marginBottom:10,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
             <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:8}}>Subscription</div>
             {isPaid?(
               <div>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                  <span style={{fontSize:12,color:"#444"}}>Plan</span>
-                  <span style={{fontWeight:"bold",color:C.gold,fontSize:12}}>{userPlanType==="annual"?"Annual — $50/yr":"Monthly — $8/mo"}</span>
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-                  <span style={{fontSize:12,color:"#444"}}>Status</span>
-                  <span style={{fontSize:12,color:C.green,fontWeight:"bold"}}>✅ Active</span>
-                </div>
-                <button onClick={()=>setTab("qa")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:6}}>Go to Q&A →</button>
-                <button onClick={()=>setAcctSection("cancelConfirm")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:"#999",fontSize:11}}>Cancel Subscription</button>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:12,color:"#444"}}>Plan</span><span style={{fontWeight:"bold",color:C.gold,fontSize:12}}>{uPT==="annual"?"Annual — $50/yr":"Monthly — $8/mo"}</span></div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><span style={{fontSize:12,color:"#444"}}>Status</span><span style={{fontSize:12,color:C.green,fontWeight:"bold"}}>Active</span></div>
+                <button onClick={()=>setTab("qa")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:6}}>Go to Q&A</button>
+                <button onClick={()=>setAcctSec("cancelConfirm")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:"#999",fontSize:11}}>Cancel Subscription</button>
               </div>
             ):(
               <div>
-                <div style={{fontSize:12,color:C.gray,marginBottom:10}}>Free plan. Upgrade for Q&A + 30-day risk alerts.</div>
-                <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Upgrade to Pro →</button>
+                <div style={{fontSize:12,color:C.gray,marginBottom:10}}>Free plan. Upgrade for Q&A and 30-day risk alerts.</div>
+                <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Upgrade to Pro</button>
               </div>
             )}
           </div>
-          <button onClick={handleSignOut} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Sign Out</button>
+          <button onClick={async()=>{await sbSignOut();setUser(null);setAcctSec("main");}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Sign Out</button>
         </div>
       )}
     </div>
   );
 
   return(
-    <div style={{maxWidth:720,margin:"0 auto",padding:isMobile?"0":"12px",fontFamily:"'Apple SD Gothic Neo','Segoe UI',sans-serif",background:C.bgPage,minHeight:"100vh"}}>
-      {onboardModal}
-      {riskDetailModal}
-      {hdr}
-      <div style={{padding:isMobile?"0 8px 8px":"0"}}>
-        {riskBanners}
-        {tab==="features"&&featuresTab}
-        {tab==="analyzer"&&analyzerTab}
-        {tab==="subscribe"&&subscribeTab}
+    <div style={{maxWidth:720,margin:"0 auto",padding:mob?"0":"12px",fontFamily:"'Apple SD Gothic Neo','Segoe UI',sans-serif",background:C.bgPage,minHeight:"100vh"}}>
+      {obModal}{riskModal}{hdr}
+      <div style={{padding:mob?"0 8px 8px":"0"}}>
+        {rBanners}
+        {tab==="features"&&homeTab}
+        {tab==="analyzer"&&analyserTab}
+        {tab==="subscribe"&&subTab}
         {tab==="qa"&&qaTab}
-        {tab==="account"&&accountTab}
+        {tab==="account"&&acctTab}
       </div>
     </div>
   );
 }
 
-// ── 헬퍼 컴포넌트 ─────────────────────────────────────────────
-function Section({title,bg,tc,pre,children}){
-  return(
-    <div style={{marginBottom:14}}>
-      <div style={{fontWeight:"bold",color:"#1C2D58",fontSize:12,marginBottom:6}}>{title}</div>
-      <div style={{color:tc||"#444",fontSize:12,lineHeight:1.7,background:bg||"#F5F5F5",borderRadius:8,padding:"10px 12px",whiteSpace:pre?"pre-line":"normal"}}>{children}</div>
-    </div>
-  );
-}
-
-ReactDOM.render(<App/>, document.getElementById("root"));
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  });
-}
+ReactDOM.render(<App/>,document.getElementById("root"));
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
