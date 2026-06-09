@@ -1,395 +1,866 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="theme-color" content="#1C2D58">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="運氣 Analyzer">
-
-<link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yun Qi Analyzer — Sang Hee Park, PhD</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Apple SD Gothic Neo','Segoe UI',sans-serif;background:#F5F3EE;min-height:100vh;padding:12px;color:#222}
-.hdr{background:#1C2D58;border-radius:10px;padding:14px 16px;margin-bottom:12px}
-.hdr-lbl{color:#B98A3A;font-size:10px;letter-spacing:2px}
-.hdr-ttl{color:white;font-size:18px;font-weight:bold;margin:3px 0}
-.hdr-sub{color:#8CA0C8;font-size:11px}
-.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-input[type=number]{width:82px;padding:6px 8px;border-radius:6px;border:2px solid #B98A3A;background:#2A4178;color:white;font-size:15px;font-weight:bold;text-align:center}
-.btn{padding:6px 13px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:12px;color:white}
-.bg{background:#B98A3A}.br{background:#C84B30}.bn{background:#2A4178}.bn.on{background:#B98A3A}
-.igrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;margin-bottom:12px}
-.ic{border-radius:8px;padding:9px 11px}
-.il{font-size:9px;color:#888;margin-bottom:2px}
-.iv{font-weight:bold;font-size:12px}
-.icn{font-size:10px;color:#aaa;margin-top:1px}
-.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.qc{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.qt{font-weight:bold;color:#1C2D58;font-size:12px;margin-bottom:8px}
-.brow{display:flex;gap:5px;flex-wrap:wrap}
-.bdg{border-radius:4px;padding:2px 7px;font-size:10px;font-weight:bold;white-space:nowrap;border:1px solid;display:inline-block}
-.sec{background:white;border-radius:8px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.sh{padding:9px 14px;font-weight:bold;font-size:13px;color:white}
-table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
-th{background:#F0F4FA;color:#1C2D58;font-weight:bold;font-size:10px;padding:7px 5px;text-align:left;border-bottom:2px solid #1C2D58;white-space:nowrap;overflow:hidden}
-td{padding:6px 5px;border-bottom:1px solid #E8E8E8;vertical-align:top;overflow:hidden;word-break:break-word}
-.rb{border-radius:4px;padding:2px 6px;font-size:10px;font-weight:bold;white-space:nowrap;border:1.5px solid}
-.rcards{display:flex;gap:8px;flex-wrap:wrap;padding:12px}
-.rcard{border-radius:8px;padding:9px 12px;min-width:135px;border:1.5px solid}
-.lgnd{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px}
-.ftr{text-align:center;color:#aaa;font-size:10px;padding:8px;margin-top:4px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;flex-direction:column;align-items:center;padding-top:16px}
-.modal.show{display:flex}
-.mbar{background:#1C2D58;width:93%;max-width:980px;border-radius:8px 8px 0 0;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mbar span{color:white;font-weight:bold;font-size:13px;flex:1}
-iframe{width:93%;max-width:980px;height:80vh;border:none;background:white;border-radius:0 0 8px 8px}
-@media(max-width:640px){.qgrid{grid-template-columns:1fr}th,td{font-size:8px;padding:3px 2px}table{font-size:9px}}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="運氣 Analyzer"/>
+  <meta name="theme-color" content="#12243B"/>
+  <title>Yun Qi 運氣 Analyzer — Sang Hee Park PhD</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icon-192.png"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#F5F3EE;font-family:'Apple SD Gothic Neo','Segoe UI',sans-serif;}
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-thumb{background:#C49A48;border-radius:2px;}
+    input,select{font-family:inherit;}
+    a{cursor:pointer;}
+  </style>
 </head>
 <body>
-<script>
-(function(){
-  // 1. Delete all caches
-  if('caches' in window){
-    caches.keys().then(function(names){
-      names.forEach(function(name){ caches.delete(name); });
-    });
-  }
-  // 2. Unregister service workers
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(function(regs){
-      regs.forEach(function(reg){ reg.unregister(); });
-    });
-  }
-  // 3. Back/forward cache
-  window.addEventListener('pageshow', function(e){
-    if(e.persisted){ window.location.reload(true); }
-  });
-  // 4. Version check — update v= when deploying
-  var V='20260530v4';
-  var s=sessionStorage.getItem('yq_v');
-  if(s && s!==V){ sessionStorage.setItem('yq_v',V); window.location.reload(true); }
-  else { sessionStorage.setItem('yq_v',V); }
-})();
-</script>
-<div class="hdr">
-  <div class="hdr-lbl">五運六氣 · YUN QI CLINICAL ANALYZER</div>
-  <div class="hdr-ttl">Yun Qi 運氣 Full Clinical Analysis</div>
-  <div class="hdr-sub">Weather  · Diseases  · Acupuncture  · Herbs  · Based on 黃帝內經素問</div>
-  <div class="ctrl">
-    <input type="number" id="yIn" value="2026" min="1924" max="2103" onkeydown="if(event.key==='Enter')go()">
-    <button class="btn bg" onclick="go()">Analyze</button>
-    <button class="btn br" onclick="pdf()">📄 PDF</button>
-    <button class="btn bn on" id="bN" onclick="sh('N')">🌏 Northern</button>
-    <button class="btn bn" id="bS" onclick="sh('S')">🦘 Southern</button>
-  </div>
-</div>
-<div class="igrid" id="IG"></div>
-<div class="qgrid" id="QG"></div>
-<div class="sec"><div class="sh" id="TH" style="background:#1C2D58"></div>
-<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-<table><thead><tr>
-  <th style="width:7%">運氣<br>Segment</th>
-  <th style="width:9%">Period<br>N / S</th>
-  <th style="width:8%">Host Yun<br>Guest Yun</th>
-  <th style="width:9%">Host Qi<br>Guest Qi</th>
-  <th style="width:8%">Ke-Zhu<br>客主加臨</th>
-  <th style="width:16%">🌤 Weather<br>Forecast</th>
-  <th style="width:18%">🏥 Disease<br>Prediction</th>
-  <th style="width:13%">📍 Acupuncture<br>Points</th>
-  <th style="width:12%">🌿 Herbs &amp;<br>Formulae</th>
-</tr></thead>
-<tbody id="TB"></tbody></table>
-</div></div>
-<div class="sec" id="RS" style="display:none">
-  <div class="sh" style="background:#C84B30" id="RH"></div>
-  <div class="rcards" id="RC"></div>
-</div>
-<div class="sec">
-  <div class="sh" style="background:#444">Legend </div>
-  <div class="lgnd">
-    <span class="rb" style="color:#C84B30;border-color:#C84B30;background:#FFF0EE">★★ Double Fire 雙火 — Epidemic peak</span>
-    <span class="rb" style="color:#E07030;border-color:#E07030;background:#FFF5EC">★ Double Earth 雙土 — Damp-Heat</span>
-    <span class="rb" style="color:#B8860B;border-color:#B8860B;background:#FFFBE8">★ Adverse 逆 — Disease surge</span>
-    <span class="rb" style="color:#2E5F8A;border-color:#2E5F8A;background:#EEF4FF">Same Qi 同氣</span>
-    <span class="rb" style="color:#2D6A4F;border-color:#2D6A4F;background:#F0FBF5">Harmonious 顺</span>
-  </div>
-</div>
-<div class="ftr">© 2026 Blossom Skin &amp; Health Pty Ltd · Sang Hee Park, PhD · Educational purposes only</div>
-<div class="modal" id="PM">
-  <div class="mbar">
-    <span id="MT">📄 PDF Preview</span>
-    <button class="btn br" onclick="pr()">🖨️ Print/PDF</button>
-    <button class="btn" style="background:#2D6A4F" onclick="nt()">🌐 New Tab</button>
-    <button class="btn" style="background:#444" onclick="cm()">✕</button>
-  </div>
-  <iframe id="PF" title="PDF"></iframe>
-</div>
-<script>
-const ST=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
-const BR=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-const SDY={甲:["Earth Excess 土運太過","土"],乙:["Metal Deficient 金運不及","金"],丙:["Water Excess 水運太過","水"],丁:["Wood Deficient 木運不及","木"],戊:["Fire Excess 火運太過","火"],己:["Earth Deficient 土運不及","土"],庚:["Metal Excess 金運太過","金"],辛:["Water Deficient 水運不及","水"],壬:["Wood Excess 木運太過","木"],癸:["Fire Deficient 火運不及","火"]};
-const BQ={子:{s:"少陰君火",z:"陽明燥金"},午:{s:"少陰君火",z:"陽明燥金"},丑:{s:"太陰濕土",z:"太陽寒水"},未:{s:"太陰濕土",z:"太陽寒水"},寅:{s:"少陽相火",z:"厥陰風木"},申:{s:"少陽相火",z:"厥陰風木"},卯:{s:"陽明燥金",z:"少陰君火"},酉:{s:"陽明燥金",z:"少陰君火"},辰:{s:"太陽寒水",z:"太陰濕土"},戌:{s:"太陽寒水",z:"太陰濕土"},巳:{s:"厥陰風木",z:"少陽相火"},亥:{s:"厥陰風木",z:"少陽相火"}};
-const SQ=["厥陰風木","少陰君火","少陽相火","太陰濕土","陽明燥金","太陽寒水"];
-const QEN={"厥陰風木":"Wind-Wood","少陰君火":"Emperor Fire","少陽相火":"Minister Fire","太陰濕土":"Damp-Earth","陽明燥金":"Dryness-Metal","太陽寒水":"Cold-Water"};
-const QEL={"厥陰風木":"木","少陰君火":"火","少陽相火":"相火","太陰濕土":"土","陽明燥金":"金","太陽寒水":"水"};
-const FY=["木","火","土","金","水"];
-const GN={木:"火",火:"土",土:"金",金:"水",水:"木"};
-const CT={木:"土",土:"水",水:"火",火:"金",金:"木"};
-const ES={木:{b:"#D0EAD8",d:"#4A8C6A",t:"#2D5A3D"},火:{b:"#FAEAE6",d:"#C84B30",t:"#8B2A18"},相火:{b:"#FAEEE0",d:"#E07030",t:"#8B4010"},土:{b:"#FDF3DC",d:"#B8860B",t:"#7A5A06"},金:{b:"#EBEBEB",d:"#6B7A6A",t:"#3A4A3A"},水:{b:"#DCE8F5",d:"#2E5F8A",t:"#1A3A5A"}};
-const RS={双火:{l:"★★ Epidemic Peak 雙火",c:"#C84B30",b:"#FFF0EE",d:"#C84B30"},双土:{l:"★ Damp-Heat 雙土",c:"#E07030",b:"#FFF5EC",d:"#E07030"},逆:{l:"★ Adverse 逆",c:"#B8860B",b:"#FFFBE8",d:"#B8860B"},顺:{l:"顺 Harmonious",c:"#2D6A4F",b:"#F0FBF5",d:"#2D6A4F"},同氣:{l:"★★ Same Qi 同氣",c:"#C84B30",b:"#FFF0EE",d:"#C84B30"}};
-const DN=["Jan 20~Mar 21","Mar 21~Apr 3","Apr 3~May 21","May 21~Jun 16","Jun 16~Jul 22","Jul 22~Aug 29","Aug 29~Sep 22","Sep 22~Nov 11","Nov 11~Nov 22","Nov 22~Jan 20"];
-const DS=["Jul 22~Sep 22","Sep 22~Oct 3","Oct 3~Nov 21","Nov 21~Dec 16","Dec 16~Jan 21","Jan 21~Feb 28","Feb 28~Mar 21","Mar 21~May 11","May 11~May 21","May 21~Jul 22"];
-const YQP=[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[4,5]];
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
 
-// Clinical database
+const C={navy:"#12243B",gold:"#C49A48",goldLight:"#F5E9C8",ink:"#1C2D58",blue:"#2A4178",bgPage:"#F5F3EE",white:"#FFFFFF",gray:"#8CA0C8",lightGray:"#F0F4FA",red:"#C84B30",orange:"#E07030",green:"#2D6A4F",darkGold:"#B98A3A"};
+const EC={木:{bg:"#D0EAD8",border:"#4A8C6A",text:"#2D5A3D"},火:{bg:"#FAEAE6",border:"#C84B30",text:"#8B2A18"},相火:{bg:"#FAEEE0",border:"#E07030",text:"#8B4010"},土:{bg:"#FDF3DC",border:"#B8860B",text:"#7A5A06"},金:{bg:"#EBEBEB",border:"#6B7A6A",text:"#3A4A3A"},水:{bg:"#DCE8F5",border:"#2E5F8A",text:"#1A3A5A"}};
+const ec=e=>EC[e]||EC["土"];
+
+const STEMS=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const BRANCHES=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const JIAZI=["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+const STEM_DAYUN={甲:["土運太過","土"],乙:["金運不及","金"],丙:["水運太過","水"],丁:["木運不及","木"],戊:["火運太過","火"],己:["土運不及","土"],庚:["金運太過","金"],辛:["水運不及","水"],壬:["木運太過","木"],癸:["火運不及","火"]};
+const BRANCH_QI={子:{si:"少陰君火",zai:"陽明燥金"},午:{si:"少陰君火",zai:"陽明燥金"},丑:{si:"太陰濕土",zai:"太陽寒水"},未:{si:"太陰濕土",zai:"太陽寒水"},寅:{si:"少陽相火",zai:"厥陰風木"},申:{si:"少陽相火",zai:"厥陰風木"},卯:{si:"陽明燥金",zai:"少陰君火"},酉:{si:"陽明燥金",zai:"少陰君火"},辰:{si:"太陽寒水",zai:"太陰濕土"},戌:{si:"太陽寒水",zai:"太陰濕土"},巳:{si:"厥陰風木",zai:"少陽相火"},亥:{si:"厥陰風木",zai:"少陽相火"}};
+const SIX_QI=["厥陰風木","少陰君火","少陽相火","太陰濕土","陽明燥金","太陽寒水"];
+const SIX_QI_ELEM={"厥陰風木":"木","少陰君火":"火","少陽相火":"相火","太陰濕土":"土","陽明燥金":"金","太陽寒水":"水"};
+const FIVE_YUN=["木","火","土","金","水"];
+const YUN_GEN={木:"火",火:"土",土:"金",金:"水",水:"木"};
+const SEG_LABELS=["1運1氣","1運2氣","2運2氣","2運3氣","3運3氣","3運4氣","4運4氣","4運5氣","5運5氣","5運6氣"];
+const DATES_N=["1.20~3.21","3.21~4.3","4.3~5.21","5.21~6.16","6.16~7.22","7.22~8.29","8.29~9.22","9.22~11.11","11.11~11.22","11.22~1.20"];
+const DATES_S=["7.22~9.22","9.22~10.3","10.3~11.21","11.21~12.16","12.16~1.21","1.21~2.28","2.28~3.21","3.21~5.11","5.11~5.21","5.21~7.22"];
+const SPECIAL={"丁卯1987":"歲會","庚午1990":"同天符","辛未1991":"同歲會","壬申1992":"同天符","癸酉1993":"同歲會","甲戌1994":"同天符","丙子1996":"歲會","戊寅1998":"天符","乙酉2005":"太乙天符","丙戌2006":"天符","丁亥2007":"天符","戊子2008":"天符","己丑2009":"太乙天符","甲午2014":"歲會","庚子2020":"同天符","辛丑2021":"同歲會","壬寅2022":"同天符","癸卯2023":"同歲會","甲辰2024":"同天符","戊申2028":"天符","辛亥2031":"同歲會","癸丑2033":"同歲會","乙卯2035":"天符","丙辰2036":"天符","丁巳2037":"天符","戊午2038":"太乙天符","己未2040":"太乙天符"};
+const RISK_S={雙火:{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color:"#C84B30"},雙土:{label:"★★ HIGH",bg:"#FFF5EC",border:"#E07030",color:"#E07030"},逆:{label:"★ HIGH",bg:"#FFFBE8",border:"#B8860B",color:"#B8860B"},順:{label:"— OK",bg:"#F0FBF5",border:"#2D6A4F",color:"#2D6A4F"}};
+
+const LANGUAGES=[{v:"en",label:"English"},{v:"ko",label:"한국어 (Korean)"},{v:"zh",label:"中文 (Chinese)"},{v:"ja",label:"日本語 (Japanese)"},{v:"es",label:"Español (Spanish)"},{v:"fr",label:"Français (French)"},{v:"de",label:"Deutsch (German)"},{v:"id",label:"Bahasa Indonesia"},{v:"pt",label:"Português"},{v:"ar",label:"العربية (Arabic)"}];
+const HEALTH_CONDITIONS=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions (asthma/COPD)","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
+const BOOKING_URL="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
+
+function getKeQi(si){const i=SIX_QI.indexOf(si);return SIX_QI.map((_,j)=>SIX_QI[(i-2+j+6)%6]);}
+function getKeYun(e){const r=[e];let c=e;for(let i=1;i<5;i++){c=YUN_GEN[c];r.push(c);}return r;}
+function judgeRisk(ke,zh){
+  if((ke==="火"||ke==="相火")&&(zh==="火"||zh==="相火"))return"雙火";
+  if(ke==="土"&&zh==="土")return"雙土";
+  const k={木:"土",火:"金",土:"水",金:"木",水:"火",相火:"金"};
+  if(k[ke]===zh||k[zh]===ke)return"逆";
+  return"順";
+}
+function calcYear(yr){
+  const idx=((yr-1984)%60+60)%60;
+  const jz=JIAZI[idx],stem=STEMS[idx%10],branch=BRANCHES[idx%12];
+  const [dayunName,dayunElem]=STEM_DAYUN[stem];
+  const{si,zai}=BRANCH_QI[branch];
+  const keQi=getKeQi(si),keYun=getKeYun(dayunElem);
+  const special=SPECIAL[jz+yr]||SPECIAL[jz]||"—";
+  const siElem=SIX_QI_ELEM[si];
+  const k={木:"土",火:"金",土:"水",金:"木",水:"火",相火:"金"};
+  const g={木:"火",火:"土",土:"金",金:"水",水:"木",相火:"土"};
+  const yunQiRel=siElem===dayunElem?"順化":k[dayunElem]===siElem?"天刑":g[dayunElem]===siElem?"小逆":"不和";
+  const segs=SEG_LABELS.map((name,i)=>{
+    const yi=[0,0,1,1,2,2,3,3,4,4][i],qi=[0,1,1,2,2,3,3,4,4,5][i];
+    const zYun=FIVE_YUN[yi],kYun=keYun[yi],zQi=SIX_QI[qi],kQiName=keQi[qi];
+    const kQiEl=SIX_QI_ELEM[kQiName],zQiEl=SIX_QI_ELEM[zQi];
+    return{name,zYun,kYun,zQi,kQiName,kQiEl,zQiEl,risk:judgeRisk(kQiEl,zQiEl)};
+  });
+  return{jz,stem,branch,dayunName,dayunElem,si,zai,keQi,keYun,special,yunQiRel,segs,siElem};
+}
+
+function parseSegDate(dateStr,yr){
+  const[startStr]=dateStr.split("~");
+  const[m,d]=startStr.split(".").map(Number);
+  return new Date(yr,m-1,d);
+}
+function getUpcomingRiskSegs(segs,hemi,yr){
+  const now=new Date();
+  const upcoming=[];
+  const dates=hemi==="S"?DATES_S:DATES_N;
+  segs.forEach((s,i)=>{
+    if(s.risk==="雙火"||s.risk==="雙土"||s.risk==="逆"){
+      const startDate=parseSegDate(dates[i],yr);
+      const alertStart=new Date(startDate);alertStart.setDate(alertStart.getDate()-30);
+      const alertEnd=new Date(startDate);alertEnd.setDate(alertEnd.getDate()+14);
+      if(now>=alertStart&&now<=alertEnd){
+        const daysUntil=Math.ceil((startDate-now)/(1000*60*60*24));
+        upcoming.push({...s,segIdx:i,startDate,daysUntil,dateStr:dates[i]});
+      }
+    }
+  });
+  return upcoming;
+}
+
 const CL={
-  顺:{
-    木:{w:"Mild spring winds. Seasonal breezes.",d:"Allergies · Mild Liver Qi stagnation\nEye dryness · Mild headaches",a:"LIV 3 太衝, GB 20 風池\nSP 6 三陰交, BL 18 肝俞",h:"Xiao Yao San 逍遙散\nChai Hu 柴胡, Bai Shao 白芍, Dang Gui 當歸"},
-    火:{w:"Warm & bright. Pleasant transition.",d:"Heat sensitivity · Mild Heart restlessness\nSkin flushing",a:"HT 7 神門, PC 6 內關\nSP 6 三陰交, LI 11 曲池",h:"Yin Qiao San 銀翹散\nMai Dong 麥冬, Sheng Di 生地"},
-    相火:{w:"Warm summer onset. Seasonal heat.",d:"Upper body heat · Mild fever · Throat dryness",a:"PC 6 內關, TB 5 外關\nLI 11 曲池, ST 44 內庭",h:"Qing Hao Bie Jia Tang 青蒿鱉甲湯\nQing Hao 青蒿, Zhi Mu 知母"},
-    土:{w:"Mild humidity. Late summer dampness.",d:"Mild digestive sluggishness · Slight heaviness\nFood stagnation",a:"SP 3 太白, ST 36 足三里\nREN 12 中脘, BL 20 脾俞",h:"Shen Ling Bai Zhu San 參苓白朮散\nBai Zhu 白朮, Fu Ling 茯苓"},
-    金:{w:"Crisp autumn air. Dry & clear.",d:"Mild dry cough · Slight skin dryness\nBowel irregularity",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交",h:"Bai He Gu Jin Tang 百合固金湯\nBai He 百合, Mai Dong 麥冬"},
-    水:{w:"Gentle cold. Normal winter.",d:"Mild lower back fatigue\nSlight urinary frequency · Cold limbs",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門",h:"Jin Gui Shen Qi Wan 金匱腎氣丸\nShu Di 熟地, Du Zhong 杜仲"}
+  雙火:{
+    w:"Both Guest & Host Qi are Fire — extreme heat, drought, sudden storms. Temperature spikes, erratic weather patterns, risk of heatwave conditions.",
+    d:"Febrile epidemics · Cardiovascular crisis · Insomnia · Bleeding disorders · Emotional agitation · Palpitations · Heat stroke risk",
+    food:"Bitter melon (苦瓜) · Lotus seed (蓮子) · Mung beans (綠豆) · Cucumber · Watermelon · Chrysanthemum tea · Green tea · Celery · Tofu · Peppermint tea",
+    tea:"Chrysanthemum & Wolfberry Tea: steep 10 dried chrysanthemum flowers + 1 tsp goji berries in hot water 5 min. Cool slightly before drinking.\n\nLotus Seed & Lily Bulb Tea: 10g lotus seeds + 10g dried lily bulb, simmer 20 min. Add a little honey. Calms the heart, clears heat.",
+    lifestyle:"Avoid peak sun hours (11am–3pm) · Stay indoors during hottest part of day · Light cotton clothing · Cold foot bath before bed · Limit spicy, fried, and alcohol · Reduce screen time in evening · Prioritise 7–8hrs sleep · Avoid intense exercise — choose gentle walking or swimming",
+    lay:"Heat peaks this period. Your body's fire energy is already elevated — adding more through spicy food, alcohol, overwork, or sun exposure can push it over the edge. Focus on cooling down from the inside out.",
+    a:"HT 7 神門 · HT 8 少府 · PC 6 內關 · LI 11 曲池 · BL 15 心俞 · GV 14 大椎",
+    h:"Huang Lian Jie Du Tang 黃連解毒湯 · Zhu Ye Shi Gao Tang 竹葉石膏湯 · Lian Zi Xin 蓮子心",
+  },
+  雙土:{
+    w:"Both Guest & Host Qi are Earth — heavy rain, flooding, oppressive humidity. Damp, heavy air and unsettled digestive conditions throughout the environment.",
+    d:"Damp-heat epidemic · Gastroenteritis · Oedema · Skin infections · Chronic digestive disorders · Fatigue · Muscle heaviness",
+    food:"Barley (薏苡仁) · Adzuki beans (赤豆) · Pumpkin · Sweet potato · Cooked ginger · Lightly cooked greens · Congee · Daikon radish · Job's tears soup",
+    tea:"Ginger & Tangerine Peel Tea: 3 slices fresh ginger + 5g dried tangerine peel (陳皮), simmer 10 min. Warms and dries dampness.\n\nBarley & Red Bean Tea: 30g barley + 20g adzuki beans, soak 1hr, simmer 40 min. Classic damp-draining drink — drink warm.",
+    lifestyle:"Avoid cold drinks and raw food · Keep living spaces dry and ventilated · Avoid sitting on damp ground · Eat smaller, more frequent meals · Morning walks in fresh air · Avoid overthinking · Gentle abdominal massage after meals",
+    lay:"Dampness accumulates in the body this period. Your digestion and energy levels are most at risk. Keep warm, eat cooked foods, and avoid anything cold or heavy.",
+    a:"SP 9 陰陵泉 · ST 40 豐隆 · REN 9 水分 · LI 11 曲池 · BL 20 脾俞 · ST 36 足三里",
+    h:"Huo Xiang Zheng Qi San 藿香正氣散 · San Ren Tang 三仁湯 · Yi Yi Ren 薏苡仁",
   },
   逆:{
-    少陰君火:{w:"★ Spring cold suppresses Heart Fire\nUnseasonable cold snaps. ",d:"★ Cardiovascular surge \nAngina · Palpitations · Cold-induced fever\nSpring influenza with cardiac complications",a:"HT 7 神門, PC 6 內關\nREN 14 巨闕, BL 15 心俞\nKID 3 太谿, SP 6 三陰交",h:"Gui Zhi Fu Ling Wan 桂枝茯苓丸\nSheng Mai San 生脈散\nRen Shen 人參, Mai Dong 麥冬, Wu Wei Zi 五味子"},
-    少陽相火:{w:"★ Extreme heat & dryness \nEarly summer heat surge. Fire blazing",d:"★ Respiratory heat diseases\nBronchitis · Pneumonia · Throat infections\nSkin eruptions  · Eye inflammation",a:"LU 5 尺澤, LI 11 曲池\nST 44 內庭, PC 8 勞宮\nDU 14 大椎, LI 4 合谷",h:"Ma Xing Shi Gan Tang 麻杏石甘湯\nYin Qiao San 銀翹散\nShi Gao 石膏, Zhi Mu 知母, Huang Qin 黃芩"},
-    陽明燥金:{w:"★ Fire overcomes Metal 火克金\nAutumn stays hot. Dry heat persists ",d:"★ Lung & Large Intestine diseases\nDry cough · Pneumonia · Constipation\nSkin diseases · Haemorrhoids Haemorrhoids",a:"LU 7 列缺, LU 9 太淵\nLI 4 合谷, SP 6 三陰交\nST 44 內庭, KID 6 照海",h:"Mai Men Dong Tang 麥門冬湯\nBai He Gu Jin Tang 百合固金湯\nBai He 百合, Sha Shen 沙參, Pi Pa Ye 枇杷葉"},
-    太陽寒水:{w:"★ Extreme cold \nFlooding · Frost · Cold Water adverse",d:"★ Cold diseases Cold diseases\nJoint pain · Diarrhoea · Lower back pain\nUrinary disorders · Fear & anxiety",a:"KID 3 太谿, BL 23 腎俞\nREN 4 關元, DU 4 命門\nST 36 足三里, SP 6 三陰交",h:"Si Ni Tang 四逆湯\nYou Gui Wan 右歸丸\nFu Zi 附子, Gan Jiang 乾薑, Gui Zhi 桂枝"},
-    厥陰風木:{w:"★ Strong erratic winds \nLate winter wind surge. Cold winds persist",d:"★ Wind diseases Wind diseases\nHeadache · Dizziness · Liver Qi uprising\nCramps · Tremors · Emotional disorders",a:"LIV 3 太衝, GB 20 風池\nDU 20 百會, GB 34 陽陵泉\nSP 6 三陰交, LIV 8 曲泉",h:"Tian Ma Gou Teng Yin 天麻鉤藤飲\nTian Ma 天麻, Gou Teng 鉤藤\nBai Shao 白芍, Long Gu 龍骨"},
-    太陰濕土:{w:"★ Excessive damp \nHeavy rainfall · Flooding conditions",d:"★ Damp diseases Damp diseases\nOedema · Bloating · Heavy limbs\nCloudy thinking · Diarrhoea · Skin weeping",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, BL 20 脾俞\nSP 6 三陰交, ST 36 足三里",h:"Wu Ling San 五苓散\nSan Ren Tang 三仁湯\nYi Yi Ren 薏苡仁, Cang Zhu 蒼朮, Ze Xie 澤瀉"}
+    w:"Guest Qi overacts Host Qi — climate contradicts the season. Unexpected temperature swings, unseasonable weather conditions.",
+    d:"Immune fluctuation · Seasonal allergies · Erratic symptom patterns · Increased infection risk · Digestive irregularity",
+    food:"Warming and easily digestible foods · Ginger · Spring onion · Garlic (cooked) · Bone broth · Lightly cooked seasonal vegetables",
+    tea:"Ginger, Spring Onion & Brown Sugar Tea: 3 slices ginger + 2 spring onion roots + 1 tsp brown sugar, simmer 10 min. Classic warming tea for weather transitions.\n\nCinnamon & Honey Tea: ½ tsp cinnamon powder in warm water + 1 tsp honey. Warms the interior, supports immunity.",
+    lifestyle:"Dress in layers — temperature swings are unpredictable · Keep neck and lower back warm · Get adequate sleep · Reduce alcohol and sugar · Be cautious with dietary extremes",
+    lay:"The seasons are clashing. Your body has to work harder to adapt. Be conservative — dress warmly, eat simply, rest well.",
+    a:"LI 4 合谷 · ST 36 足三里 · LU 7 列缺 · BL 12 風門 · GV 14 大椎",
+    h:"Yu Ping Feng San 玉屏風散 · Gui Zhi Tang 桂枝湯 · Huang Qi 黃耆",
   },
-  双火:{w:"★★ EXTREME HEAT — Both Guest & Host Qi are Fire\nDrought · Heat waves · Very dry & hot",d:"★★ EPIDEMIC PEAK — Wen Bing 溫病\nAcute febrile illness · Cardiovascular emergency\nHeatstroke Heatstroke · Cerebrovascular events\nSeasonal epidemic outbreaks epidemic peak",a:"PC 6 內關, HT 8 少府\nKID 6 照海, LI 11 曲池\nSP 6 三陰交, DU 14 大椎\nST 44 內庭",h:"Huang Lian Jie Du Tang 黃連解毒湯\nBai Hu Tang 白虎湯\nShi Gao 石膏, Zhi Mu 知母, Huang Lian 黃連\nSheng Mai San 生脈散: Mai Dong 麥冬, Wu Wei Zi 五味子\n⚠️ Prepare 2–3 weeks BEFORE this period!"},
-  同氣:{w:"★★ EXTREME — Identical Qi amplified\nSame elemental force doubled\nClimate extremes amplified",d:"★★ Same-Qi Period — Max vulnerability\nConstitutional organ at maximum stress\nPrepare 2 weeks in advance",a:"Tonify primary organ\nDrain excess with sedation points\nUse Yuan-Source points",h:"Consult segment-specific formula\nPrepare constitutional herbs 2 wks early"},
-  双土:{w:"★ EXTREME DAMP — Both Guest & Host Qi are Earth\nHeavy rain · Flooding · Humid & oppressive",d:"★ DAMP-HEAT EPIDEMIC Damp-Heat \nGastroenteritis · Food poisoning\nOedema  · Skin infections Skin infections\nChronic digestive disorders · Fatigue syndrome",a:"SP 9 陰陵泉, ST 40 豐隆\nREN 9 水分, LI 11 曲池\nBL 20 脾俞, ST 36 足三里",h:"Huo Xiang Zheng Qi San 藿香正氣散\nSan Ren Tang 三仁湯\nHuo Xiang 藿香, Yi Yi Ren 薏苡仁\nHuang Lian 黃連, Bai Zhu 白朮"},
-  同氣:{
-    木:{w:"Wind amplified. Wind dominant",d:"Liver & GB focus 肝膽\nDizziness · Irritability · Tendon issues\nEye disorders · Migraine",a:"LIV 3 太衝, LIV 8 曲泉\nGB 20 風池, GB 34 陽陵泉\nBL 18 肝俞",h:"Long Dan Xie Gan Tang 龍膽瀉肝湯\nGou Qi Zi 枸杞子, Bai Shao 白芍"},
-    火:{w:"Heat amplified",d:"Heart & SI focus 心小腸\nPalpitations · Insomnia · Tongue sores",a:"HT 7 神門, HT 8 少府\nPC 6 內關, BL 15 心俞",h:"Huang Lian Jie Du Tang 黃連解毒湯\nLian Zi Xin 蓮子心, Sheng Di 生地"},
-    土:{w:"Damp amplified",d:"Spleen & ST focus 脾胃\nBloating · Oedema · Heaviness",a:"SP 3 太白, SP 9 陰陵泉\nST 36 足三里, REN 12 中脘",h:"Ping Wei San 平胃散\nBai Zhu 白朮, Cang Zhu 蒼朮"},
-    金:{w:"Dryness amplified",d:"Lung & LI focus 肺大腸\nDry cough · Skin dryness · Constipation",a:"LU 9 太淵, LU 7 列缺\nLI 4 合谷, BL 13 肺俞",h:"Bai He Gu Jin Tang 百合固金湯\nYu Zhu 玉竹, Sha Shen 沙參"},
-    水:{w:"Cold amplified",d:"Kidney & BL focus 腎膀胱\nLower back pain · Urinary frequency · Fear",a:"KID 3 太谿, KID 7 復溜\nBL 23 腎俞, REN 4 關元",h:"Liu Wei Di Huang Wan 六味地黃丸\nShu Di 熟地, Shan Zhu Yu 山茱萸"}
+  順:{
+    w:"Guest and Host Qi harmonise — normal seasonal pattern, weather follows expected rhythms.",
+    d:"Mild seasonal patterns. No elevated disease risk. Standard seasonal self-care applies.",
+    food:"Follow seasonal foods naturally: spring=leafy greens, summer=cooling fruits, late summer=root vegetables, autumn=pears, winter=warming black foods & nuts",
+    tea:"Seasonal wellness tea: Spring=chrysanthemum; Summer=mint & honey; Late summer=ginger & tangerine peel; Autumn=pear & white fungus; Winter=cinnamon & goji berry.",
+    lifestyle:"Maintain regular sleep and wake times · Gentle seasonal exercise · Eat with the season · Spend time in nature",
+    lay:"This is a harmonious period. Energy flows naturally. Maintain your regular routines and enjoy the season.",
+    a:"ST 36 足三里 · SP 6 三陰交 · LI 4 合谷 · BL 23 腎俞",
+    h:"Seasonal tonic formulas as appropriate to individual constitution",
   }
 };
+function getCL(risk){return CL[risk]||CL["順"];}
 
-function getCL(r,zq,kq){
-  if(r==="双火")return CL.双火;
-  if(r==="双土")return CL.双土;
-  if(r==="逆"){
-    const k=CL.逆[zq]||CL.逆[kq];
-    return k||{w:"Adverse Qi 逆氣. Unseasonable conditions",d:"Disease surge. Acute onset",a:"Pattern differentiation 辨證",h:"Pattern differentiation 辨證"};
+function buildSysPrompt(u){
+  const lang=u&&u.prefLang?LANGUAGES.find(l=>l.v===u.prefLang):null;
+  const langNote=lang?"Preferred language: "+lang.label+". Default to this language if ambiguous.":"";
+  const dob=u&&u.dob?"\nDate of birth: "+u.dob:"";
+  const conds=u&&u.conditions&&u.conditions.length>0?"\nHealth conditions: "+u.conditions.join(", "):"";
+  const profile=(dob||conds)?"\nUSER HEALTH PROFILE:"+dob+conds+"\nPersonalise responses to this profile where relevant.":"";
+  return"You are the Wu Yun Liu Qi (五運六氣) expert health assistant for Sang Hee Park, PhD — AHPRA registered acupuncturist, Doctor of TCM, Blossom Skin & Health, Wahroonga NSW Australia.\n\nAdapt tone: clinical depth for professional questions, plain warm language for wellness questions. Always explain Chinese terms simply.\n"+langNote+profile+"\n\nCRITICAL LANGUAGE RULE: Always reply in the same language as the user's question.\n\nKNOWLEDGE BASE:\nHeavenly Stems: 甲=土太過|乙=金不及|丙=水太過|丁=木不及|戊=火太過|己=土不及|庚=金太過|辛=水不及|壬=木太過|癸=火不及\nBranches: 子午=少陰君火/陽明燥金|丑未=太陰濕土/太陽寒水|寅申=少陽相火/厥陰風木|卯酉=陽明燥金/少陰君火|辰戌=太陽寒水/太陰濕土|巳亥=厥陰風木/少陽相火\nSix Qi: 厥陰風木=Wood/Liver-GB|少陰君火=Fire/Heart|少陽相火=MinFire/SJ|太陰濕土=Earth/SP|陽明燥金=Metal/LU|太陽寒水=Water/KID\nRisk: 雙火=EXTREME cardiovascular/febrile|雙土=HIGH damp-heat digestive|逆=HIGH immune discord|順=manageable\n2026: 水太過, 少陰君火 Si Tian, KID-HT axis\n2027: 木不及, 太陰濕土 Si Tian, digestive watch\nSeasonal foods: Wood=leafy greens|Fire=bitter melon,lotus|Earth=congee,pumpkin,ginger|Metal=pear,daikon|Water=black sesame,walnut\n\nRULES:\n1. Reply in same language as question.\n2. Personalise to health profile when relevant.\n3. For existing health conditions: always recommend consulting a qualified TCM practitioner for diagnosis-based treatment.\n4. End every answer: '⚠️ Educational purposes only. Consult a qualified practitioner for personal health advice. Book with Sang Hee: "+BOOKING_URL+"'\n5. Never diagnose or recommend stopping medication.";
+}
+
+const iS={display:"block",width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid #ddd",fontSize:12,marginBottom:8,outline:"none",boxSizing:"border-box"};
+const USER_DB={};
+
+const FREE_FEATURES=[
+  {icon:"📊",title:"Yun Qi Analyser",desc:"Annual Da Yun · Si Tian · Zai Quan · Special classification for any year 1924–2103"},
+  {icon:"🗓️",title:"10-Segment Calendar",desc:"Full year risk calendar · colour-coded · North & South hemisphere dates"},
+  {icon:"🌏",title:"Hemisphere Toggle",desc:"Automatic date adjustment for Southern Hemisphere (Australia/NZ) and Northern"},
+  {icon:"⚠️",title:"Risk Classification",desc:"★★ EXTREME · ★ HIGH · OK per segment with clinical significance"},
+  {icon:"🧮",title:"Special Year Lookup",desc:"天符 · 歲會 · 太乙天符 · 同天符 · 同歲會 instant identification"},
+  {icon:"📱",title:"PWA — Install on Phone",desc:"Works on any device · No download · Add to home screen"},
+];
+const PAID_FEATURES=[
+  {icon:"💬",title:"Unlimited Q&A Chat",desc:"Ask anything about Wu Yun Liu Qi — theory, calculations, clinical application"},
+  {icon:"🌐",title:"All Languages",desc:"Korean · English · Chinese · Japanese · Spanish · French · any language"},
+  {icon:"📚",title:"Dr Park's Own Materials",desc:"Answers from Su Wen Ch.66–74, course modules, terminology glossary & clinical handouts"},
+  {icon:"⏰",title:"30-Day Advance Risk Alerts",desc:"Personalised alerts 30 days before high-risk segments — matched to your health profile"},
+  {icon:"🏥",title:"Clinical Guidance",desc:"Herbal protocols · Acupuncture points · Segment-specific treatment strategies"},
+  {icon:"❤️",title:"Personalised Health Guidance",desc:"Answers tailored to your date of birth, health conditions & preferred language"},
+  {icon:"🔄",title:"Auto-renewing",desc:"Cancel anytime · Instant access · New year profiles added automatically"},
+];
+
+function App(){
+  const isMobile=window.innerWidth<=600;
+  const [tab,setTab]=useState("features");
+  const [year,setYear]=useState(2026);
+  const [hemi,setHemi]=useState("S");
+  const [data,setData]=useState(()=>calcYear(2026));
+  const [authMode,setAuthMode]=useState("login");
+  const [email,setEmail]=useState("");
+  const [pwV,setPwV]=useState("");
+  const [nameV,setNameV]=useState("");
+  const [user,setUser]=useState(null);
+  const [authErr,setAuthErr]=useState("");
+  const [signupDob,setSignupDob]=useState("");
+  const [signupLang,setSignupLang]=useState("en");
+  const [signupConds,setSignupConds]=useState([]);
+  const [onboardStep,setOnboardStep]=useState(0);
+  const [obConds,setObConds]=useState([]);
+  const [acctSection,setAcctSection]=useState("main");
+  const [editName,setEditName]=useState("");
+  const [editEmail,setEditEmail]=useState("");
+  const [oldPw,setOldPw]=useState("");
+  const [newPw,setNewPw]=useState("");
+  const [newPw2,setNewPw2]=useState("");
+  const [acctMsg,setAcctMsg]=useState({text:"",ok:true});
+  const [forgotSent,setForgotSent]=useState(false);
+  const [forgotEmail,setForgotEmail]=useState("");
+  const [msgs,setMsgs]=useState([{role:"assistant",content:"Hello! I'm the Wu Yun Liu Qi (五運六氣) health assistant.\n\n🌐 Ask in any language — I'll reply in your language.\n📅 Answers personalised to your health profile once you sign up.\n\nWhat would you like to know?"}]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [riskModal,setRiskModal]=useState(null);
+  const chatRef=useRef(null);
+
+  useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[msgs]);
+
+  const isPaid=user&&user.plan==="paid";
+  const upcomingRisks=isPaid?getUpcomingRiskSegs(data.segs,hemi,year):[];
+
+  function toggleCond(c){setSignupConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
+  function toggleObCond(c){setObConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
+
+  function handleAuth(){
+    if(authMode==="register"){
+      if(!email||!pwV||!nameV){setAuthErr("Please fill in all required fields.");return;}
+      if(USER_DB[email]){setAuthErr("Email already registered.");return;}
+      const u={email,pw:pwV,name:nameV,plan:"free",since:new Date().toISOString(),dob:signupDob,prefLang:signupLang,conditions:signupConds};
+      USER_DB[email]=u;setUser(u);setAuthErr("");
+      setObConds(signupConds);setOnboardStep(1);
+    }else{
+      const u=USER_DB[email];
+      if(!u||u.pw!==pwV){setAuthErr("Incorrect email or password.");return;}
+      setUser(u);setAuthErr("");
+    }
   }
-  if(r==="同氣"){
-    const e=QEL[zq]==="相火"?"火":QEL[zq];
-    return CL.同氣[e]||{w:"Same Qi amplified",d:QEN[zq]+" organ focus",a:"Target organ meridians",h:"Regulate organ system"};
+
+  function finishOnboard(){
+    const updated={...user,conditions:obConds,onboarded:true};
+    USER_DB[user.email]=updated;setUser(updated);setOnboardStep(0);setTab("qa");
   }
-  const e=QEL[zq]==="相火"?"火":QEL[zq];
-  return CL.顺[e]||{w:"Harmonious. Normal seasonal pattern",d:"Mild seasonal conditions",a:"Standard seasonal acu",h:"Standard seasonal herbs"};
+
+  function handleSubscribe(planType){
+    if(!user){setAuthMode("register");setTab("account");return;}
+    const u={...user,plan:"paid",planType,paidSince:new Date().toISOString()};
+    USER_DB[user.email]=u;setUser(u);setTab("qa");
+  }
+
+  function saveProfile(){
+    if(!editName.trim()||!editEmail.trim()){setAcctMsg({text:"Name and email required.",ok:false});return;}
+    const updated={...user,name:editName,email:editEmail};
+    if(USER_DB[user.email])delete USER_DB[user.email];
+    USER_DB[editEmail]=updated;setUser(updated);
+    setAcctMsg({text:"✅ Profile updated.",ok:true});
+    setTimeout(()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});},1200);
+  }
+  function savePw(){
+    if(oldPw!==user.pw){setAcctMsg({text:"Current password incorrect.",ok:false});return;}
+    if(newPw.length<6){setAcctMsg({text:"New password must be at least 6 characters.",ok:false});return;}
+    if(newPw!==newPw2){setAcctMsg({text:"New passwords do not match.",ok:false});return;}
+    const updated={...user,pw:newPw};
+    USER_DB[user.email]=updated;setUser(updated);
+    setAcctMsg({text:"✅ Password changed.",ok:true});
+    setTimeout(()=>{setAcctSection("main");setOldPw("");setNewPw("");setNewPw2("");setAcctMsg({text:"",ok:true});},1200);
+  }
+  function cancelSub(){
+    const u={...user,plan:"free",planType:null};
+    USER_DB[user.email]=u;setUser(u);setAcctSection("main");
+  }
+
+  async function sendMsg(){
+    if(!input.trim()||loading)return;
+    const userMsg={role:"user",content:input};
+    setMsgs(m=>[...m,userMsg]);setInput("");setLoading(true);
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-calls":"true"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})});
+      const d=await res.json();
+      setMsgs(m=>[...m,{role:"assistant",content:(d.content&&d.content[0]&&d.content[0].text)||"Error retrieving response."}]);
+    }catch(e){setMsgs(m=>[...m,{role:"assistant",content:"An error occurred. Please try again."}]);}
+    setLoading(false);
+  }
+
+  // ── 온보딩 모달 ───────────────────────────────────────────────
+  const onboardModal=onboardStep>0&&(
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.65)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:C.white,borderRadius:12,padding:20,maxWidth:460,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
+        <div style={{color:C.gold,fontSize:11,letterSpacing:1,marginBottom:4}}>ALMOST DONE</div>
+        <div style={{fontWeight:"bold",color:C.ink,fontSize:15,marginBottom:4}}>Any health conditions to note?</div>
+        <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>This helps us alert you when upcoming seasons may affect your health. Completely optional — update anytime in My Account.</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16}}>
+          {HEALTH_CONDITIONS.map(c=>(
+            <div key={c} onClick={()=>toggleObCond(c)} style={{border:"1.5px solid "+(obConds.includes(c)?C.gold:"#eee"),borderRadius:6,padding:"7px 10px",cursor:"pointer",background:obConds.includes(c)?C.goldLight:"#FAFAFA",fontSize:11,color:obConds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:5}}>
+              <span style={{color:obConds.includes(c)?C.gold:"#ddd",fontSize:13,flexShrink:0}}>✓</span>{c}
+            </div>
+          ))}
+        </div>
+        <button onClick={finishOnboard} style={{width:"100%",padding:"10px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.navy,color:C.white,fontWeight:"bold",fontSize:12}}>
+          {obConds.length>0?"Save & Go to Q&A →":"Skip & Go to Q&A →"}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── 위험구간 상세 모달 ────────────────────────────────────────
+  const riskDetailModal=riskModal&&(
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.65)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:C.white,borderRadius:12,padding:0,maxWidth:500,width:"100%",maxHeight:"92vh",overflowY:"auto"}}>
+        <div style={{background:riskModal.risk==="雙火"?C.red:riskModal.risk==="雙土"?C.orange:C.darkGold,borderRadius:"12px 12px 0 0",padding:"16px 20px",color:C.white}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+            <div>
+              <div style={{fontSize:11,opacity:0.85,marginBottom:3}}>{RISK_S[riskModal.risk]&&RISK_S[riskModal.risk].label} · {riskModal.name}</div>
+              <div style={{fontWeight:"bold",fontSize:17,marginBottom:2}}>{riskModal.risk==="雙火"?"⚡ Double Fire Period":riskModal.risk==="雙土"?"💧 Double Earth Period":"⚠️ High-Risk Period"}</div>
+              <div style={{fontSize:12,opacity:0.9}}>{riskModal.daysUntil>0?"Starts in "+riskModal.daysUntil+" days · ":"Currently active · "}{riskModal.dateStr} ({hemi==="S"?"Southern":"Northern"} Hemisphere)</div>
+            </div>
+            <button onClick={()=>setRiskModal(null)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:6,color:C.white,cursor:"pointer",padding:"4px 8px",fontSize:14,flexShrink:0,marginLeft:8}}>✕</button>
+          </div>
+        </div>
+        <div style={{padding:20}}>
+          <Section title="🌤 Climate Forecast" bg={C.lightGray}>{getCL(riskModal.risk).w}</Section>
+          <Section title="🏥 General Health Risks" bg="#FFF8F0">{getCL(riskModal.risk).d}</Section>
+          {user&&user.conditions&&user.conditions.length>0?(
+            <div style={{marginBottom:14,background:"#FFF0EE",borderRadius:8,padding:"12px 14px",border:"1px solid #FABFB0"}}>
+              <div style={{fontWeight:"bold",color:C.red,fontSize:12,marginBottom:6}}>⚠️ Your Conditions & This Period</div>
+              <div style={{color:"#555",fontSize:12,lineHeight:1.7,marginBottom:10}}>
+                You have noted: <strong>{user.conditions.join(", ")}</strong>.<br/><br/>
+                {riskModal.risk==="雙火"?"Fire periods place extra stress on the cardiovascular system, heart, and nervous system. Extra vigilance required."
+                  :riskModal.risk==="雙土"?"Earth periods place extra stress on the digestive system and immune response. Damp accumulation may worsen symptoms."
+                  :"Climate mismatch periods can trigger immune fluctuation and aggravate existing conditions."}
+              </div>
+              <div style={{background:C.white,borderRadius:6,padding:"10px 12px",border:"1px solid #FABFB0"}}>
+                <div style={{fontWeight:"bold",color:C.ink,fontSize:11,marginBottom:4}}>📋 Recommendation</div>
+                <div style={{color:"#555",fontSize:11,lineHeight:1.7}}>Because you have existing health conditions, please consult Sang Hee for a <strong>diagnosis-based treatment plan</strong> tailored to you — ideally 2–4 weeks before this period begins.</div>
+              </div>
+            </div>
+          ):(
+            <div style={{marginBottom:14,background:C.lightGray,borderRadius:8,padding:"10px 12px"}}>
+              <div style={{color:"#666",fontSize:11,lineHeight:1.6}}>💡 <strong>No health conditions listed.</strong> Add your health conditions in My Account to receive personalised guidance.</div>
+            </div>
+          )}
+          <Section title="🍽️ Recommended Foods" bg="#F0FBF5" tc="#2D5A3D">{getCL(riskModal.risk).food}</Section>
+          <Section title="🚶 Lifestyle & Habits to Watch" bg="#F8F6F0">{getCL(riskModal.risk).lifestyle}</Section>
+          <Section title="🍵 Home Teas You Can Make" bg="#FDFAF0" pre>{getCL(riskModal.risk).tea}</Section>
+          <Section title="✅ Key Takeaway" bg="#F0F4FA">{getCL(riskModal.risk).lay}</Section>
+          <div style={{background:C.navy,borderRadius:10,padding:16,textAlign:"center"}}>
+            <div style={{color:C.gold,fontWeight:"bold",fontSize:14,marginBottom:4}}>Prepare before this period</div>
+            <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>
+              {user&&user.conditions&&user.conditions.length>0
+                ?"With your health conditions, a personalised treatment plan with Sang Hee 2–4 weeks before this period is strongly recommended."
+                :"A preventive acupuncture session before high-risk periods helps your body adapt."}
+            </div>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{display:"block",padding:"12px 0",borderRadius:8,background:C.gold,color:C.white,fontWeight:"bold",fontSize:14,textDecoration:"none",marginBottom:8}}>📅 Book with Sang Hee →</a>
+            <button onClick={()=>{setRiskModal(null);setTab("qa");setInput("What should I do to prepare for this "+riskModal.risk+" period?");}} style={{width:"100%",padding:"9px 0",borderRadius:8,border:"1px solid "+C.gray,background:"transparent",color:C.gray,fontSize:12,cursor:"pointer"}}>Ask Q&A for more advice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── 위험 배너 ─────────────────────────────────────────────────
+  const riskBanners=upcomingRisks.length>0&&(
+    <div style={{marginBottom:12}}>
+      {upcomingRisks.map((s,i)=>(
+        <div key={i} style={{background:s.risk==="雙火"?"#FFF0EE":s.risk==="雙土"?"#FFF5EC":"#FFFBE8",border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),borderRadius:8,padding:"12px 14px",marginBottom:8,display:"flex",gap:10,alignItems:"flex-start"}}>
+          <div style={{fontSize:22,flexShrink:0}}>{s.risk==="雙火"?"⚡":s.risk==="雙土"?"💧":"⚠️"}</div>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:"bold",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontSize:12,marginBottom:2}}>{RISK_S[s.risk].label} · {s.name} · {s.dateStr}</div>
+            <div style={{color:"#555",fontSize:11,lineHeight:1.5,marginBottom:8}}>
+              {s.daysUntil>0?"Starting in "+s.daysUntil+" day"+(s.daysUntil===1?"":"s")+" — ":"Currently active — "}
+              {s.risk==="雙火"?"Extreme heat/fire period. Cardiovascular & febrile disease risk.":s.risk==="雙土"?"Damp-heat period. Digestive & immune vulnerability.":"Climate mismatch period. Immune fluctuation risk."}
+              {user&&user.conditions&&user.conditions.length>0&&" ⚠️ Relevant to your health profile."}
+            </div>
+            <button onClick={()=>setRiskModal(s)} style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"1px solid "+(s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold),background:C.white,cursor:"pointer",color:s.risk==="雙火"?C.red:s.risk==="雙土"?C.orange:C.darkGold,fontWeight:"bold",marginRight:6}}>Read More →</button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{fontSize:11,padding:"5px 12px",borderRadius:6,border:"none",background:C.navy,cursor:"pointer",color:C.white,fontWeight:"bold",textDecoration:"none",display:"inline-block"}}>📅 Book with Sang Hee</a>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── NAV ───────────────────────────────────────────────────────
+  const NAV=[
+    {t:"features",label:"Home",icon:"🏠"},
+    {t:"analyzer",label:"Analyser",icon:"📊",badge:"FREE"},
+    {t:"qa",label:"Q&A",icon:"💬"},
+    {t:"subscribe",label:"Subscribe",icon:"💎"},
+    {t:"account",label:"My Account",icon:"👤"},
+    {t:"booking",label:"Book Now",icon:"📅",ext:true},
+  ];
+
+  const hdr=(
+    <div style={{background:C.navy,borderRadius:10,padding:"12px 16px 0 16px",marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <div style={{color:C.gold,fontSize:10,letterSpacing:2}}>五運六氣 · WU YUN LIU QI</div>
+          <div style={{color:C.white,fontSize:isMobile?16:20,fontWeight:"bold",margin:"2px 0"}}>運氣 Analyzer</div>
+          <div style={{color:C.gray,fontSize:10}}>Sang Hee Park, PhD · sangheeparkacupuncture.com</div>
+        </div>
+        {user&&<div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold",marginTop:4}}>{isPaid?"💎 Pro":"Free"}</div>}
+      </div>
+      <div style={{display:"flex",marginTop:10,borderTop:"1px solid rgba(255,255,255,0.1)",overflowX:"auto"}}>
+        {NAV.map(({t,label,icon,badge,ext})=>ext
+          ?<a key={t} href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{flex:1,minWidth:isMobile?50:68,padding:isMobile?"8px 2px":"9px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:C.gold,fontSize:isMobile?9:11,fontWeight:"bold",textDecoration:"none",borderBottom:"2px solid "+C.gold}}>
+            <span style={{fontSize:isMobile?14:13}}>{icon}</span>
+            <span style={{whiteSpace:"nowrap"}}>{label}</span>
+          </a>
+          :<button key={t} onClick={()=>setTab(t)} style={{flex:1,minWidth:isMobile?50:68,padding:isMobile?"8px 2px":"9px 4px",border:"none",cursor:"pointer",background:"transparent",color:tab===t?C.gold:C.gray,borderBottom:tab===t?"2px solid "+C.gold:"2px solid transparent",fontWeight:tab===t?"bold":"normal",fontSize:isMobile?9:11,display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}>
+            <span style={{fontSize:isMobile?14:13}}>{icon}</span>
+            <span style={{whiteSpace:"nowrap"}}>{label}</span>
+            {badge&&<span style={{position:"absolute",top:3,right:isMobile?0:4,background:C.green,color:C.white,fontSize:7,fontWeight:"bold",padding:"1px 4px",borderRadius:6}}>{badge}</span>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── HOME ──────────────────────────────────────────────────────
+  const featuresTab=(
+    <div>
+      <div style={{background:"linear-gradient(135deg,"+C.navy+","+C.ink+")",borderRadius:10,padding:20,marginBottom:14,textAlign:"center"}}>
+        <div style={{color:C.gold,fontSize:22,fontWeight:"bold",marginBottom:4}}>五運六氣 · Wu Yun Liu Qi</div>
+        <div style={{color:C.white,fontSize:13,marginBottom:6}}>The World's First Southern Hemisphere Validated Wu Yun Liu Qi Clinical Tool</div>
+        <div style={{color:C.gray,fontSize:11}}>Sang Hee Park, PhD · AHPRA Registered Acupuncturist · Liaoning University of TCM</div>
+      </div>
+      <div style={{background:C.white,borderRadius:10,padding:16,marginBottom:12,border:"1px solid #ddd"}}>
+        <div style={{background:C.lightGray,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.ink,display:"inline-block",marginBottom:12}}>🆓 FREE — No sign-in required</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8}}>
+          {FREE_FEATURES.map((f,i)=>(
+            <div key={i} style={{background:"#FAFAF8",borderRadius:8,padding:12,border:"1px solid #eee"}}>
+              <div style={{fontSize:20,marginBottom:4}}>{f.icon}</div>
+              <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:3}}>{f.title}</div>
+              <div style={{color:"#666",fontSize:11,lineHeight:1.5}}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={()=>setTab("analyzer")} style={{width:"100%",marginTop:12,padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Try Analyser Free →</button>
+      </div>
+      <div style={{background:"linear-gradient(135deg,#1a2f50,"+C.navy+")",borderRadius:10,padding:16,marginBottom:12,border:"2px solid "+C.gold}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:6}}>
+          <div style={{background:C.gold,borderRadius:6,padding:"4px 10px",fontWeight:"bold",fontSize:12,color:C.white}}>💎 PRO SUBSCRIPTION</div>
+          <div style={{color:C.gold,fontWeight:"bold",fontSize:13}}>$8/mo · $50/yr</div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8,marginBottom:14}}>
+          {PAID_FEATURES.map((f,i)=>(
+            <div key={i} style={{background:"rgba(255,255,255,0.07)",borderRadius:8,padding:12,border:"1px solid rgba(196,154,72,0.3)"}}>
+              <div style={{fontSize:20,marginBottom:4}}>{f.icon}</div>
+              <div style={{fontWeight:"bold",color:C.gold,fontSize:12,marginBottom:3}}>{f.title}</div>
+              <div style={{color:C.gray,fontSize:11,lineHeight:1.5}}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Monthly $8 →</button>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"10px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Annual $50 — Best Value →</button>
+        </div>
+      </div>
+      <div style={{background:"linear-gradient(135deg,#1a3a1a,#2D5A3D)",borderRadius:10,padding:16,marginBottom:12,border:"1px solid #4A8C6A"}}>
+        <div style={{color:"#A8D8A8",fontSize:11,letterSpacing:1,marginBottom:4}}>🌿 NOT JUST FOR PRACTITIONERS</div>
+        <div style={{color:C.white,fontWeight:"bold",fontSize:15,marginBottom:6}}>For Everyone Who Wants to Live in Harmony with the Seasons</div>
+        <div style={{color:"#c8e6c8",fontSize:12,lineHeight:1.7,marginBottom:12}}>You don't need to be a doctor to benefit. This 2,000-year-old system tells you exactly <strong style={{color:C.white}}>when to rest, what to eat, and how to protect your health</strong> — based on the season's energy.</div>
+        <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"10px 0",borderRadius:6,border:"1px solid #4A8C6A",cursor:"pointer",background:"rgba(255,255,255,0.1)",color:C.white,fontWeight:"bold",fontSize:12}}>Start Your Seasonal Health Journey →</button>
+      </div>
+      <div style={{background:C.white,borderRadius:10,overflow:"hidden",marginBottom:12,border:"1px solid #eee"}}>
+        <div style={{background:C.navy,padding:"10px 14px",color:C.white,fontWeight:"bold",fontSize:12}}>Feature Comparison</div>
+        <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+          <thead>
+            <tr style={{background:C.lightGray}}>
+              <th style={{padding:"8px 10px",textAlign:"left",color:C.ink}}>Feature</th>
+              <th style={{padding:"8px 6px",textAlign:"center",color:C.ink}}>🆓 Free</th>
+              <th style={{padding:"8px 6px",textAlign:"center",color:C.orange}}>💎 Monthly<br/><span style={{fontWeight:"normal",fontSize:10}}>$8/mo</span></th>
+              <th style={{padding:"8px 6px",textAlign:"center",color:C.gold}}>⭐ Annual<br/><span style={{fontWeight:"normal",fontSize:10}}>$50/yr</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["Yun Qi Analyser (any year)","✅","✅","✅"],
+              ["10-Segment Calendar + Clinical Data","✅","✅","✅"],
+              ["N & S Hemisphere","✅","✅","✅"],
+              ["Unlimited Q&A (all languages)","—","✅","✅"],
+              ["Dr Park's Materials as Source","—","✅","✅"],
+              ["30-Day Advance Risk Alerts","—","✅","✅"],
+              ["Personalised Health Profile","—","✅","✅"],
+              ["New Year Profiles","—","Current year","✅ All years"],
+              ["Price","Free","$8/month","$50/year · Save $46"],
+            ].map(([f,fr,mo,an],i)=>(
+              <tr key={i} style={{borderBottom:"1px solid #f0f0f0",background:i%2===0?"#FAFAFA":"#FFF"}}>
+                <td style={{padding:"7px 10px",color:"#333"}}>{f}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:fr==="✅"?C.green:fr==="—"?"#ccc":C.ink,fontWeight:"bold"}}>{fr}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:mo==="✅"?C.orange:mo==="—"?"#ccc":C.orange,fontWeight:"bold"}}>{mo}</td>
+                <td style={{padding:"7px 6px",textAlign:"center",color:an==="✅"?C.gold:an==="—"?"#ccc":C.gold,fontWeight:"bold"}}>{an}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{fontSize:10,color:"#999",textAlign:"center",paddingBottom:16}}>Educational purposes only · © Blossom Skin & Health Pty Ltd</div>
+    </div>
+  );
+
+  // ── ANALYSER ──────────────────────────────────────────────────
+  const analyzerTab=(
+    <div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:12}}>
+        <input type="number" value={year} onChange={e=>setYear(+e.target.value)} style={{width:80,padding:"6px 8px",borderRadius:6,border:"2px solid "+C.gold,background:C.blue,color:C.white,fontSize:15,fontWeight:"bold",textAlign:"center"}}/>
+        {["N","S"].map(h=>(
+          <button key={h} onClick={()=>setHemi(h)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:hemi===h?C.gold:C.blue,color:C.white}}>{h==="N"?"🌏 Northern":"🌏 Southern"}</button>
+        ))}
+        <button onClick={()=>setData(calcYear(year))} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:C.red,color:C.white}}>Analyze</button>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(108px,1fr))",gap:8,marginBottom:12}}>
+        {[
+          {l:"Year · 干支",v:year+"년 "+data.jz,bg:"#E8EEF8",tc:C.ink},
+          {l:"大運 Dà Yùn",v:data.dayunName,e:data.dayunElem},
+          {l:"司天 Sī Tiān",v:data.si,e:data.siElem},
+          {l:"在泉 Zài Quán",v:data.zai,e:SIX_QI_ELEM[data.zai]},
+          {l:"運氣相合",v:data.yunQiRel,bg:(data.yunQiRel.includes("不和")||data.yunQiRel.includes("天刑"))?"#FFF0EE":"#F0FBF5",tc:(data.yunQiRel.includes("不和")||data.yunQiRel.includes("天刑"))?C.red:C.green},
+          {l:"特殊分類",v:data.special,bg:data.special==="太乙天符"?"#FFF0EE":data.special==="天符"?"#FFF5EC":data.special==="歲會"?"#F0FBF5":"#F5F5F5",tc:data.special.includes("太乙")?C.red:data.special.includes("天符")?C.orange:data.special==="歲會"?C.green:C.navy},
+        ].map((item,i)=>{const col=item.e?ec(item.e):{bg:item.bg,border:"#ddd",text:item.tc};return(
+          <div key={i} style={{borderRadius:8,padding:"9px 11px",background:col.bg,border:"1px solid "+col.border}}>
+            <div style={{fontSize:9,color:"#888",marginBottom:2}}>{item.l}</div>
+            <div style={{fontWeight:"bold",fontSize:11,color:col.text}}>{item.v}</div>
+          </div>
+        );})}
+      </div>
+      <div style={{background:C.white,borderRadius:8,overflow:"hidden",marginBottom:4,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+        <div style={{padding:"9px 14px",background:C.navy,color:C.white,fontWeight:"bold",fontSize:13}}>十節段 · Ten Segments · {hemi==="S"?"Southern":"Northern"} Hemisphere</div>
+        <div style={{background:"#FFFBE8",borderLeft:"4px solid "+C.darkGold,padding:"10px 14px",fontSize:11,color:"#5A4A00",lineHeight:1.6}}>
+          <strong>📍 Acupuncture Points & 🌿 Herbal Formulas</strong> shown here are general climate-based recommendations from Su Wen Ch.66–74 — not personalised to any individual. If you have existing health conditions, please consult a qualified TCM practitioner for a diagnosis-based treatment plan.
+        </div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,minWidth:800}}>
+            <thead>
+              <tr style={{background:C.lightGray}}>
+                {["Segment","Date","主運","客運","主氣","客氣","Risk","🌤 Climate","🏥 Disease","📍 Acu","🌿 Herbs"].map(h=>(
+                  <th key={h} style={{padding:"5px 7px",textAlign:"left",color:C.ink,borderBottom:"1px solid #ddd",whiteSpace:"nowrap",fontSize:10}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.segs.map((s,i)=>{
+                const ri=RISK_S[s.risk]||RISK_S["順"];
+                const dates=hemi==="N"?DATES_N:DATES_S;
+                const cl=getCL(s.risk);
+                const zYC=ec(s.zYun),kYC=ec(s.kYun),zQC=ec(s.zQiEl),kQC=ec(s.kQiEl);
+                return(
+                  <tr key={i} style={{background:i%2===0?"#FAFAFA":"#FFF",borderLeft:"3px solid "+ri.border,verticalAlign:"top"}}>
+                    <td style={{padding:"6px 7px",fontWeight:"bold",color:C.navy,whiteSpace:"nowrap"}}>{SEG_LABELS[i]}</td>
+                    <td style={{padding:"6px 7px",color:"#555",whiteSpace:"nowrap"}}>{dates[i]}</td>
+                    <td style={{padding:"6px 7px"}}><span style={{background:zYC.bg,color:zYC.text,border:"1px solid "+zYC.border,borderRadius:4,padding:"1px 5px",fontWeight:"bold"}}>{s.zYun}</span></td>
+                    <td style={{padding:"6px 7px"}}><span style={{background:kYC.bg,color:kYC.text,border:"1px solid "+kYC.border,borderRadius:4,padding:"1px 5px",fontWeight:"bold"}}>{s.kYun}</span></td>
+                    <td style={{padding:"6px 7px",color:zQC.text,whiteSpace:"nowrap",fontSize:9}}>{s.zQi}</td>
+                    <td style={{padding:"6px 7px",color:kQC.text,whiteSpace:"nowrap",fontSize:9}}>{s.kQiName}</td>
+                    <td style={{padding:"6px 7px"}}><span style={{background:ri.bg,color:ri.color,border:"1px solid "+ri.border,borderRadius:4,padding:"2px 6px",fontWeight:"bold",fontSize:9,whiteSpace:"nowrap",display:"block"}}>{ri.label}</span></td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:120}}>{cl.w.split("—")[0]}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#444",lineHeight:1.5,minWidth:140}}>{cl.d}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:C.ink,lineHeight:1.6,minWidth:130}}>{cl.a}</td>
+                    <td style={{padding:"6px 7px",fontSize:9,color:"#2D5A3D",lineHeight:1.5,minWidth:130}}>{cl.h}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style={{fontSize:9,color:"#999",textAlign:"center",padding:"8px 0 16px"}}>Educational purposes only · sangheeparkacupuncture.com</div>
+    </div>
+  );
+
+  // ── SUBSCRIBE ─────────────────────────────────────────────────
+  const subscribeTab=(
+    <div>
+      <div style={{background:"linear-gradient(135deg,"+C.navy+","+C.ink+")",borderRadius:10,padding:16,marginBottom:14,textAlign:"center",border:"2px solid "+C.gold}}>
+        <div style={{color:C.gold,fontSize:18,fontWeight:"bold"}}>Upgrade to Pro</div>
+        <div style={{color:C.white,fontSize:12,marginTop:4}}>Unlimited Q&A · 30-Day Risk Alerts · Personalised Health Guidance</div>
+        <div style={{color:C.gray,fontSize:11,marginTop:3}}>Based on Dr Sang Hee Park's own Su Wen translations & course materials</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        <div style={{background:C.white,borderRadius:10,padding:16,border:"2px solid "+C.blue}}>
+          <div style={{color:C.ink,fontWeight:"bold",fontSize:13}}>Monthly</div>
+          <div style={{color:C.red,fontSize:30,fontWeight:"bold",margin:"6px 0"}}>$8</div>
+          <div style={{color:C.gray,fontSize:11,marginBottom:10}}>/month</div>
+          <div style={{background:C.lightGray,borderRadius:6,padding:"8px 10px",fontSize:11,color:C.ink,lineHeight:1.8,marginBottom:10}}>
+            ✔ Unlimited Q&A<br/>✔ All languages<br/>✔ 30-day risk alerts<br/>✔ Personal health profile<br/>✔ Current year profile<br/>✔ Cancel anytime
+          </div>
+          <div style={{fontSize:10,color:"#aaa",marginBottom:10}}>New year profiles: current year only</div>
+          <button onClick={()=>handleSubscribe("monthly")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Start Monthly</button>
+        </div>
+        <div style={{background:C.navy,borderRadius:10,padding:16,border:"2px solid "+C.gold,position:"relative"}}>
+          <div style={{position:"absolute",top:-10,right:10,background:C.gold,color:C.white,fontSize:9,fontWeight:"bold",padding:"3px 8px",borderRadius:10}}>BEST VALUE</div>
+          <div style={{color:C.gold,fontWeight:"bold",fontSize:13}}>Annual</div>
+          <div style={{color:C.white,fontSize:30,fontWeight:"bold",margin:"6px 0"}}>$50</div>
+          <div style={{color:C.gray,fontSize:11,marginBottom:6}}>/year <span style={{color:C.gold,fontWeight:"bold"}}>· Save $46</span></div>
+          <div style={{background:"rgba(196,154,72,0.15)",borderRadius:6,padding:"8px 10px",border:"1px solid rgba(196,154,72,0.3)",fontSize:11,color:C.gray,lineHeight:1.8,marginBottom:6}}>
+            ✔ Everything in Monthly<br/>
+            <span style={{color:C.gold,fontWeight:"bold"}}>✔ ALL future year profiles<br/>✔ 12 months full access<br/>✔ Priority knowledge updates</span>
+          </div>
+          <div style={{fontSize:10,color:C.gold,marginBottom:10,fontWeight:"bold"}}>≈ $4.17/month</div>
+          <button onClick={()=>handleSubscribe("annual")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid "+C.gold,cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Start Annual →</button>
+        </div>
+      </div>
+      {!user&&(
+        <div style={{background:C.white,borderRadius:8,padding:14,border:"1px solid #ddd"}}>
+          <div style={{fontWeight:"bold",color:C.ink,marginBottom:10,fontSize:12}}>Create Account to Subscribe</div>
+          <input placeholder="Full name *" value={nameV} onChange={e=>setNameV(e.target.value)} style={iS}/>
+          <input placeholder="Email *" value={email} onChange={e=>setEmail(e.target.value)} style={iS}/>
+          <input placeholder="Password *" type="password" value={pwV} onChange={e=>setPwV(e.target.value)} style={iS}/>
+          {authErr&&<div style={{color:C.red,fontSize:11,marginBottom:8}}>{authErr}</div>}
+          <button onClick={()=>{setAuthMode("register");handleAuth();}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Create Account & Subscribe</button>
+        </div>
+      )}
+      <div style={{fontSize:9,color:"#999",textAlign:"center",marginTop:8,paddingBottom:16}}>Stripe integration · Educational only · Blossom Skin & Health Pty Ltd</div>
+    </div>
+  );
+
+  // ── Q&A ───────────────────────────────────────────────────────
+  const langEx=[
+    {flag:"🇰🇷",lang:"한국어",q:"2026년 가장 위험한 구간은?"},
+    {flag:"🇬🇧",lang:"English",q:"What should I eat this season?"},
+    {flag:"🇨🇳",lang:"中文",q:"天符年的临床意义是什么？"},
+    {flag:"🇯🇵",lang:"日本語",q:"今の季節に何を食べればいいですか？"},
+    {flag:"🇪🇸",lang:"Español",q:"¿Qué debo comer esta temporada?"},
+    {flag:"🇫🇷",lang:"Français",q:"Comment me préparer pour la période à risque?"},
+  ];
+  const qaTab=(
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 220px)",minHeight:380}}>
+      {!user?(
+        <div style={{background:C.white,borderRadius:8,padding:24,textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:8}}>🔒</div>
+          <div style={{fontWeight:"bold",color:C.ink,marginBottom:4}}>Sign in required</div>
+          <div style={{color:C.gray,fontSize:12,marginBottom:12}}>Create a free account, then subscribe for Q&A access</div>
+          <button onClick={()=>setTab("account")} style={{padding:"8px 20px",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",marginRight:8}}>Sign In</button>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"8px 20px",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold"}}>Subscribe</button>
+        </div>
+      ):!isPaid?(
+        <div style={{background:C.white,borderRadius:8,padding:24,textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:8}}>💎</div>
+          <div style={{fontWeight:"bold",color:C.ink,marginBottom:4}}>Pro subscription required</div>
+          <div style={{color:C.gray,fontSize:12,marginBottom:12}}>$8/mo · $50/yr — Unlimited Q&A + 30-day risk alerts</div>
+          <button onClick={()=>setTab("subscribe")} style={{padding:"8px 24px",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold"}}>Subscribe Now</button>
+        </div>
+      ):(
+        <>
+          <div style={{background:C.navy,borderRadius:"8px 8px 0 0",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
+            <div style={{color:C.gold,fontWeight:"bold",fontSize:12}}>五運六氣 Q&A</div>
+            <div style={{color:C.gray,fontSize:10}}>🌐 All Languages · Dr Park's Materials</div>
+          </div>
+          <div style={{background:"#F8F6F2",padding:"6px 10px",display:"flex",gap:5,flexWrap:"wrap",borderBottom:"1px solid #eee"}}>
+            {langEx.map((l,i)=>(
+              <button key={i} onClick={()=>setInput(l.q)} style={{fontSize:10,padding:"2px 8px",borderRadius:10,border:"1px solid #ddd",background:C.white,cursor:"pointer",color:C.ink}}>{l.flag} {l.lang}</button>
+            ))}
+          </div>
+          <div ref={chatRef} style={{flex:1,overflowY:"auto",padding:12,background:"#FAFAF8",display:"flex",flexDirection:"column",gap:10}}>
+            {msgs.map((m,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+                <div style={{maxWidth:"85%",padding:"10px 13px",borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:m.role==="user"?C.blue:C.white,color:m.role==="user"?C.white:"#222",fontSize:12,lineHeight:1.6,boxShadow:"0 1px 3px rgba(0,0,0,.08)",whiteSpace:"pre-wrap"}}>{m.content}</div>
+              </div>
+            ))}
+            {loading&&(
+              <div style={{display:"flex",justifyContent:"flex-start"}}>
+                <div style={{background:C.white,borderRadius:"12px 12px 12px 2px",padding:"10px 14px",boxShadow:"0 1px 3px rgba(0,0,0,.08)"}}>
+                  <span style={{color:C.gray,fontSize:12}}>⟳ Searching knowledge base…</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{padding:10,background:C.white,borderTop:"1px solid #eee",borderRadius:"0 0 8px 8px",display:"flex",gap:8}}>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendMsg()} placeholder="Ask in any language…" style={{flex:1,padding:"8px 10px",borderRadius:6,border:"1px solid #ddd",fontSize:12,outline:"none"}}/>
+            <button onClick={sendMsg} disabled={loading} style={{padding:"8px 14px",borderRadius:6,border:"none",cursor:"pointer",background:loading?C.gray:C.gold,color:C.white,fontWeight:"bold",fontSize:13}}>→</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  // ── ACCOUNT ───────────────────────────────────────────────────
+  const msgBox=acctMsg.text&&(
+    <div style={{padding:"8px 12px",borderRadius:6,marginBottom:8,fontSize:11,background:acctMsg.ok?"#F0FBF5":"#FFF0EE",color:acctMsg.ok?C.green:C.red,border:"1px solid "+(acctMsg.ok?C.green:C.red)}}>{acctMsg.text}</div>
+  );
+  const accountTab=(
+    <div style={{paddingBottom:24}}>
+      {!user?(
+        <div style={{background:C.white,borderRadius:8,padding:16}}>
+          {acctSection==="forgot"?(
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+                <button onClick={()=>{setAcctSection("main");setForgotSent(false);setForgotEmail("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+                <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Reset Password</div>
+              </div>
+              {forgotSent?(
+                <div style={{textAlign:"center",padding:"16px 8px"}}>
+                  <div style={{fontSize:40,marginBottom:10}}>📧</div>
+                  <div style={{fontWeight:"bold",color:C.ink,fontSize:13,marginBottom:6}}>Check your inbox</div>
+                  <div style={{color:C.gray,fontSize:12,lineHeight:1.6,marginBottom:4}}>A reset link has been sent to:</div>
+                  <div style={{color:C.ink,fontWeight:"bold",fontSize:12,marginBottom:12}}>{forgotEmail}</div>
+                  <div style={{color:C.gray,fontSize:11,lineHeight:1.6,marginBottom:16}}>Link expires in 15 minutes. Check your spam folder.</div>
+                  <button onClick={()=>{setAcctSection("main");setForgotSent(false);setForgotEmail("");}} style={{padding:"8px 24px",borderRadius:6,border:"none",cursor:"pointer",background:C.blue,color:C.white,fontWeight:"bold",fontSize:12}}>Back to Sign In</button>
+                </div>
+              ):(
+                <div>
+                  <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>Enter your email and we'll send a password reset link.</div>
+                  <input placeholder="your@email.com" value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)} style={iS}/>
+                  <button onClick={()=>{if(forgotEmail.trim())setForgotSent(true);}} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Send Reset Link</button>
+                  <div style={{fontSize:10,color:"#aaa",textAlign:"center"}}>※ Requires Supabase Auth backend to activate email sending.</div>
+                </div>
+              )}
+            </div>
+          ):(
+            <div>
+              <div style={{fontWeight:"bold",color:C.ink,marginBottom:12,fontSize:13}}>{authMode==="register"?"Create Account":"Sign In"}</div>
+              {authMode==="register"&&(
+                <div>
+                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Full Name *</div>
+                  <input placeholder="Your name" value={nameV} onChange={e=>setNameV(e.target.value)} style={iS}/>
+                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Date of Birth</div>
+                  <input type="date" value={signupDob} onChange={e=>setSignupDob(e.target.value)} style={iS}/>
+                  <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Preferred Language</div>
+                  <select value={signupLang} onChange={e=>setSignupLang(e.target.value)} style={{...iS,cursor:"pointer"}}>
+                    {LANGUAGES.map(l=><option key={l.v} value={l.v}>{l.label}</option>)}
+                  </select>
+                  <div style={{fontSize:11,color:C.gray,marginBottom:6}}>Health Conditions <span style={{color:"#aaa"}}>(optional — for personalised alerts)</span></div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10,maxHeight:200,overflowY:"auto",padding:4,border:"1px solid #eee",borderRadius:6}}>
+                    {HEALTH_CONDITIONS.map(c=>(
+                      <div key={c} onClick={()=>toggleCond(c)} style={{border:"1.5px solid "+(signupConds.includes(c)?C.gold:"#eee"),borderRadius:5,padding:"6px 8px",cursor:"pointer",background:signupConds.includes(c)?C.goldLight:"#FAFAFA",fontSize:10,color:signupConds.includes(c)?C.ink:C.gray,display:"flex",alignItems:"center",gap:4}}>
+                        <span style={{color:signupConds.includes(c)?C.gold:"#ddd",fontSize:12,flexShrink:0}}>✓</span>{c}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Email *</div>
+              <input placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} style={iS}/>
+              <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Password *</div>
+              <input placeholder="Password" type="password" value={pwV} onChange={e=>setPwV(e.target.value)} style={iS}/>
+              {authErr&&<div style={{color:C.red,fontSize:11,marginBottom:8}}>{authErr}</div>}
+              <button onClick={handleAuth} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:10}}>
+                {authMode==="register"?"Create Account":"Sign In"}
+              </button>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontSize:11,color:C.gray,cursor:"pointer"}} onClick={()=>setAuthMode(authMode==="register"?"login":"register")}>
+                  {authMode==="register"?"Already have an account? Sign in":"No account? Register free"}
+                </div>
+                {authMode==="login"&&(
+                  <div style={{fontSize:11,color:C.blue,cursor:"pointer",textDecoration:"underline"}} onClick={()=>{setAcctSection("forgot");setForgotEmail(email);}}>Forgot password?</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ):acctSection==="editProfile"?(
+        <div style={{background:C.white,borderRadius:8,padding:16}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+            <button onClick={()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+            <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Edit Profile</div>
+          </div>
+          {msgBox}
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Name</div>
+          <input value={editName} onChange={e=>setEditName(e.target.value)} style={iS}/>
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Email</div>
+          <input value={editEmail} onChange={e=>setEditEmail(e.target.value)} style={iS}/>
+          <button onClick={saveProfile} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Save Changes</button>
+        </div>
+      ):acctSection==="editPw"?(
+        <div style={{background:C.white,borderRadius:8,padding:16}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+            <button onClick={()=>{setAcctSection("main");setAcctMsg({text:"",ok:true});setOldPw("");setNewPw("");setNewPw2("");}} style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.gray}}>←</button>
+            <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>Change Password</div>
+          </div>
+          {msgBox}
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Current Password</div>
+          <input type="password" value={oldPw} onChange={e=>setOldPw(e.target.value)} style={iS}/>
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>New Password (min. 6 characters)</div>
+          <input type="password" value={newPw} onChange={e=>setNewPw(e.target.value)} style={iS}/>
+          <div style={{fontSize:11,color:C.gray,marginBottom:3}}>Confirm New Password</div>
+          <input type="password" value={newPw2} onChange={e=>setNewPw2(e.target.value)} style={iS}/>
+          <button onClick={savePw} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Update Password</button>
+        </div>
+      ):acctSection==="cancelConfirm"?(
+        <div style={{background:C.white,borderRadius:8,padding:20,textAlign:"center"}}>
+          <div style={{fontSize:36,marginBottom:8}}>⚠️</div>
+          <div style={{fontWeight:"bold",color:C.ink,fontSize:13,marginBottom:6}}>Cancel Subscription?</div>
+          <div style={{color:C.gray,fontSize:12,marginBottom:16,lineHeight:1.6}}>Q&A access and risk alerts will be removed immediately.<br/>You can re-subscribe at any time.</div>
+          <button onClick={cancelSub} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.red,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Yes, Cancel</button>
+          <button onClick={()=>setAcctSection("main")} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Keep Subscription</button>
+        </div>
+      ):(
+        <div>
+          <div style={{background:C.white,borderRadius:8,padding:14,marginBottom:10,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:42,height:42,borderRadius:"50%",background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",color:C.white,fontWeight:"bold",fontSize:16}}>{(user.name&&user.name[0].toUpperCase())||"U"}</div>
+                <div>
+                  <div style={{fontWeight:"bold",color:C.ink,fontSize:13}}>{user.name}</div>
+                  <div style={{color:C.gray,fontSize:11}}>{user.email}</div>
+                  {user.dob&&<div style={{color:C.gray,fontSize:10}}>DOB: {user.dob}</div>}
+                  {user.prefLang&&<div style={{color:C.gray,fontSize:10}}>Language: {(LANGUAGES.find(l=>l.v===user.prefLang)||{}).label}</div>}
+                </div>
+              </div>
+              <div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold"}}>{isPaid?"💎 "+(user.planType==="annual"?"Annual":"Monthly"):"Free"}</div>
+            </div>
+            {user.conditions&&user.conditions.length>0&&(
+              <div style={{fontSize:11,color:C.gray,marginBottom:8,background:C.lightGray,borderRadius:6,padding:"6px 10px"}}>
+                <span style={{fontWeight:"bold",color:C.ink}}>Health conditions: </span>{user.conditions.join(", ")}
+                <span style={{color:C.blue,cursor:"pointer",marginLeft:6}} onClick={()=>setOnboardStep(1)}>(update)</span>
+              </div>
+            )}
+            <button onClick={()=>{setEditName(user.name);setEditEmail(user.email);setAcctSection("editProfile");}} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12,marginBottom:6}}>✏️ Edit Profile</button>
+            <button onClick={()=>setAcctSection("editPw")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:"#FAFAFA",color:C.ink,fontSize:12}}>🔑 Change Password</button>
+          </div>
+          <div style={{background:C.white,borderRadius:8,padding:14,marginBottom:10,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>
+            <div style={{fontWeight:"bold",color:C.ink,fontSize:12,marginBottom:8}}>Subscription</div>
+            {isPaid?(
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                  <span style={{fontSize:12,color:"#444"}}>Plan</span>
+                  <span style={{fontWeight:"bold",color:C.gold,fontSize:12}}>{user.planType==="annual"?"Annual — $50/yr":"Monthly — $8/mo"}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                  <span style={{fontSize:12,color:"#444"}}>Status</span>
+                  <span style={{fontSize:12,color:C.green,fontWeight:"bold"}}>✅ Active</span>
+                </div>
+                <button onClick={()=>setTab("qa")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:6}}>Go to Q&A →</button>
+                <button onClick={()=>setAcctSection("cancelConfirm")} style={{width:"100%",padding:"7px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:"#999",fontSize:11}}>Cancel Subscription</button>
+              </div>
+            ):(
+              <div>
+                <div style={{fontSize:12,color:C.gray,marginBottom:10}}>Free plan. Upgrade for Q&A + 30-day risk alerts.</div>
+                <button onClick={()=>setTab("subscribe")} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12}}>Upgrade to Pro →</button>
+              </div>
+            )}
+          </div>
+          <button onClick={()=>{setUser(null);setAcctSection("main");}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Sign Out</button>
+        </div>
+      )}
+    </div>
+  );
+
+  return(
+    <div style={{maxWidth:720,margin:"0 auto",padding:isMobile?"0":"12px",fontFamily:"'Apple SD Gothic Neo','Segoe UI',sans-serif",background:C.bgPage,minHeight:"100vh"}}>
+      {onboardModal}
+      {riskDetailModal}
+      {hdr}
+      <div style={{padding:isMobile?"0 8px 8px":"0"}}>
+        {riskBanners}
+        {tab==="features"&&featuresTab}
+        {tab==="analyzer"&&analyzerTab}
+        {tab==="subscribe"&&subscribeTab}
+        {tab==="qa"&&qaTab}
+        {tab==="account"&&accountTab}
+      </div>
+    </div>
+  );
 }
 
-let Y=2026,H="N",D=null,SG=[];
-
-const KO=["厥陰風木","少陰君火","太陰濕土","少陽相火","陽明燥金","太陽寒水"];
-function gKQ(si){const i=KO.indexOf(si);return Array.from({length:6},(_,j)=>KO[(i-2+j+6)%6]);}
-function gKY(e){let c=e;const r=[e];for(let i=1;i<5;i++){c=GN[c];r.push(c);}return r;}
-function jKZ(ke,zh){
-  if(ke===zh)return(ke==="火"||ke==="相火")?"双火":ke==="土"?"双土":"同氣";
-  const kb=ke==="相火"?"火":ke,zb=zh==="相火"?"火":zh;
-  if(kb===zb)return"双火";  // Minister Fire + Emperor Fire = Double Fire
-  if(kb===zb&&kb==="土")return"双土";
-  if(GN[kb]===zb)return"顺";
-  if(CT[zb]===kb||CT[kb]===zb)return"逆";
-  return"顺";
-}
-function jY(ke,zh){if(ke===zh)return"Same 同運";if(GN[ke]===zh)return"Harmonious 顺";return"Neutral";}
-function cy(y){
-  const s=ST[(y-4)%10],b=BR[(y-4)%12];
-  const[dn,de]=SDY[s];const{s:si,z:za}=BQ[b];
-  const kq=gKQ(si),ky=gKY(de);
-  const se=QEL[si]==="相火"?"火":QEL[si];
-  let rel="",rc="";
-  if(de===se){rel="Tian Fu 天符";rc="Da Yun = Si Tian";}
-  else if(GN[se]===de){rel="Shun Hua 順化";rc="Qi generates Yun";}
-  else if(GN[de]===se){rel="Xiao Ni 小逆";rc="Yun generates Qi";}
-  else if(CT[se]===de){rel="Tian Xing 天刑";rc="Qi controls Yun";}
-  else if(CT[de]===se){rel="Bu He 不和";rc="Yun controls Qi";}
-  const TA=[2005,2009,2038,2039],TF2=[1990,1992,1994,2020,2022,2024],TF=[1998,2006,2007,2008,2028,2035,2036,2037],SH=[1987,1994,1996,2005,2009,2014,2024,2038];
-  let sp="Ordinary year 平年",sc="";
-  if(TA.includes(y)){sp="★★★★★ Tai Yi Tian Fu 太乙天符";sc="Most extreme";}
-  else if(TF2.includes(y)){sp="★★★★ Tong Tian Fu 同天符";sc="Very extreme";}
-  else if(TF.includes(y)){sp="★★★ Tian Fu 天符";sc="Extreme";}
-  else if(SH.includes(y)){sp="★★ Sui Hui 歲會";sc="Mild";}
-  // Epidemic warnings — Liu Yuan Zheng Ji Da Lun Ch.71
-  const isExcess=(de===de&&["水","火","金","土","木"].includes(de))&&(["甲","丙","戊","庚","壬"].includes(s));
-  const isDefic=["乙","丁","己","辛","癸"].includes(s);
-  const epSegs={};
-  if(si==="少陰君火"&&isExcess){epSegs[8]="[!] Wen Bing 溫病 — 71 Pian: Emperor Fire Si Tian Excess, 5th Qi";epSegs[9]="[!] Wen Bing 溫病 — 71 Pian: Emperor Fire Si Tian Excess, 5th Qi";}
-  if(si==="少陽相火"&&isExcess){epSegs[0]="[!] Wen Bing 溫病 — 71 Pian: Minister Fire Si Tian Excess, 1st Qi";epSegs[1]="[!] Wen Bing 溫病 — 71 Pian: Minister Fire Si Tian Excess, 1st Qi";}
-  if(si==="太陽寒水"&&isExcess){epSegs[0]="[!] Yi+Wen Bing 疫+溫病 — 71 Pian: Cold-Water Si Tian Excess, 1st Qi";epSegs[1]="[!] Yi+Wen Bing 疫+溫病 — 71 Pian: Cold-Water Si Tian Excess, 1st Qi";}
-  if(si==="陽明燥金"&&isDefic){epSegs[2]="[!] Yi Bing 疫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 2nd Qi";epSegs[3]="[!] Yi Bing 疫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 2nd Qi";epSegs[9]="[!] Wen Bing 溫病 — 71 Pian: Dryness-Metal Si Tian Deficiency, 6th Qi";}
-  if(si==="太陰濕土"&&isDefic){epSegs[2]="[!] Wen Bing+Yi 溫病+疫 — 71 Pian: Damp-Earth Si Tian Deficiency, 2nd Qi";epSegs[3]="[!] Wen Bing+Yi 溫病+疫 — 71 Pian: Damp-Earth Si Tian Deficiency, 2nd Qi";}
-  if(si==="厥陰風木"&&isDefic){epSegs[9]="[!] Wen Yi 溫疫 — 71 Pian: Wind-Wood Si Tian Deficiency, 6th Qi";}
-  return{jiazi:s+b,s,b,dn,de,si,za,rel,rc,sp,sc,kq,ky,epSegs};
+// ── 헬퍼 컴포넌트 ─────────────────────────────────────────────
+function Section({title,bg,tc,pre,children}){
+  return(
+    <div style={{marginBottom:14}}>
+      <div style={{fontWeight:"bold",color:"#1C2D58",fontSize:12,marginBottom:6}}>{title}</div>
+      <div style={{color:tc||"#444",fontSize:12,lineHeight:1.7,background:bg||"#F5F5F5",borderRadius:8,padding:"10px 12px",whiteSpace:pre?"pre-line":"normal"}}>{children}</div>
+    </div>
+  );
 }
 
-function sh(h){H=h;document.getElementById("bN").className="btn bn"+(h==="N"?" on":"");document.getElementById("bS").className="btn bn"+(h==="S"?" on":"");ra();}
-function go(){const v=parseInt(document.getElementById("yIn").value);if(v>=1924&&v<=2103){Y=v;ra();}else alert("Enter year 1924–2103");}
-const YCN=["初運","二運","三運","四運","終運"],GCN=["初氣","二氣","三氣","四氣","五氣","終氣"];
-function ra(){D=cy(Y);SG=YQP.map(([yi,qi],idx)=>({name:`${YCN[yi]}${GCN[qi]}`,sub:`Yun ${yi+1}·Qi ${qi+1}`,dn:DN[idx],ds:DS[idx],zy:FY[yi],ky:D.ky[yi],zq:SQ[qi],kq:D.kq[qi]}));rI();rQ();rT();rR();}
+ReactDOM.render(<App/>, document.getElementById("root"));
 
-function eb(e,n){const c=ES[e]||ES["木"];return`<span class="bdg" style="background:${c.b};border-color:${c.d};color:${c.t}">${n||e}</span>`;}
-function rb(r){const v=RS[r]||RS["顺"];return`<span class="rb" style="color:${v.c};border-color:${v.d};background:${v.b}">${v.l}</span>`;}
-
-function rI(){
-  const de=ES[D.de]||ES["水"],se=ES[QEL[D.si]]||ES["火"],ze=ES[QEL[D.za]]||ES["金"];
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
-  const rb2=D.rel.includes("不和")||D.rel.includes("天刑"),sb=D.sp.includes("太乙")||D.sp.includes("同天")||D.sp.includes("天符");
-  document.getElementById("IG").innerHTML=[
-    {l:"Year · Jia Zi 干支",v:`${Y} · ${D.jiazi}`,cn:"",bg:"#E8EEF8",c:"#1C2D58"},
-    {l:"Annual Period 大運 Da Yun",v:D.dn,cn:`Stem: ${D.s}`,bg:de.b,c:de.t},
-    {l:"Si Tian 司天 Controlling Heaven",v:QEN[D.si],cn:D.si,bg:se.b,c:se.t},
-    {l:"Zai Quan 在泉 At the Fountain",v:QEN[D.za],cn:D.za,bg:ze.b,c:ze.t},
-    {l:"Yun-Qi 運氣 Relationship",v:D.rel,cn:D.rc,bg:rb2?"#FFF0EE":"#F0FBF5",c:rb2?"#C84B30":"#2D6A4F"},
-    {l:"Special Classification",v:D.sp,cn:D.sc,bg:sb?"#FFF5EC":"#F5F5F5",c:sb?"#E07030":"#444"},
-    {l:"Risk Segments",v:`${hr.length} / 10`,cn:"high-risk periods",bg:hr.length>=4?"#FFF0EE":"#F0FBF5",c:hr.length>=4?"#C84B30":"#2D6A4F"},
-  ].map(({l,v,cn,bg,c})=>`<div class="ic" style="background:${bg}"><div class="il">${l}</div><div class="iv" style="color:${c}">${v}</div>${cn?`<div class="icn">${cn}</div>`:""}</div>`).join("");
-}
-
-function rQ(){
-  const ql=["Step 1 初氣","Step 2 二氣","Step 3★ 司天","Step 4 四氣","Step 5 五氣","Step 6★ 在泉"];
-  const yl=["Yun 1 初運","Yun 2 二運","Yun 3 三運","Yun 4 四運","Yun 5 終運"];
-  const FEN={木:"Wood",火:"Fire",土:"Earth",金:"Metal",水:"Water"};
-  document.getElementById("QG").innerHTML=`
-    <div class="qc"><div class="qt">Guest Qi 客氣 Ke Qi — 6 Steps</div><div class="brow">${D.kq.map((q,i)=>`<div><div style="font-size:9px;color:#888;text-align:center;margin-bottom:2px">${ql[i]}</div>${eb(QEL[q],QEN[q])}<div style="font-size:9px;color:#aaa;text-align:center;margin-top:1px">${q}</div></div>`).join("")}</div></div>
-    <div class="qc"><div class="qt">Guest Yun 客運 Ke Yun — 5 Periods</div><div class="brow">${D.ky.map((q,i)=>`<div><div style="font-size:9px;color:#888;text-align:center;margin-bottom:2px">${yl[i]}</div>${eb(q,FEN[q]+" "+q)}</div>`).join("")}</div></div>`;
-}
-
-function rT(){
-  document.getElementById("TH").textContent=`📊 ${Y} Yun Qi Segment Analysis · ${H==="N"?"Northern 北半球":"Southern 南半球/Sydney"}`;
-  document.getElementById("TB").innerHTML=SG.map((s,i)=>{
-    const r=jKZ(QEL[s.kq],QEL[s.zq]),yr=jY(s.ky,s.zy),cl=getCL(r,s.zq,s.kq);
-    const ep=(D.epSegs&&D.epSegs[i])||"";
-    const v=RS[r]||RS["顺"];
-    const bg=r==="双火"?"#FFF0EE":r==="双土"?"#FFF5EC":r==="逆"?"#FFFBE8":r==="同氣"?"#EEF4FF":i%2===0?"#FAFFFE":"white";
-    const zyS=ES[s.zy]||ES["木"],kyS=ES[s.ky]||ES["木"],zqS=ES[QEL[s.zq]]||ES["木"],kqS=ES[QEL[s.kq]]||ES["木"];
-    return`<tr style="background:${bg}">
-      <td><div style="font-weight:bold;color:${v.c};font-size:13px">${s.name}</div><div style="font-size:9px;color:#aaa">${s.sub}</div>${D.epSegs&&D.epSegs[i]?`<div style="font-size:9px;color:#C84B30;font-weight:bold;margin-top:3px">[!] EPIDEMIC</div>`:""}</td>
-      <td style="white-space:nowrap;color:#555">${H==="N"?s.dn:s.ds}</td>
-      <td><span class="bdg" style="background:${zyS.b};border-color:${zyS.d};color:${zyS.t}">H:${s.zy}</span> <span class="bdg" style="background:${kyS.b};border-color:${kyS.d};color:${kyS.t}">G:${s.ky}</span><div style="font-size:9px;color:#888;margin-top:2px">${yr}</div></td>
-      <td><span class="bdg" style="background:${zqS.b};border-color:${zqS.d};color:${zqS.t}">H:${QEN[s.zq]}</span><div style="font-size:9px;color:#aaa">${s.zq}</div><span class="bdg" style="background:${kqS.b};border-color:${kqS.d};color:${kqS.t}">G:${QEN[s.kq]}</span><div style="font-size:9px;color:#aaa">${s.kq}</div></td>
-      <td style="text-align:center">${rb(r)}</td>
-      <td style="color:#2E5F8A">${cl.w.replace(/\n/g,"<br>")}</td>
-      <td style="color:#C84B30">${(ep?"<div style='font-weight:bold;background:#FFF0EE;padding:2px 5px;border-radius:3px;border-left:3px solid #C84B30;margin-bottom:4px'>"+ep+"</div>":"")+cl.d.replace(/\n/g,"<br>")}</td>
-      <td style="color:#2D6A4F">${cl.a.replace(/\n/g,"<br>")}</td>
-      <td style="color:#7A5A06">${cl.h.replace(/\n/g,"<br>")}</td>
-    </tr>`;
-  }).join("");
-}
-
-function rR(){
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
-  const sec=document.getElementById("RS");
-  if(!hr.length){sec.style.display="none";return;}
-  sec.style.display="";
-  document.getElementById("RH").textContent=`⚠️ ${Y} Epidemic & Disease Risk Periods — ${hr.length} high-risk segments`;
-  document.getElementById("RC").innerHTML=hr.map(s=>{
-    const r=jKZ(QEL[s.kq],QEL[s.zq]),v=RS[r]||RS["顺"],cl=getCL(r,s.zq,s.kq);
-    return`<div class="rcard" style="background:${v.b};border-color:${v.d}">
-      <div style="font-weight:bold;color:${v.c};font-size:13px">${s.name} <small style="color:#aaa">${s.sub}</small></div>
-      <div style="font-size:10px;color:#666;margin-top:2px">📅 ${H==="N"?s.dn:s.ds}</div>
-      <div style="font-weight:bold;color:${v.c};font-size:11px;margin-top:4px">${v.l}</div>
-      <div style="font-size:10px;color:#2E5F8A;margin-top:3px">🌤 ${cl.w.split("\n")[0]}</div>
-      <div style="font-size:10px;color:#C84B30;margin-top:2px">🏥 ${cl.d.split("\n")[0]}</div>
-      <div style="font-size:10px;color:#2D6A4F;margin-top:2px">📍 ${cl.a.split("\n")[0]}</div>
-      <div style="font-size:10px;color:#7A5A06;margin-top:2px">🌿 ${cl.h.split("\n")[0]}</div>
-    </div>`;
-  }).join("");
-}
-
-let PS="";
-function pdf(){
-  const hl=H==="N"?"Northern 北半球":"Southern 南半球/Sydney",dk=H==="N"?"dn":"ds";
-  const hr=SG.filter(s=>{const r=jKZ(QEL[s.kq],QEL[s.zq]);return r==="双火"||r==="双土"||r==="逆"||r==="同氣";});
-  const rows=SG.map((s,i)=>{
-    const r=jKZ(QEL[s.kq],QEL[s.zq]),yr=jY(s.ky,s.zy),cl=getCL(r,s.zq,s.kq),v=RS[r]||RS["顺"];
-    const bg=r==="双火"?"#FFF0EE":r==="双土"?"#FFF5EC":r==="逆"?"#FFFBE8":r==="同氣"?"#EEF4FF":i%2===0?"#FAFFFE":"white";
-    return`<tr style="background:${bg};border-bottom:1px solid #e8e8e8">
-      <td style="padding:5px 7px;font-weight:bold;color:${v.c};font-size:12px">${s.name}<br><small style="color:#aaa;font-weight:normal">${s.sub}</small></td>
-      <td style="padding:5px 7px;font-size:10px;white-space:nowrap">${s[dk]}</td>
-      <td style="padding:5px 7px;font-size:10px">H:${s.zy} / G:${s.ky}<br><small style="color:#888">${yr}</small></td>
-      <td style="padding:5px 7px;font-size:10px">H:${QEN[s.zq]}<small style="color:#aaa">(${s.zq})</small><br>G:${QEN[s.kq]}<small style="color:#aaa">(${s.kq})</small></td>
-      <td style="padding:5px 7px;text-align:center"><span style="background:${v.b};border:1.5px solid ${v.d};color:${v.c};padding:2px 5px;border-radius:4px;font-weight:bold;font-size:10px">${v.l}</span></td>
-      <td style="padding:5px 7px;font-size:10px;color:#2E5F8A">${cl.w.replace(/\n/g,"<br>")}</td>
-      <td style="padding:5px 7px;font-size:10px;color:#C84B30">${cl.d.replace(/\n/g,"<br>")}</td>
-      <td style="padding:5px 7px;font-size:10px;color:#2D6A4F">${cl.a.replace(/\n/g,"<br>")}</td>
-      <td style="padding:5px 7px;font-size:10px;color:#7A5A06">${cl.h.replace(/\n/g,"<br>")}</td>
-    </tr>`;
-  }).join("");
-  const cards=hr.map(s=>{
-    const r=jKZ(QEL[s.kq],QEL[s.zq]),v=RS[r]||RS["顺"],cl=getCL(r,s.zq,s.kq);
-    return`<div style="background:${v.b};border:1.5px solid ${v.d};border-radius:8px;padding:9px 12px;min-width:140px;display:inline-block;margin:4px;vertical-align:top">
-      <b style="color:${v.c}">${s.name}</b> <small style="color:#aaa">${s.sub}</small><br><small style="color:#666">${s[dk]}</small><br>
-      <b style="color:${v.c}">${v.l}</b><br>
-      <span style="color:#2E5F8A;font-size:10px">🌤 ${cl.w.split("\n")[0]}</span><br>
-      <span style="color:#C84B30;font-size:10px">🏥 ${cl.d.split("\n")[0]}</span><br>
-      <span style="color:#2D6A4F;font-size:10px">📍 ${cl.a.split(",")[0]}</span><br>
-      <span style="color:#7A5A06;font-size:10px">🌿 ${cl.h.split("\n")[0]}</span>
-    </div>`;
-  }).join("");
-  const ep_html=hr.length>0?'<div class="sec"><div class="sh" style="background:#C84B30">&#9888; '+Y+' Epidemic &amp; Risk Periods — '+hr.length+' segments</div><div class="rw">'+cards+'</div></div>':'';
-  PS=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0"><title>${Y} ${D.jiazi} Yun Qi Analysis</title>
-<style>body{font-family:'Segoe UI',sans-serif;background:#F5F3EE;margin:0;padding:16px;color:#222}table{width:100%;border-collapse:collapse}th{background:#1C2D58;color:white;padding:6px 8px;text-align:left;font-size:10px}.sec{background:white;border-radius:8px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}.sh{padding:8px 14px;font-weight:bold;font-size:12px;color:white}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;padding:12px}.c{border-radius:6px;padding:8px 10px}.rw{display:flex;gap:8px;flex-wrap:wrap;padding:12px}tr{border-bottom:1px solid #e8e8e8}@media print{body{background:white;padding:0}.np{display:none}}</style></head><body>
-<div style="max-width:1100px;margin:0 auto">
-<div class="np" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="background:#1C2D58;color:white;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;font-weight:bold">🖨️ Print / Save PDF</button></div>
-<div style="background:#1C2D58;border-radius:10px;padding:14px 18px;margin-bottom:14px">
-  <div style="color:#B98A3A;font-size:10px;letter-spacing:2px">YUN QI 運氣 COMPLETE CLINICAL ANALYSIS · ${hl}</div>
-  <div style="color:white;font-size:17px;font-weight:bold;margin-top:2px">${Y} · ${D.jiazi} · Segment Analysis with Clinical Protocols</div>
-  <div style="color:#8CA0C8;font-size:11px;margin-top:2px">Sang Hee Park, PhD · Weather · Disease · Acupuncture · Herbs · 黃帝內經素問</div>
-</div>
-<div class="sec"><div class="sh" style="background:#2A4178">📋 Annual Information</div><div class="g">
-  <div class="c" style="background:#DCE8F5"><small style="color:#888">Da Yun 大運</small><br><b style="color:#1A3A5A;font-size:11px">${D.dn}</b></div>
-  <div class="c" style="background:#FAEAE6"><small style="color:#888">Si Tian 司天</small><br><b style="color:#8B2A18;font-size:11px">${QEN[D.si]} ${D.si}</b></div>
-  <div class="c" style="background:#EBEBEB"><small style="color:#888">Zai Quan 在泉</small><br><b style="font-size:11px">${QEN[D.za]} ${D.za}</b></div>
-  <div class="c" style="background:#FFFBE8"><small style="color:#888">Yun-Qi 運氣</small><br><b style="color:#7A5A06;font-size:11px">${D.rel}</b><br><small style="color:#aaa">${D.rc}</small></div>
-  <div class="c" style="background:#F5F5F5"><small style="color:#888">Special</small><br><b style="font-size:11px">${D.sp}</b></div>
-  <div class="c" style="background:#FFF0EE"><small style="color:#888">Risk segments</small><br><b style="color:#C84B30;font-size:11px">${hr.length} / 10</b></div>
-</div></div>
-<div class="sec"><div class="sh" style="background:#1C2D58">📊 Yun Qi Segment Analysis · ${hl}</div>
-<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr>
-  <th>Segment</th><th>Dates</th><th>Host/Guest Yun 運</th><th>Host/Guest Qi 氣</th>
-  <th>Ke-Zhu 客主加臨</th><th>🌤 Weather Forecast</th><th>🏥 Disease Prediction</th>
-  <th>📍 Acupuncture Points</th><th>🌿 Herbs &amp; Formulae</th>
-</tr></thead><tbody>${rows}</tbody></table></div></div>
-${ep_html}
-<div style="text-align:center;color:#999;font-size:10px;padding:8px">© 2026 Blossom Skin &amp; Health Pty Ltd · Sang Hee Park, PhD · Educational purposes only</div>
-</div>
-
-</body></html>`;
-  document.getElementById("MT").textContent=`📄 ${Y} ${D.jiazi} — Full Clinical PDF`;
-  document.getElementById("PF").srcdoc=PS;
-  document.getElementById("PM").className="modal show";
-}
-function pr(){const w=window.open("","_blank");w.document.write(PS);w.document.close();w.focus();setTimeout(()=>w.print(),600);}
-function nt(){const w=window.open("","_blank");w.document.write(PS);w.document.close();}
-function cm(){document.getElementById("PM").className="modal";}
-ra();
-</script>
-
-<script>
-// Service Worker disabled — prevents caching issues
-// Unregister any existing service workers
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(registrations){
-    for(let reg of registrations){ reg.unregister(); }
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
   });
 }
 </script>
