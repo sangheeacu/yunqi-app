@@ -11,13 +11,16 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const BOOKING="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
 
 async function sbSignUp(email,pw,name,dob,lang,conds){
-  const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name}}});
+  const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name,dob,pref_lang:lang}}});
   if(error)throw error;
-  if(!data.user)throw new Error("Sign-up requires email confirmation. Please check your inbox.");
-  const uid=data.user.id;
-  const{error:ie}=await sb.from("users").upsert({id:uid,email,name,dob:dob||null,pref_lang:lang,conditions:conds||[],plan:"free"},{onConflict:"id"});
-  if(ie)console.warn("users insert warning:",ie.message);
-  return{id:uid,email,name,dob,pref_lang:lang,conditions:conds||[],plan:"free"};
+  const uid=data.user?.id||data.session?.user?.id;
+  if(!uid)throw new Error("CHECK_EMAIL");
+  const{error:ie}=await sb.from("users").upsert(
+    {id:uid,email,name,dob:dob||null,pref_lang:lang||"en",conditions:conds||[],plan:"free"},
+    {onConflict:"id"}
+  );
+  if(ie)console.warn("users upsert:",ie.message);
+  return{id:uid,email,name,dob,pref_lang:lang||"en",conditions:conds||[],plan:"free"};
 }
 async function sbSignIn(email,pw){
   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
@@ -143,6 +146,16 @@ function Sec({title,bg,tc,pre,children}){
 
 function App(){
   const mob=window.innerWidth<=600;
+
+  // Stripe 결제 완료 후 URL 파라미터 처리
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    if(params.get("payment")==="success"){
+      // 세션 재로딩으로 최신 plan 상태 반영
+      sbSession().then(p=>{if(p)setUser(p);});
+      window.history.replaceState({},"","/");
+    }
+  },[]);
   const[tab,setTab]=useState("features");
   const[yr,setYr]=useState(2026);
   const[hemi,setHemi]=useState("S");
@@ -173,7 +186,26 @@ function App(){
   const[rModal,setRModal]=useState(null);
   const chatRef=useRef(null);
 
-  useEffect(()=>{sbSession().then(p=>{if(p)setUser(p);setReady(true);});},[]);
+  useEffect(()=>{
+    sbSession().then(p=>{if(p)setUser(p);setReady(true);});
+    const{data:{subscription}}=sb.auth.onAuthStateChange(async(event,session)=>{
+      if(event==="SIGNED_IN"&&session){
+        const uid=session.user.id;
+        const email=session.user.email;
+        const nm=session.user.user_metadata?.name||email.split("@")[0];
+        const{data:p,error:pe}=await sb.from("users").select("*").eq("id",uid).single();
+        if(pe||!p){
+          const{data:np}=await sb.from("users").upsert({id:uid,email,name:nm,plan:"free"},{onConflict:"id"}).select().single();
+          if(np)setUser(np);
+        } else {
+          setUser(p);
+        }
+      } else if(event==="SIGNED_OUT"){
+        setUser(null);
+      }
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
   useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[msgs]);
 
   const isPaid=user&&user.plan==="paid";
@@ -193,10 +225,10 @@ function App(){
         setUser(p);setObConds(conds);setObStep(1);
       }catch(e){
         const msg=e.message||"";
-        if(msg.includes("confirmation")||msg.includes("confirm")||msg.includes("verify")){
+        if(msg==="CHECK_EMAIL"){
           setAuthErr("Account created! Please check your email to confirm, then sign in.");
           setAuthMode("login");
-        } else if(msg.includes("already registered")||msg.includes("already exists")){
+        } else if(msg.includes("already registered")||msg.includes("already exists")||msg.includes("User already registered")){
           setAuthErr("Email already registered. Please sign in.");
           setAuthMode("login");
         } else {
@@ -217,9 +249,22 @@ function App(){
 
   async function handleSub(planType){
     if(!user){setAuthMode("register");setTab("account");return;}
-    try{await sbUpdate(user.id,{plan:"paid",plan_type:planType});}catch(e){}
-    setUser(u=>({...u,plan:"paid",plan_type:planType}));
-    setTab("qa");
+    try{
+      const res=await fetch("/api/create-checkout",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({planType,email:user.email,userId:user.id})
+      });
+      const d=await res.json();
+      if(d.url){window.location.href=d.url;return;}
+      // Stripe 미설정 시 임시 직접 업그레이드
+      throw new Error(d.error||"stripe_not_configured");
+    }catch(e){
+      // Stripe 미설정 상태 - 개발용 임시 처리
+      try{await sbUpdate(user.id,{plan:"paid",plan_type:planType});}catch(e2){}
+      setUser(u=>({...u,plan:"paid",plan_type:planType}));
+      setTab("qa");
+    }
   }
 
   async function saveProfile(){
