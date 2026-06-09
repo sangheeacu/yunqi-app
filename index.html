@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{background:#F5F3EE;font-family:'Apple SD Gothic Neo','Segoe UI',sans-serif;}
@@ -48,7 +49,11 @@ const RISK_S={雙火:{label:"★★ EXTREME",bg:"#FFF0EE",border:"#C84B30",color
 
 const LANGUAGES=[{v:"en",label:"English"},{v:"ko",label:"한국어 (Korean)"},{v:"zh",label:"中文 (Chinese)"},{v:"ja",label:"日本語 (Japanese)"},{v:"es",label:"Español (Spanish)"},{v:"fr",label:"Français (French)"},{v:"de",label:"Deutsch (German)"},{v:"id",label:"Bahasa Indonesia"},{v:"pt",label:"Português"},{v:"ar",label:"العربية (Arabic)"}];
 const HEALTH_CONDITIONS=["Cardiovascular disease","Hypertension","Diabetes","Respiratory conditions (asthma/COPD)","Digestive disorders","Liver / Gallbladder conditions","Kidney / Urinary conditions","Joint / Arthritis pain","Autoimmune conditions","Anxiety / Depression","Insomnia / Sleep disorders","Hormonal / Menstrual disorders","Skin conditions","Chronic fatigue","Migraine / Headaches","Cancer (in treatment or remission)","Thyroid conditions","Allergies / Immune issues","Weight management","Other"];
-const BOOKING_URL="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
+const SUPABASE_URL = "https://dqcxpevxkbgwqqzackjd.supabase.co";
+const SUPABASE_ANON_KEY = "%%NEXT_PUBLIC_SUPABASE_ANON_KEY%%";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ANTHROPIC_KEY = "%%ANTHROPIC_API_KEY%%";
 
 function getKeQi(si){const i=SIX_QI.indexOf(si);return SIX_QI.map((_,j)=>SIX_QI[(i-2+j+6)%6]);}
 function getKeYun(e){const r=[e];let c=e;for(let i=1;i<5;i++){c=YUN_GEN[c];r.push(c);}return r;}
@@ -206,27 +211,60 @@ function App(){
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
   const [riskModal,setRiskModal]=useState(null);
+  const [initLoading,setInitLoading]=useState(true);
   const chatRef=useRef(null);
+
+  // 세션 복원
+  useEffect(()=>{
+    sbGetSession().then(profile=>{
+      if(profile)setUser(profile);
+      setInitLoading(false);
+    });
+  },[]);
 
   useEffect(()=>{if(chatRef.current)chatRef.current.scrollTop=chatRef.current.scrollHeight;},[msgs]);
 
-  const isPaid=user&&user.plan==="paid";
+  // Forgot password — 실제 이메일 발송
+  async function handleForgotPassword(){
+    if(!forgotEmail.trim()){return;}
+    try{
+      await sbForgotPassword(forgotEmail);
+      setForgotSent(true);
+    }catch(e){setForgotSent(true);} // 보안상 항상 성공 표시
+  }
+
+  // Sign out
+  async function handleSignOut(){
+    await sbSignOut();
+    setUser(null);setAcctSection("main");
+  }
+
+  if(initLoading){
+    return(
+      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bgPage}}>
+        <div style={{color:C.navy,fontSize:14,fontFamily:"sans-serif"}}>⟳ Loading…</div>
+      </div>
+    );
+  }
   const upcomingRisks=isPaid?getUpcomingRiskSegs(data.segs,hemi,year):[];
 
   function toggleCond(c){setSignupConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
   function toggleObCond(c){setObConds(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c]);}
 
-  function handleAuth(){
+  async function handleAuth(){
+    setAuthErr("");
     if(authMode==="register"){
       if(!email||!pwV||!nameV){setAuthErr("Please fill in all required fields.");return;}
-      if(USER_DB[email]){setAuthErr("Email already registered.");return;}
-      const u={email,pw:pwV,name:nameV,plan:"free",since:new Date().toISOString(),dob:signupDob,prefLang:signupLang,conditions:signupConds};
-      USER_DB[email]=u;setUser(u);setAuthErr("");
-      setObConds(signupConds);setOnboardStep(1);
+      try{
+        const u=await sbSignUp(email,pwV,nameV,signupDob,signupLang,signupConds);
+        const profile={id:u.id,email,name:nameV,dob:signupDob,pref_lang:signupLang,conditions:signupConds,plan:"free"};
+        setUser(profile);setObConds(signupConds);setOnboardStep(1);
+      }catch(e){setAuthErr(e.message||"Registration failed.");}
     }else{
-      const u=USER_DB[email];
-      if(!u||u.pw!==pwV){setAuthErr("Incorrect email or password.");return;}
-      setUser(u);setAuthErr("");
+      try{
+        const profile=await sbSignIn(email,pwV);
+        setUser(profile);
+      }catch(e){setAuthErr("Incorrect email or password.");}
     }
   }
 
@@ -268,8 +306,11 @@ function App(){
     const userMsg={role:"user",content:input};
     setMsgs(m=>[...m,userMsg]);setInput("");setLoading(true);
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-calls":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})});
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-calls":"true"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildSysPrompt(user),messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content}))})
+      });
       const d=await res.json();
       setMsgs(m=>[...m,{role:"assistant",content:(d.content&&d.content[0]&&d.content[0].text)||"Error retrieving response."}]);
     }catch(e){setMsgs(m=>[...m,{role:"assistant",content:"An error occurred. Please try again."}]);}
@@ -694,7 +735,7 @@ function App(){
                 <div>
                   <div style={{color:C.gray,fontSize:12,marginBottom:14,lineHeight:1.6}}>Enter your email and we'll send a password reset link.</div>
                   <input placeholder="your@email.com" value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)} style={iS}/>
-                  <button onClick={()=>{if(forgotEmail.trim())setForgotSent(true);}} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Send Reset Link</button>
+                  <button onClick={handleForgotPassword} style={{width:"100%",padding:"9px 0",borderRadius:6,border:"none",cursor:"pointer",background:C.gold,color:C.white,fontWeight:"bold",fontSize:12,marginBottom:8}}>Send Reset Link</button>
                   <div style={{fontSize:10,color:"#aaa",textAlign:"center"}}>※ Requires Supabase Auth backend to activate email sending.</div>
                 </div>
               )}
@@ -790,11 +831,11 @@ function App(){
                   {user.prefLang&&<div style={{color:C.gray,fontSize:10}}>Language: {(LANGUAGES.find(l=>l.v===user.prefLang)||{}).label}</div>}
                 </div>
               </div>
-              <div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold"}}>{isPaid?"💎 "+(user.planType==="annual"?"Annual":"Monthly"):"Free"}</div>
+              <div style={{background:isPaid?C.gold:C.blue,color:C.white,borderRadius:6,padding:"3px 9px",fontSize:10,fontWeight:"bold"}}>{isPaid?"💎 "+(userPlanType==="annual"?"Annual":"Monthly"):"Free"}</div>
             </div>
-            {user.conditions&&user.conditions.length>0&&(
+            {userConditions.length>0&&(
               <div style={{fontSize:11,color:C.gray,marginBottom:8,background:C.lightGray,borderRadius:6,padding:"6px 10px"}}>
-                <span style={{fontWeight:"bold",color:C.ink}}>Health conditions: </span>{user.conditions.join(", ")}
+                <span style={{fontWeight:"bold",color:C.ink}}>Health conditions: </span>{userConditions.join(", ")}
                 <span style={{color:C.blue,cursor:"pointer",marginLeft:6}} onClick={()=>setOnboardStep(1)}>(update)</span>
               </div>
             )}
@@ -807,7 +848,7 @@ function App(){
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                   <span style={{fontSize:12,color:"#444"}}>Plan</span>
-                  <span style={{fontWeight:"bold",color:C.gold,fontSize:12}}>{user.planType==="annual"?"Annual — $50/yr":"Monthly — $8/mo"}</span>
+                  <span style={{fontWeight:"bold",color:C.gold,fontSize:12}}>{userPlanType==="annual"?"Annual — $50/yr":"Monthly — $8/mo"}</span>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
                   <span style={{fontSize:12,color:"#444"}}>Status</span>
@@ -823,7 +864,7 @@ function App(){
               </div>
             )}
           </div>
-          <button onClick={()=>{setUser(null);setAcctSection("main");}} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Sign Out</button>
+          <button onClick={handleSignOut} style={{width:"100%",padding:"8px 0",borderRadius:6,border:"1px solid #ddd",cursor:"pointer",background:C.white,color:C.gray,fontSize:12}}>Sign Out</button>
         </div>
       )}
     </div>
