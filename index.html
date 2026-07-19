@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Yun Qi Analyzer"/>
 <meta name="theme-color" content="#12243B"/>
-<title>Yun Qi \u904b\u6c23 Analyzer — Sang Hee Park PhD</title>
+<title>Yun Qi Analyzer - Sang Hee Park PhD</title>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <style>
@@ -15,30 +15,29 @@ body{background:#F5F3EE;font-family:'Apple SD Gothic Neo','Segoe UI',sans-serif;
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:#C49A48;border-radius:2px;}
 table{border-collapse:collapse;width:100%;}
-th,td{padding:6px 8px;text-align:left;font-size:11px;}
-th{background:#F0F4FA;color:#1C2D58;font-weight:bold;border-bottom:2px solid #1C2D58;white-space:nowrap;}
-td{border-bottom:1px solid #E8E8E8;vertical-align:top;}
-input[type=number]{font-family:inherit;}
+th{background:#F0F4FA;color:#1C2D58;font-weight:bold;border-bottom:2px solid #1C2D58;white-space:nowrap;padding:7px 9px;font-size:11px;text-align:left;}
+td{border-bottom:1px solid #E8E8E8;vertical-align:top;padding:7px 9px;font-size:11px;}
 a{text-decoration:none;}
+button{cursor:pointer;font-family:inherit;}
+input{font-family:inherit;}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root" style="max-width:960px;margin:0 auto;padding:12px;"></div>
 <script>
-// ═══════════════════════════════════════════════════════════════
-// YUN QI ANALYZER — FREE EDITION
+// ================================================================
+// YUN QI ANALYZER - FREE EDITION
+// Wu Yun Liu Qi Five Periods Six Qi Clinical Tool
 // Source: Su Wen Ch.66-74 + Sang Hee Park PhD course materials
-// Si Tian = 3rd position in Ke Qi sequence (Su Wen 71 confirmed)
-// ═══════════════════════════════════════════════════════════════
+// ================================================================
 
-const C={
-  navy:"#12243B",gold:"#C49A48",ink:"#1C2D58",blue:"#2A4178",
-  bgPage:"#F5F3EE",white:"#FFFFFF",gray:"#8CA0C8",lgray:"#F0F4FA",
-  red:"#C84B30",orange:"#E07030",green:"#2D6A4F",dkGold:"#B98A3A"
+var C = {
+  navy:"#12243B", gold:"#C49A48", ink:"#1C2D58", blue:"#2A4178",
+  red:"#C84B30", orange:"#E07030", green:"#2D6A4F", gray:"#8CA0C8",
+  lgray:"#F0F4FA", white:"#FFFFFF", bgPage:"#F5F3EE", dkGold:"#B98A3A"
 };
 
-// ── Element colours ──────────────────────────────────────────
-const EC={
+var EC = {
   "\u6728":{bg:"#D0EAD8",bd:"#4A8C6A",tx:"#2D5A3D"},
   "\u706b":{bg:"#FAEAE6",bd:"#C84B30",tx:"#8B2A18"},
   "\u76f8\u706b":{bg:"#FAEEE0",bd:"#E07030",tx:"#8B4010"},
@@ -46,15 +45,10 @@ const EC={
   "\u91d1":{bg:"#EBEBEB",bd:"#6B7A6A",tx:"#3A4A3A"},
   "\u6c34":{bg:"#DCE8F5",bd:"#2E5F8A",tx:"#1A3A5A"}
 };
-const ec=e=>EC[e]||{bg:"#F5F5F5",bd:"#999",tx:"#333"};
+function ec(e){return EC[e]||{bg:"#F5F5F5",bd:"#999",tx:"#333"};}
 
-// ── Core data ────────────────────────────────────────────────
-const STEMS=["\u7532","\u4e59","\u4e19","\u4e01","\u620a","\u5df1","\u5e9a","\u8f9b","\u58ec","\u7678"];
-const BRANCHES=["\u5b50","\u4e11","\u5bc5","\u536f","\u8fb0","\u5df3","\u5348","\u672a","\u7533","\u9149","\u620c","\u4ea5"];
-const JIAZI=["\u7532\u5b50","\u4e59\u4e11","\u4e19\u5bc5","\u4e01\u536f","\u620a\u8fb0","\u5df1\u5df3","\u5e9a\u5348","\u8f9b\u672a","\u58ec\u7533","\u7678\u9149","\u7532\u620c","\u4e59\u4ea5","\u4e19\u5b50","\u4e01\u4e11","\u620a\u5bc5","\u5df1\u536f","\u5e9a\u8fb0","\u8f9b\u5df3","\u58ec\u5348","\u7678\u672a","\u7532\u7533","\u4e59\u9149","\u4e19\u620c","\u4e01\u4ea5","\u620a\u5b50","\u5df1\u4e11","\u5e9a\u5bc5","\u8f9b\u536f","\u58ec\u8fb0","\u7678\u5df3","\u7532\u5348","\u4e59\u672a","\u4e19\u7533","\u4e01\u9149","\u620a\u620c","\u5df1\u4ea5","\u5e9a\u5b50","\u8f9b\u4e11","\u58ec\u5bc5","\u7678\u536f","\u7532\u8fb0","\u4e59\u5df3","\u4e19\u5348","\u4e01\u672a","\u620a\u7533","\u5df1\u9149","\u5e9a\u620c","\u8f9b\u4ea5","\u58ec\u5b50","\u7678\u4e11","\u7532\u5bc5","\u4e59\u536f","\u4e19\u8fb0","\u4e01\u5df3","\u620a\u5348","\u5df1\u672a","\u5e9a\u7533","\u8f9b\u9149","\u58ec\u620c","\u7678\u4ea5"];
-
-// Heavenly Stem → Da Yun [name, element, taiGuo?]
-const SY={
+// Heavenly Stems - Da Yun
+var SY = {
   "\u7532":["\u571f\u904b\u592a\u904e","\u571f",true],
   "\u4e59":["\u91d1\u904b\u4e0d\u53ca","\u91d1",false],
   "\u4e19":["\u6c34\u904b\u592a\u904e","\u6c34",true],
@@ -67,8 +61,8 @@ const SY={
   "\u7678":["\u706b\u904b\u4e0d\u53ca","\u706b",false]
 };
 
-// Earthly Branch → Si Tian / Zai Quan
-const BQ={
+// Earthly Branches - Si Tian / Zai Quan
+var BQ = {
   "\u5b50":{si:"\u5c11\u9670\u541b\u706b",zai:"\u967d\u660e\u71e5\u91d1"},
   "\u5348":{si:"\u5c11\u9670\u541b\u706b",zai:"\u967d\u660e\u71e5\u91d1"},
   "\u4e11":{si:"\u592a\u9670\u6e7f\u571f",zai:"\u592a\u9633\u5bd2\u6c34"},
@@ -83,455 +77,524 @@ const BQ={
   "\u4ea5":{si:"\u5a25\u9670\u98a8\u6728",zai:"\u5c11\u9633\u76f8\u706b"}
 };
 
-// Six Qi fixed order
-// SQ: fixed Zhu Qi order for display (seasonal host qi sequence)
-const SQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u5c11\u9633\u76f8\u706b","\u592a\u9670\u6e7f\u571f","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
-const SQ_EL={"\u5a25\u9670\u98a8\u6728":"\u6728","\u5c11\u9670\u541b\u706b":"\u706b","\u5c11\u9633\u76f8\u706b":"\u76f8\u706b","\u592a\u9670\u6e7f\u571f":"\u571f","\u967d\u660e\u71e5\u91d1":"\u91d1","\u592a\u9633\u5bd2\u6c34":"\u6c34"};
-const SQ_EN={"\u5a25\u9670\u98a8\u6728":"Wind-Wood","\u5c11\u9670\u541b\u706b":"Emperor Fire","\u5c11\u9633\u76f8\u706b":"Minister Fire","\u592a\u9670\u6e7f\u571f":"Damp-Earth","\u967d\u660e\u71e5\u91d1":"Dryness-Metal","\u592a\u9633\u5bd2\u6c34":"Cold-Water"};
-// SQ_KQ: Ke Qi rotation order per Su Wen 68 (Yin before Yang within each pair)
-// 厥陰→少陰→太陰→少陽→陽明→太陽
-// This gives correct 2026 sequence: 太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金
-const SQ_KQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u592a\u9670\u6e7f\u571f","\u5c11\u9633\u76f8\u706b","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
+// Zhu Qi (Host Qi) - fixed seasonal order every year
+// 1: JueYin-Wind, 2: ShaoYin-EmperorFire, 3: ShaoYang-MinisterFire
+// 4: TaiYin-DampEarth, 5: YangMing-DrynessM, 6: TaiYang-ColdWater
+var ZHU_QI = [
+  "\u5a25\u9670\u98a8\u6728",
+  "\u5c11\u9670\u541b\u706b",
+  "\u5c11\u9633\u76f8\u706b",
+  "\u592a\u9670\u6e7f\u571f",
+  "\u967d\u660e\u71e5\u91d1",
+  "\u592a\u9633\u5bd2\u6c34"
+];
 
-const FY=["\u6728","\u706b","\u571f","\u91d1","\u6c34"];
-const YG={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728"};
+// Ke Qi (Guest Qi) rotation order - Su Wen 68 Yin-Yang paired order:
+// JueYin(0), ShaoYin(1), TaiYin(2), ShaoYang(3), YangMing(4), TaiYang(5)
+// Si Tian = 3rd position (index 2) in this rotation
+// Verified: 2026 ShaoYin SiTian -> seq: TaiYang,JueYin,ShaoYin,TaiYin,ShaoYang,YangMing
+// = ColdWater, WindWood, EmperorFire, DampEarth, MinisterFire, DrynessM ✓ matches Module4
+var KQ_ORDER = [
+  "\u5a25\u9670\u98a8\u6728",   // 0 JueYin Wind-Wood
+  "\u5c11\u9670\u541b\u706b",   // 1 ShaoYin Emperor-Fire
+  "\u592a\u9670\u6e7f\u571f",   // 2 TaiYin Damp-Earth
+  "\u5c11\u9633\u76f8\u706b",   // 3 ShaoYang Minister-Fire
+  "\u967d\u660e\u71e5\u91d1",   // 4 YangMing Dryness-Metal
+  "\u592a\u9633\u5bd2\u6c34"    // 5 TaiYang Cold-Water
+];
 
-// Ke Yun: starts from Da Yun element, follows generation cycle, alternates excess/deficiency
-function getKeYun(dyEl,taiGuo){
-  const seq=[dyEl];
-  let cur=dyEl,isTai=taiGuo;
-  for(let i=1;i<5;i++){cur=YG[cur];isTai=!isTai;seq.push(cur);}
-  return seq;
-}
-function getKeYunLabel(dyEl,taiGuo){
-  const seq=[];
-  let cur=dyEl,isTai=taiGuo;
-  const ch={"\u6728":"\u89d2","\u706b":"\u5fb5","\u571f":"\u5bae","\u91d1":"\u5546","\u6c34":"\u7fbd"};
-  for(let i=0;i<5;i++){
-    seq.push((isTai?"\u592a":"\u5c11")+ch[cur]);
-    cur=YG[cur];isTai=!isTai;
-  }
-  return seq;
-}
-
-// Ke Qi: Si Tian = 4th position (index 3) — verified against Module 4 source data
-// 2026 丙午 少陰君火 Si Tian → Ke Qi sequence:
-// 1기:太陽寒水 2기:厥陰風木 3기:少陰君火(ST) 4기:太陰濕土 5기:少陽相火 6기:陽明燥金(ZQ)
-// Wait — re-checking: Si Tian at 3rd means idx-2. Let me trace:
-// 少陰君火 = SQ index 1. (1-2+0+6)%6=5=太陽寒水 ✓ (1기)
-// (1-2+1+6)%6=0=厥陰風木 ✓ (2기)
-// (1-2+2+6)%6=1=少陰君火 ✓ (3기=ST)
-// (1-2+3+6)%6=2=少陽相火 ✗ should be 太陰濕土
-// So idx-2 gives wrong 4기. Need idx-3:
-// 少陰君火=index1. (1-3+0+6)%6=4=陽明燥金 ✗
-// Try starting offset differently. Correct sequence for 2026:
-// 1:太陽寒水(5) 2:厥陰風木(0) 3:少陰君火(1) 4:太陰濕土(3) 5:少陽相火(2) 6:陽明燥金(4)
-// This is NOT a simple rotation of SQ. It follows the correct Ke Qi rule:
-// Start from Si Tian, go backwards through SQ for positions before Si Tian,
-// then forward after. Actually the correct formula per Module4 data:
-// For 少陰君火(idx=1): sequence = [5,0,1,3,2,4] → custom order
-// The standard rule: Ke Qi sequence starts from the Qi OPPOSITE to Si Tian (i.e. Zai Quan side)
-// Correct standard: start 2 before Si Tian going forward
-// 少陰君火 idx=1: start at (1-2+6)%6=5=太陽寒水 → [5,0,1,2,3,4] 
-// gives: 太陽寒水,厥陰風木,少陰君火,少陽相火,太陰濕土,陽明燥金
-// But Module4 shows: 太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金
-// positions 4기 and 5기 are swapped vs standard SQ order
-// Module4 verified order for 2026: [太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金]
-// This matches SQ order EXCEPT 3기(少陰君火) and onward skip 少陽相火 and insert 太陰濕土 first
-// Actually this IS correct per Su Wen: the Ke Qi sequence follows SQ order
-// starting from 2 positions before Si Tian:
-// Standard SQ: [厥陰風木(0),少陰君火(1),少陽相火(2),太陰濕土(3),陽明燥金(4),太陽寒水(5)]
-// Si Tian=少陰君火(1), start at (1-2+6)%6=5
-// Sequential: 5,0,1,2,3,4 = 太陽寒水,厥陰風木,少陰君火,少陽相火,太陰濕土,陽明燥金
-// Module4 actual: [太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金]
-// The difference is in positions 4&5. Module4 has 太陰濕土 before 少陽相火.
-// This means the correct Ke Qi sequence is NOT simply sequential SQ from offset.
-// Per Su Wen 68: the order is 厥陰→少陰→太陰→少陽→陽明→太陽 (YIN first then YANG)
-// That order: [厥陰風木(0),少陰君火(1),太陰濕土(3),少陽相火(2),陽明燥金(4),太陽寒水(5)]
-const SQ_KQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u592a\u9670\u6e7f\u571f","\u5c11\u9633\u76f8\u706b","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
-// Ke Qi true order (Su Wen 68): 厥陰→少陰→太陰→少陽→陽明→太陽
-// Si Tian = 3rd position in this order
-function getKeQi(si){
-  const idx=SQ_KQ.indexOf(si);
-  return SQ_KQ.map((_,i)=>SQ_KQ[(idx-2+i+6)%6]);
-}
-
-// Special year classifications
-const SPECIAL_MAP={
-  "\u4e01\u536f1987":"\u6b72\u6703","\u5e9a\u53481990":"\u540c\u5929\u7b26","\u8f9b\u672a1991":"\u540c\u6b72\u6703","\u58ec\u75331992":"\u540c\u5929\u7b26",
-  "\u7678\u914d1993":"\u540c\u6b72\u6703","\u7532\u620c1994":"\u540c\u5929\u7b26","\u4e19\u5b501996":"\u6b72\u6703","\u620a\u5bc51998":"\u5929\u7b26",
-  "\u4e59\u914d2005":"\u592a\u4e59\u5929\u7b26","\u4e19\u620c2006":"\u5929\u7b26","\u4e01\u4ea52007":"\u5929\u7b26","\u620a\u5b502008":"\u5929\u7b26",
-  "\u5df1\u4e112009":"\u592a\u4e59\u5929\u7b26","\u7532\u53482014":"\u6b72\u6703","\u5e9a\u5b502020":"\u540c\u5929\u7b26","\u8f9b\u4e112021":"\u540c\u6b72\u6703",
-  "\u58ec\u5bc52022":"\u540c\u5929\u7b26","\u7678\u536f2023":"\u540c\u6b72\u6703","\u7532\u8fb02024":"\u540c\u5929\u7b26","\u620a\u75332028":"\u5929\u7b26",
-  "\u8f9b\u4ea52031":"\u540c\u6b72\u6703","\u7678\u4e112033":"\u540c\u6b72\u6703","\u4e59\u536f2035":"\u5929\u7b26","\u4e19\u8fb02036":"\u5929\u7b26",
-  "\u4e01\u5df32037":"\u5929\u7b26","\u620a\u53482038":"\u592a\u4e59\u5929\u7b26","\u5df1\u672a2040":"\u592a\u4e59\u5929\u7b26"
+var QI_EL = {
+  "\u5a25\u9670\u98a8\u6728":"\u6728",
+  "\u5c11\u9670\u541b\u706b":"\u706b",
+  "\u592a\u9670\u6e7f\u571f":"\u571f",
+  "\u5c11\u9633\u76f8\u706b":"\u76f8\u706b",
+  "\u967d\u660e\u71e5\u91d1":"\u91d1",
+  "\u592a\u9633\u5bd2\u6c34":"\u6c34"
 };
+
+var QI_EN = {
+  "\u5a25\u9670\u98a8\u6728":"Wind-Wood",
+  "\u5c11\u9670\u541b\u706b":"Emperor Fire",
+  "\u592a\u9670\u6e7f\u571f":"Damp-Earth",
+  "\u5c11\u9633\u76f8\u706b":"Minister Fire",
+  "\u967d\u660e\u71e5\u91d1":"Dryness-Metal",
+  "\u592a\u9633\u5bd2\u6c34":"Cold-Water"
+};
+
+// Five Periods (Yun) - fixed host order
+var ZHU_YUN = ["\u6728","\u706b","\u571f","\u91d1","\u6c34"];
+var YUN_GEN = {"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728"};
+
+// 60 Jiazi
+var STEMS=["\u7532","\u4e59","\u4e19","\u4e01","\u620a","\u5df1","\u5e9a","\u8f9b","\u58ec","\u7678"];
+var BRANCHES=["\u5b50","\u4e11","\u5bc5","\u536f","\u8fb0","\u5df3","\u5348","\u672a","\u7533","\u9149","\u620c","\u4ea5"];
+var JIAZI=["\u7532\u5b50","\u4e59\u4e11","\u4e19\u5bc5","\u4e01\u536f","\u620a\u8fb0","\u5df1\u5df3","\u5e9a\u5348","\u8f9b\u672a","\u58ec\u7533","\u7678\u9149","\u7532\u620c","\u4e59\u4ea5","\u4e19\u5b50","\u4e01\u4e11","\u620a\u5bc5","\u5df1\u536f","\u5e9a\u8fb0","\u8f9b\u5df3","\u58ec\u5348","\u7678\u672a","\u7532\u7533","\u4e59\u9149","\u4e19\u620c","\u4e01\u4ea5","\u620a\u5b50","\u5df1\u4e11","\u5e9a\u5bc5","\u8f9b\u536f","\u58ec\u8fb0","\u7678\u5df3","\u7532\u5348","\u4e59\u672a","\u4e19\u7533","\u4e01\u9149","\u620a\u620c","\u5df1\u4ea5","\u5e9a\u5b50","\u8f9b\u4e11","\u58ec\u5bc5","\u7678\u536f","\u7532\u8fb0","\u4e59\u5df3","\u4e19\u5348","\u4e01\u672a","\u620a\u7533","\u5df1\u9149","\u5e9a\u620c","\u8f9b\u4ea5","\u58ec\u5b50","\u7678\u4e11","\u7532\u5bc5","\u4e59\u536f","\u4e19\u8fb0","\u4e01\u5df3","\u620a\u5348","\u5df1\u672a","\u5e9a\u7533","\u8f9b\u9149","\u58ec\u620c","\u7678\u4ea5"];
+
+var SPECIAL_MAP = {
+  "\u4e01\u536f1987":"\u6b72\u6703","\u5e9a\u53481990":"\u540c\u5929\u7b26",
+  "\u8f9b\u672a1991":"\u540c\u6b72\u6703","\u58ec\u75331992":"\u540c\u5929\u7b26",
+  "\u7678\u914d1993":"\u540c\u6b72\u6703","\u7532\u620c1994":"\u540c\u5929\u7b26",
+  "\u4e19\u5b501996":"\u6b72\u6703","\u620a\u5bc51998":"\u5929\u7b26",
+  "\u4e59\u914d2005":"\u592a\u4e59\u5929\u7b26","\u4e19\u620c2006":"\u5929\u7b26",
+  "\u4e01\u4ea52007":"\u5929\u7b26","\u620a\u5b502008":"\u5929\u7b26",
+  "\u5df1\u4e112009":"\u592a\u4e59\u5929\u7b26","\u7532\u53482014":"\u6b72\u6703",
+  "\u5e9a\u5b502020":"\u540c\u5929\u7b26","\u8f9b\u4e112021":"\u540c\u6b72\u6703",
+  "\u58ec\u5bc52022":"\u540c\u5929\u7b26","\u7678\u536f2023":"\u540c\u6b72\u6703",
+  "\u7532\u8fb02024":"\u540c\u5929\u7b26","\u620a\u75332028":"\u5929\u7b26",
+  "\u8f9b\u4ea52031":"\u540c\u6b72\u6703","\u7678\u4e112033":"\u540c\u6b72\u6703",
+  "\u4e59\u536f2035":"\u5929\u7b26","\u4e19\u8fb02036":"\u5929\u7b26",
+  "\u4e01\u5df32037":"\u5929\u7b26","\u620a\u53482038":"\u592a\u4e59\u5929\u7b26",
+  "\u5df1\u672a2040":"\u592a\u4e59\u5929\u7b26"
+};
+
+// Segment date pairs [zhuYunIdx, zhuQiIdx]
+var PAIRS = [[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[4,5]];
+var SEG_NAMES = ["1\u904b1\u6c23","1\u904b2\u6c23","2\u904b2\u6c23","2\u904b3\u6c23","3\u904b3\u6c23","3\u904b4\u6c23","4\u904b4\u6c23","4\u904b5\u6c23","5\u904b5\u6c23","5\u904b6\u6c23"];
+var DATES_N = ["1.20-3.21","3.21-4.3","4.3-5.21","5.21-6.16","6.16-7.22","7.22-8.29","8.29-9.22","9.22-11.11","11.11-11.22","11.22-1.20"];
+var DATES_S = ["7.22-9.22","9.22-10.3","10.3-11.21","11.21-12.16","12.16-1.21","1.21-2.28","2.28-3.21","3.21-5.11","5.11-5.21","5.21-7.22"];
+
+var BOOKING = "https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
+
+// Get Ke Qi sequence: SiTian = 3rd position (idx 2) in KQ_ORDER
+// Verified with 2026 data: ShaoYin(idx=1 in KQ_ORDER)
+// seq: (1-2+0+6)%6=5=TaiYang, (1-2+1+6)%6=0=JueYin, (1-2+2+6)%6=1=ShaoYin(ST)
+// (1-2+3+6)%6=2=TaiYin, (1-2+4+6)%6=3=ShaoYang, (1-2+5+6)%6=4=YangMing
+// = ColdWater, WindWood, EmperorFire, DampEarth, MinisterFire, DrynessM ✓
+function getKeQi(si) {
+  var idx = KQ_ORDER.indexOf(si);
+  var result = [];
+  for (var i = 0; i < 6; i++) {
+    result.push(KQ_ORDER[(idx - 2 + i + 6) % 6]);
+  }
+  return result;
+}
+
+// Ke Yun sequence: starts from Da Yun element, follows generation cycle
+// Alternates excess/deficiency (but we just need elements here)
+function getKeYun(dyEl, taiGuo) {
+  var els = [dyEl];
+  var cur = dyEl;
+  for (var i = 1; i < 5; i++) { cur = YUN_GEN[cur]; els.push(cur); }
+  // Labels with Tai/Shao
+  var ch = {"\u6728":"\u89d2","\u706b":"\u5fb5","\u571f":"\u5bae","\u91d1":"\u5546","\u6c34":"\u7fbd"};
+  var labels = [];
+  var isTai = taiGuo;
+  var c2 = dyEl;
+  for (var j = 0; j < 5; j++) {
+    labels.push((isTai ? "\u592a" : "\u5c11") + ch[c2]);
+    c2 = YUN_GEN[c2]; isTai = !isTai;
+  }
+  return {els: els, labels: labels};
+}
 
 // Yun-Qi relationship
-function yunQiRel(dyEl,siEl){
-  const k={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
-  const g={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728","\u76f8\u706b":"\u571f"};
-  if(dyEl===siEl)return"\u5929\u7b26 (Tian Fu \u5929\u7b26)";
-  if(k[dyEl]===siEl)return"\u904b\u514b\u6c23 \u4e0d\u548c (Bu He)";
-  if(g[dyEl]===siEl)return"\u904b\u751f\u6c23 \u5c0f\u9006 (Xiao Ni)";
-  if(k[siEl]===dyEl)return"\u6c23\u514b\u904b \u5929\u5211 (Tian Xing)";
-  if(g[siEl]===dyEl)return"\u6c23\u751f\u904b \u9806\u5316 (Shun Hua)";
-  return"\u4e0d\u548c (Bu He)";
+function yunQiRel(dyEl, siEl) {
+  var k = {"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b"};
+  var g = {"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728"};
+  if (dyEl === siEl) return "\u5929\u7b26 Tian Fu";
+  if (k[dyEl] === siEl) return "\u904b\u514b\u6c23 \u4e0d\u548c Bu He";
+  if (g[dyEl] === siEl) return "\u904b\u751f\u6c23 \u5c0f\u9006 Xiao Ni";
+  if (k[siEl] === dyEl) return "\u6c23\u514b\u904b \u5929\u5211 Tian Xing";
+  if (g[siEl] === dyEl) return "\u6c23\u751f\u904b \u9806\u5316 Shun Hua";
+  return "\u4e0d\u548c Bu He";
 }
 
-// Ke Zhu Jia Lin risk assessment
-function judgeRisk(keQiEl,zhuQiEl){
-  if((keQiEl==="\u706b"||keQiEl==="\u76f8\u706b")&&(zhuQiEl==="\u706b"||zhuQiEl==="\u76f8\u706b"))return"\u96d9\u706b";
-  if(keQiEl==="\u571f"&&zhuQiEl==="\u571f")return"\u96d9\u571f";
-  const k={"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
-  if(k[keQiEl]===zhuQiEl)return"\u9006";
-  if(k[zhuQiEl]===keQiEl)return"\u9006";
-  return"\u9806";
+// Risk assessment (Ke Zhu Jia Lin)
+function judgeRisk(keEl, zhuEl) {
+  if ((keEl==="\u706b"||keEl==="\u76f8\u706b") && (zhuEl==="\u706b"||zhuEl==="\u76f8\u706b")) return "SF"; // Double Fire
+  if (keEl==="\u571f" && zhuEl==="\u571f") return "ST"; // Double Earth
+  var k = {"\u6728":"\u571f","\u706b":"\u91d1","\u571f":"\u6c34","\u91d1":"\u6728","\u6c34":"\u706b","\u76f8\u706b":"\u91d1"};
+  if (k[keEl]===zhuEl || k[zhuEl]===keEl) return "NI"; // Adverse
+  return "OK";
 }
 
-// 10-segment pairs [zhuYunIdx, zhuQiIdx]
-const PAIRS=[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3],[3,3],[3,4],[4,4],[4,5]];
-const SEG_NAMES=["1\u904b1\u6c23","1\u904b2\u6c23","2\u904b2\u6c23","2\u904b3\u6c23","3\u904b3\u6c23","3\u904b4\u6c23","4\u904b4\u6c23","4\u904b5\u6c23","5\u904b5\u6c23","5\u904b6\u6c23"];
-const DATES_N=["1.20~3.21","3.21~4.3","4.3~5.21","5.21~6.16","6.16~7.22","7.22~8.29","8.29~9.22","9.22~11.11","11.11~11.22","11.22~1.20"];
-const DATES_S=["7.22~9.22","9.22~10.3","10.3~11.21","11.21~12.16","12.16~1.21","1.21~2.28","2.28~3.21","3.21~5.11","5.11~5.21","5.21~7.22"];
+var RISK_INFO = {
+  "SF":{label:"\u2605\u2605 EXTREME \u2014 Double Fire",color:"#C84B30",bg:"#FFF0EE",bd:"#C84B30"},
+  "ST":{label:"\u2605\u2605 HIGH \u2014 Double Earth",color:"#E07030",bg:"#FFF5EC",bd:"#E07030"},
+  "NI":{label:"\u2605 HIGH \u2014 Adverse",color:"#B8860B",bg:"#FFFBE8",bd:"#B8860B"},
+  "OK":{label:"\u2014 Manageable (Shun)",color:"#2D6A4F",bg:"#F0FBF5",bd:"#2D6A4F"}
+};
 
-// ── Clinical data per segment ─────────────────────────────────
-// Source: Su Wen 71 + Sang Hee Park PhD Module 3,4,5 materials
-// Key: [risk-label, climate, disease, epidemic-warning, herbs, acupoints]
-const SEG_CLINICAL={
-  // 2026 丙午 — each segment based on verified source data
-  // Structure: keQiName determines clinical context
-  "\u96d9\u706b":{
-    label:"★★ EXTREME — Double Fire",color:"#C84B30",bg:"#FFF0EE",
-    climate:"Extreme heat \u00b7 Drought \u00b7 Sudden storms \u00b7 Temperature spikes",
-    disease:"Febrile epidemic \u00b7 Cardiovascular crisis \u00b7 Insomnia \u00b7 Palpitations \u00b7 Bleeding disorders \u00b7 Heatstroke",
-    prep:"Prepare 2 weeks before. Switch to cooling protocols. Weekly cardiovascular monitoring.",
-    herbs:"Huang Lian Jie Du Tang \u9ec4\u8fde\u89e3\u6bd2\u6e6f \u00b7 Zhu Ye Shi Gao Tang \u7af9\u8449\u77f3\u818f\u6e6f \u00b7 Lian Zi Xin \u84ee\u5b50\u5fc3 \u00b7 Sheng Di \u751f\u5730",
-    acu:"LI 11 \u66f2\u6c60 \u00b7 DU 14 \u5927\u690e \u00b7 HT 7 \u795e\u9580 \u00b7 PC 6 \u5185\u95dc \u00b7 HT 8 \u5c11\u5e9c \u00b7 BL 15 \u5fc3\u4fde"
+// Epidemic warnings from Su Wen 71
+// key = year + "-" + segIndex (0-based)
+var EPIDEMIC = {
+  "2026-8": "EPIDEMIC WARNING (Su Wen 71): ShaoYin SiTian + Water Excess year. 5th Qi (Seg 9): Warm Disease (Wen Bing). Prep: add Yin Qiao San 2 weeks before. N: Nov 9 / S: May 9.",
+  "2027-2": "EPIDEMIC WARNING (Su Wen 71): TaiYin SiTian + Wood Deficiency year. 2nd Qi (Seg 3): Warm Disease epidemic (Wen Li Da Xing). Add Huang Lian Jie Du Tang + Yin Qiao San."
+};
+
+// Clinical data per risk type
+var CL = {
+  "SF":{
+    climate:"Extreme heat, drought, sudden storms, temperature spikes",
+    disease:"Febrile epidemic, Cardiovascular crisis, Insomnia, Palpitations, Bleeding disorders, Heatstroke",
+    herbs:"Huang Lian Jie Du Tang \u9ec4\u8fde\u89e3\u6bd2\u6e6f \u00b7 Zhu Ye Shi Gao Tang \u7af9\u8449\u77f3\u818f\u6e6f \u00b7 Lian Zi Xin \u84ee\u5b50\u5fc3",
+    acu:"LI 11 \u66f2\u6c60 \u00b7 DU 14 \u5927\u690e \u00b7 HT 7 \u795e\u9580 \u00b7 HT 8 \u5c11\u5e9c \u00b7 PC 6 \u5185\u95dc \u00b7 BL 15 \u5fc3\u4fde"
   },
-  "\u96d9\u571f":{
-    label:"★★ HIGH — Double Earth",color:"#E07030",bg:"#FFF5EC",
-    climate:"Heavy rain \u00b7 Flooding \u00b7 Oppressive humidity \u00b7 Damp accumulation",
-    disease:"Damp-heat epidemic \u00b7 Gastroenteritis \u00b7 Oedema \u00b7 Skin infections \u00b7 Chronic digestive disorders \u00b7 Fatigue",
-    prep:"Avoid cold raw food. Keep dry. Support Spleen-Stomach. Light warm meals.",
-    herbs:"Huo Xiang Zheng Qi San \u85ff\u9999\u6b63\u6c23\u6563 \u00b7 San Ren Tang \u4e09\u4ec1\u6e6f \u00b7 Yi Yi Ren \u85a6\u82e1\u4ec1 \u00b7 Cang Zhu \u84bc\u672f",
+  "ST":{
+    climate:"Heavy rain, flooding, oppressive humidity, damp accumulation",
+    disease:"Damp-heat epidemic, Gastroenteritis, Oedema, Skin infections, Digestive disorders, Fatigue",
+    herbs:"Huo Xiang Zheng Qi San \u85ff\u9999\u6b63\u6c23\u6563 \u00b7 San Ren Tang \u4e09\u4ec1\u6e6f \u00b7 Yi Yi Ren \u85a6\u82e1\u4ec1",
     acu:"SP 9 \u9670\u9675\u6cc9 \u00b7 ST 40 \u8c50\u9686 \u00b7 REN 9 \u6c34\u5206 \u00b7 BL 20 \u813e\u4fde \u00b7 ST 36 \u8db3\u4e09\u91cc \u00b7 LI 11 \u66f2\u6c60"
   },
-  "\u9006":{
-    label:"★ HIGH — Adverse (Bu He \u4e0d\u548c)",color:"#B8860B",bg:"#FFFBE8",
-    climate:"Climate contradicts season \u00b7 Paradoxical temperature \u00b7 Unseasonable patterns",
-    disease:"Immune fluctuation \u00b7 Seasonal allergies \u00b7 Erratic symptoms \u00b7 Organ stress \u00b7 Respiratory sensitivity",
-    prep:"Dress in layers. Support immune system. Monitor sensitive patients closely.",
-    herbs:"Yu Ping Feng San \u7389\u5c4f\u98a8\u6563 \u00b7 Gui Zhi Tang \u6842\u679d\u6e6f \u00b7 Huang Qi \u9ec4\u8036 \u00b7 Fang Feng \u9632\u98a8",
-    acu:"LI 4 \u5408\u8c37 \u00b7 ST 36 \u8db3\u4e09\u91cc \u00b7 LU 7 \u5217\u7f3a \u00b7 BL 12 \u98a8\u9580 \u00b7 GV 14 \u5927\u690e \u00b7 SP 6 \u4e09\u9670\u4ea4"
+  "NI":{
+    climate:"Climate contradicts season, paradoxical temperatures, unseasonable patterns",
+    disease:"Immune fluctuation, Seasonal allergies, Erratic symptoms, Respiratory sensitivity",
+    herbs:"Yu Ping Feng San \u7389\u5c4f\u98a8\u6563 \u00b7 Gui Zhi Tang \u6842\u679d\u6e6f \u00b7 Huang Qi \u9ec4\u8036",
+    acu:"LI 4 \u5408\u8c37 \u00b7 ST 36 \u8db3\u4e09\u91cc \u00b7 LU 7 \u5217\u7f3a \u00b7 BL 12 \u98a8\u9580 \u00b7 GV 14 \u5927\u690e"
   },
-  "\u9806":{
-    label:"— Manageable (Shun \u9806)",color:"#2D6A4F",bg:"#F0FBF5",
-    climate:"Qi harmonises \u00b7 Normal seasonal pattern \u00b7 Expected weather rhythms",
-    disease:"Mild seasonal patterns \u00b7 Standard self-care applies \u00b7 No elevated epidemic risk",
-    prep:"Follow normal seasonal protocols. No special preparation needed.",
-    herbs:"Seasonal tonic as appropriate \u00b7 Si Jun Zi Tang \u56db\u541b\u5b50\u6e6f (base) \u00b7 Liu Wei Di Huang Wan \u516d\u5473\u5730\u9ec4\u4e38",
-    acu:"ST 36 \u8db3\u4e09\u91cc \u00b7 SP 6 \u4e09\u9670\u4ea4 \u00b7 LI 4 \u5408\u8c37 \u00b7 BL 23 \u814e\u4fde \u00b7 REN 6 \u6c23\u6d77"
+  "OK":{
+    climate:"Qi harmonises, normal seasonal pattern, expected weather rhythms",
+    disease:"Mild seasonal patterns, no elevated epidemic risk, standard self-care applies",
+    herbs:"Seasonal tonic as appropriate \u00b7 Si Jun Zi Tang \u56db\u541b\u5b50\u6e6f \u00b7 Liu Wei Di Huang Wan \u516d\u5473\u5730\u9ec4\u4e38",
+    acu:"ST 36 \u8db3\u4e09\u91cc \u00b7 SP 6 \u4e09\u9670\u4ea4 \u00b7 LI 4 \u5408\u8c37 \u00b7 BL 23 \u814e\u4fde"
   }
 };
 
-// Epidemic warnings from Su Wen 71 (per year+segment)
-// Key: "year-segIndex" → warning text
-const EPIDEMIC_WARN={
-  // 2026 丙午 少陰司天 太過年 — Seg 9 (index 8)
-  // Su Wen 71: 五之氣 其病溫
-  "2026-8":"⚠️ EPIDEMIC WARNING — Su Wen 71 (\u516d\u5143\u6b63\u7d00\u5927\u8ad6): \u5c11\u9670\u53f8\u5929\u592a\u904e\u5e74 \u4e94\u4e4b\u6c23 \u5176\u75c5\u6e29 — Emperor Fire Si Tian + Water Excess year: 5th Qi Warm Disease (\u6e29\u75c5). Febrile epidemic risk. Add Yin Qiao San \u9280\u7fd4\u6563 2 weeks before. Alert: Nov 9 (N) / May 9 (S).",
-  // 2027 丁未 太陰司天 不及年 — Seg 3 (index 2)
-  // Su Wen 71: 二之氣 溫厲大行
-  "2027-2":"⚠️ EPIDEMIC WARNING — Su Wen 71 (\u516d\u5143\u6b63\u7d00\u5927\u8ad6): \u592a\u9670\u53f8\u5929\u4e0d\u53ca\u5e74 \u4e8c\u4e4b\u6c23 \u6e29\u5398\u5927\u884c — Damp-Earth Si Tian + Wood Deficiency year: 2nd Qi Warm Disease epidemic (\u6e29\u5398\u5927\u884c). Highly contagious febrile disease. Add Huang Lian Jie Du Tang + Yin Qiao San."
-};
+// Main calculation
+function calcYear(yr) {
+  var idx = ((yr - 1984) % 60 + 60) % 60;
+  var jz = JIAZI[idx];
+  var stem = STEMS[idx % 10];
+  var branch = BRANCHES[idx % 12];
+  var dyArr = SY[stem];
+  var dyName = dyArr[0], dyEl = dyArr[1], taiGuo = dyArr[2];
+  var bqArr = BQ[branch];
+  var si = bqArr.si, zai = bqArr.zai;
+  var siEl = QI_EL[si], zaiEl = QI_EL[zai];
+  var keQi = getKeQi(si);
+  var kyObj = getKeYun(dyEl, taiGuo);
+  var keYunEls = kyObj.els, keYunLabels = kyObj.labels;
+  var special = SPECIAL_MAP[jz + yr] || SPECIAL_MAP[jz] || "\u2014 (Ordinary)";
+  var rel = yunQiRel(dyEl, siEl);
 
-// ── Main calculation ──────────────────────────────────────────
-function calcYear(yr){
-  const idx=((yr-1984)%60+60)%60;
-  const jz=JIAZI[idx],stem=STEMS[idx%10],branch=BRANCHES[idx%12];
-  const[dyName,dyEl,taiGuo]=SY[stem];
-  const{si,zai}=BQ[branch];
-  const siEl=SQ_EL[si],zaiEl=SQ_EL[zai];
-  const keQi=getKeQi(si);
-  const keYun=getKeYun(dyEl,taiGuo);
-  const keYunLbl=getKeYunLabel(dyEl,taiGuo);
-  const special=SPECIAL_MAP[jz+yr]||SPECIAL_MAP[jz]||"\u2014 (Ordinary \u5e73\u5e74)";
-  const rel=yunQiRel(dyEl,siEl);
-
-  const segs=PAIRS.map(([yi,qi],i)=>{
-    const zYun=FY[yi],kYun=keYun[yi],kYunLbl=keYunLbl[yi];
-    const zQi=SQ[qi],kQi=keQi[qi];
-    const zQiEl=SQ_EL[zQi],kQiEl=SQ_EL[kQi];
-    const risk=judgeRisk(kQiEl,zQiEl);
-    const epidemicKey=yr+"-"+i;
-    const epidemic=EPIDEMIC_WARN[epidemicKey]||null;
-    return{name:SEG_NAMES[i],zYun,kYun,kYunLbl,zQi,kQi,zQiEl,kQiEl,risk,epidemic};
+  var segs = PAIRS.map(function(pair, i) {
+    var yi = pair[0], qi = pair[1];
+    var zYun = ZHU_YUN[yi];
+    var kYun = keYunEls[yi], kYunLbl = keYunLabels[yi];
+    var zQi = ZHU_QI[qi];
+    var kQi = keQi[qi];
+    var zQiEl = QI_EL[zQi] || zQi;
+    var kQiEl = QI_EL[kQi] || kQi;
+    var risk = judgeRisk(kQiEl, zQiEl);
+    var epidemicKey = yr + "-" + i;
+    return {
+      name: SEG_NAMES[i], zYun: zYun, kYun: kYun, kYunLbl: kYunLbl,
+      zQi: zQi, kQi: kQi, zQiEl: zQiEl, kQiEl: kQiEl,
+      risk: risk, epidemic: EPIDEMIC[epidemicKey] || null
+    };
   });
 
-  return{jz,stem,branch,dyName,dyEl,taiGuo,si,zai,siEl,zaiEl,keQi,keYun,keYunLbl,special,rel,segs};
+  return {jz:jz, dyName:dyName, dyEl:dyEl, si:si, zai:zai,
+          siEl:siEl, zaiEl:zaiEl, keQi:keQi, special:special, rel:rel, segs:segs};
 }
 
-// ── Render ────────────────────────────────────────────────────
-function h(tag,attrs,children){
-  const el=document.createElement(tag);
-  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
-    if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
-    else if(k==="onclick")el.onclick=v;
-    else el.setAttribute(k,v);
-  });
-  if(children){
-    if(Array.isArray(children))children.forEach(c=>{if(c)el.appendChild(typeof c==="string"?document.createTextNode(c):c);});
-    else if(typeof children==="string")el.textContent=children;
-    else el.appendChild(children);
-  }
-  return el;
+// DOM helpers
+function el(tag, style, inner) {
+  var e = document.createElement(tag);
+  if (style) Object.assign(e.style, style);
+  if (typeof inner === 'string') e.innerHTML = inner;
+  else if (inner) e.appendChild(inner);
+  return e;
 }
-function txt(s){return document.createTextNode(s);}
-function div(style,children){return h("div",{style},children);}
-function span(style,text){return h("span",{style},text);}
-function badge(el,label){
-  const col=ec(el);
-  return h("span",{style:{background:col.bg,color:col.tx,border:"1px solid "+col.bd,borderRadius:4,padding:"2px 6px",fontSize:10,fontWeight:"bold",whiteSpace:"nowrap"}},label);
+function div(style, inner) { return el('div', style, inner); }
+function span(style, text) { var s = el('span', style); s.textContent = text; return s; }
+function append(parent) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  args.forEach(function(c) { if (c) parent.appendChild(c); });
+  return parent;
 }
 
-let currentYear=2026,currentHemi="S",currentData=calcYear(2026);
-const BOOKING="https://blossom-skin-and-health-acupuncture-clinic.au2.cliniko.com/bookings";
-const mob=window.innerWidth<=600;
+function elemBadge(elemKey, text) {
+  var c = ec(elemKey);
+  var s = span({background:c.bg, color:c.tx, border:'1px solid '+c.bd,
+    borderRadius:'4px', padding:'2px 7px', fontSize:'11px',
+    fontWeight:'bold', whiteSpace:'nowrap', display:'inline-block'}, text || elemKey);
+  return s;
+}
 
-function render(){
-  currentData=calcYear(currentYear);
-  const root=document.getElementById("root");
-  root.innerHTML="";
+// State
+var CUR_YEAR = 2026;
+var CUR_HEMI = 'S';
 
-  // ── HEADER ───────────────────────────────────────────────
-  const hdr=div({background:C.navy,borderRadius:10,padding:"12px 16px",marginBottom:12});
-  hdr.appendChild(div({color:C.gold,fontSize:10,letterSpacing:2,marginBottom:2},"\u4e94\u904b\u516d\u6c23 \u00b7 WU YUN LIU QI"));
-  hdr.appendChild(div({color:"#fff",fontSize:mob?17:22,fontWeight:"bold",marginBottom:2},"\u904b\u6c23 Analyzer"));
-  hdr.appendChild(div({color:C.gray,fontSize:10,marginBottom:12},"Sang Hee Park, PhD \u00b7 AHPRA Registered Acupuncturist \u00b7 sangheeparkacupuncture.com"));
+function render() {
+  var root = document.getElementById('root');
+  root.innerHTML = '';
+  var data = calcYear(CUR_YEAR);
+  var dates = CUR_HEMI === 'N' ? DATES_N : DATES_S;
+  var mob = window.innerWidth <= 600;
 
-  // Controls
-  const ctrl=div({display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginBottom:12});
-  const inp=h("input",{type:"number",min:"1924",max:"2103",value:currentYear,style:{width:80,padding:"6px 8px",borderRadius:6,border:"2px solid "+C.gold,background:C.blue,color:"#fff",fontSize:15,fontWeight:"bold",textAlign:"center",outline:"none"}});
+  // ── HEADER ────────────────────────────────────────────────
+  var hdr = div({background:C.navy, borderRadius:'10px', padding:'14px 16px', marginBottom:'12px'});
+
+  var titleRow = div({display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'12px'});
+  var titleLeft = div({});
+  append(titleLeft,
+    div({color:C.gold, fontSize:'10px', letterSpacing:'2px', marginBottom:'3px'},
+        '\u4e94\u904b\u516d\u6c23 \u00b7 WU YUN LIU QI'),
+    div({color:'#fff', fontSize: mob?'18px':'22px', fontWeight:'bold', marginBottom:'2px'},
+        '\u904b\u6c23 Analyzer'),
+    div({color:C.gray, fontSize:'10px'}, 'Sang Hee Park, PhD \u00b7 sangheeparkacupuncture.com')
+  );
+  titleRow.appendChild(titleLeft);
+  hdr.appendChild(titleRow);
+
+  // Year input + controls
+  var ctrl = div({display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center', marginBottom:'12px'});
+  var inp = document.createElement('input');
+  inp.type = 'number'; inp.value = CUR_YEAR;
+  inp.min = '1924'; inp.max = '2103';
+  Object.assign(inp.style, {width:'80px', padding:'6px 8px', borderRadius:'6px',
+    border:'2px solid '+C.gold, background:C.blue, color:'#fff',
+    fontSize:'15px', fontWeight:'bold', textAlign:'center', outline:'none'});
   ctrl.appendChild(inp);
-  ["N","S"].forEach(hm=>{
-    const btn=h("button",{style:{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:currentHemi===hm?C.gold:C.blue,color:"#fff"}},hm==="N"?"\uD83C\uDF0F Northern":"\uD83C\uDF0F Southern");
-    btn.onclick=()=>{currentHemi=hm;render();};
+
+  ['N','S'].forEach(function(h) {
+    var btn = el('button', {padding:'6px 13px', borderRadius:'6px', border:'none',
+      fontWeight:'bold', fontSize:'12px',
+      background: CUR_HEMI===h ? C.gold : C.blue, color:'#fff'});
+    btn.textContent = h==='N' ? 'Northern' : 'Southern';
+    btn.onclick = function() { CUR_HEMI = h; render(); };
     ctrl.appendChild(btn);
   });
-  const analyzeBtn=h("button",{style:{padding:"6px 16px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:"bold",fontSize:12,background:C.red,color:"#fff"}},"Analyze");
-  analyzeBtn.onclick=()=>{currentYear=parseInt(inp.value)||2026;render();};
+
+  var analyzeBtn = el('button', {padding:'6px 16px', borderRadius:'6px', border:'none',
+    fontWeight:'bold', fontSize:'12px', background:C.red, color:'#fff'}, 'Analyze');
+  analyzeBtn.onclick = function() { CUR_YEAR = parseInt(inp.value) || 2026; render(); };
   ctrl.appendChild(analyzeBtn);
   hdr.appendChild(ctrl);
 
-  // Book Now
-  const bookBar=div({display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid rgba(255,255,255,0.15)",paddingTop:10});
-  bookBar.appendChild(div({color:C.gray,fontSize:10},"Free Analyser \u00b7 Educational purposes only \u00b7 Su Wen Ch.66\u201374"));
-  const bookBtn=h("a",{href:BOOKING,target:"_blank",style:{background:C.gold,color:"#fff",borderRadius:6,padding:"5px 12px",fontSize:11,fontWeight:"bold",textDecoration:"none"}},"\uD83D\uDCC5 Book with Sang Hee");
-  bookBar.appendChild(bookBtn);
+  // Book Now bar
+  var bookBar = div({display:'flex', justifyContent:'space-between', alignItems:'center',
+    borderTop:'1px solid rgba(255,255,255,0.15)', paddingTop:'10px'});
+  bookBar.appendChild(div({color:C.gray, fontSize:'10px'},
+    'Free Analyser \u00b7 Su Wen Ch.66-74 \u00b7 Educational purposes only'));
+  var bookA = document.createElement('a');
+  bookA.href = BOOKING; bookA.target = '_blank';
+  Object.assign(bookA.style, {background:C.gold, color:'#fff', borderRadius:'6px',
+    padding:'5px 13px', fontSize:'11px', fontWeight:'bold', textDecoration:'none'});
+  bookA.textContent = 'Book with Sang Hee';
+  bookBar.appendChild(bookA);
   hdr.appendChild(bookBar);
   root.appendChild(hdr);
 
-  const d=currentData;
+  // ── ANNUAL SUMMARY ────────────────────────────────────────
+  var sumWrap = div({background:C.white, borderRadius:'8px', overflow:'hidden',
+    marginBottom:'12px', boxShadow:'0 1px 4px rgba(0,0,0,.08)'});
+  var sumHdr = div({background:C.navy, color:'#fff', padding:'9px 14px',
+    fontWeight:'bold', fontSize:'13px'},
+    CUR_YEAR + ' ' + data.jz + ' \u2014 Annual Summary');
+  sumWrap.appendChild(sumHdr);
 
-  // ── ANNUAL SUMMARY ───────────────────────────────────────
-  const sumCard=div({background:C.white,borderRadius:8,padding:14,marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,.08)"});
-  const sumTitle=div({background:C.navy,color:"#fff",borderRadius:"6px 6px 0 0",padding:"8px 14px",fontWeight:"bold",fontSize:13,marginBottom:10});
-  sumTitle.textContent=currentYear+"\u5e74 "+d.jz+" \u2014 Annual Yun Qi Summary";
-  sumCard.insertBefore(sumTitle,sumCard.firstChild);
+  var sumGrid = div({display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',
+    gap:'8px', padding:'12px'});
 
-  const grid=div({display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8});
-  const items=[
-    {label:"Da Yun \u5927\u904b",val:d.dyName,el:d.dyEl},
-    {label:"Si Tian \u53f8\u5929",val:d.si,sub:SQ_EN[d.si],el:d.siEl},
-    {label:"Zai Quan \u5728\u6cc9",val:d.zai,sub:SQ_EN[d.zai],el:d.zaiEl},
-    {label:"Yun-Qi Relation",val:d.rel,bg:d.rel.includes("\u4e0d\u548c")||d.rel.includes("\u5929\u5211")?"#FFF0EE":"#F0FBF5",tc:d.rel.includes("\u4e0d\u548c")||d.rel.includes("\u5929\u5211")?C.red:C.green},
-    {label:"Special Year",val:d.special,bg:d.special.includes("\u592a\u4e59")?"#FFF0EE":d.special.includes("\u5929\u7b26")||d.special.includes("\u540c\u5929")?"#FFF5EC":d.special.includes("\u6b72\u6703")||d.special.includes("\u540c\u6b72")?"#F0FBF5":"#F5F5F5",tc:d.special.includes("\u592a\u4e59")?C.red:d.special.includes("\u5929\u7b26")||d.special.includes("\u540c\u5929")?C.orange:d.special.includes("\u6b72\u6703")||d.special.includes("\u540c\u6b72")?C.green:C.navy},
+  var items = [
+    {label:'Da Yun \u5927\u904b', val:data.dyName, el:data.dyEl},
+    {label:'Si Tian \u53f8\u5929', val:data.si, sub:QI_EN[data.si]||'', el:data.siEl},
+    {label:'Zai Quan \u5728\u6cc9', val:data.zai, sub:QI_EN[data.zai]||'', el:data.zaiEl},
+    {label:'Yun-Qi Relation', val:data.rel,
+     bg: (data.rel.indexOf('\u4e0d\u548c')>=0||data.rel.indexOf('\u5929\u5211')>=0) ? '#FFF0EE' : '#F0FBF5',
+     tc: (data.rel.indexOf('\u4e0d\u548c')>=0||data.rel.indexOf('\u5929\u5211')>=0) ? C.red : C.green},
+    {label:'Special Year', val:data.special,
+     bg: data.special.indexOf('\u592a\u4e59')>=0 ? '#FFF0EE' :
+         data.special.indexOf('\u5929\u7b26')>=0 ? '#FFF5EC' :
+         data.special.indexOf('\u6b72\u6703')>=0 ? '#F0FBF5' : '#F5F5F5',
+     tc: data.special.indexOf('\u592a\u4e59')>=0 ? C.red :
+         data.special.indexOf('\u5929\u7b26')>=0 ? C.orange :
+         data.special.indexOf('\u6b72\u6703')>=0 ? C.green : C.navy}
   ];
-  items.forEach(item=>{
-    const col=item.el?ec(item.el):{bg:item.bg||"#F5F5F5",bd:"#ddd",tx:item.tc||C.navy};
-    const card=div({background:col.bg,border:"1px solid "+col.bd,borderRadius:8,padding:"9px 11px"});
-    card.appendChild(div({fontSize:9,color:"#888",marginBottom:3},item.label));
-    card.appendChild(div({fontWeight:"bold",fontSize:11,color:col.tx,lineHeight:1.4},item.val));
-    if(item.sub)card.appendChild(div({fontSize:9,color:"#777",marginTop:2},item.sub));
-    grid.appendChild(card);
+
+  items.forEach(function(item) {
+    var col = item.el ? ec(item.el) : {bg:item.bg||'#F5F5F5', bd:'#ddd', tx:item.tc||C.navy};
+    var card = div({background:col.bg, border:'1px solid '+col.bd, borderRadius:'8px', padding:'9px 11px'});
+    append(card,
+      div({fontSize:'9px', color:'#888', marginBottom:'3px'}, item.label),
+      div({fontWeight:'bold', fontSize:'11px', color:col.tx, lineHeight:'1.4'}, item.val)
+    );
+    if (item.sub) card.appendChild(div({fontSize:'9px', color:'#777', marginTop:'2px'}, item.sub));
+    sumGrid.appendChild(card);
   });
-  sumCard.appendChild(grid);
+  sumWrap.appendChild(sumGrid);
 
   // Ke Qi sequence display
-  const kqRow=div({marginTop:10,padding:"8px 10px",background:C.lgray,borderRadius:6});
-  kqRow.appendChild(div({fontSize:10,fontWeight:"bold",color:C.ink,marginBottom:6},"\u5ba2\u6c23 Ke Qi Sequence — Si Tian (\u53f8\u5929) = 3rd Position (Su Wen 71 \u516d\u5143\u6b63\u7d00\u5927\u8ad6)"));
-  const kqFlex=div({display:"flex",gap:6,flexWrap:"wrap"});
-  d.keQi.forEach((q,i)=>{
-    const isST=i===2,isZQ=i===5;
-    const col=ec(SQ_EL[q]);
-    const item=div({textAlign:"center"});
-    item.appendChild(div({fontSize:9,color:"#888",marginBottom:2},(i+1)+"\u6c23"+(isST?" \u2605ST":isZQ?" \u25cb ZQ":"")));
-    item.appendChild(h("span",{style:{background:col.bg,color:col.tx,border:(isST?"2px solid "+C.gold:isZQ?"2px solid "+C.navy:"1px solid "+col.bd),borderRadius:4,padding:"2px 7px",fontSize:10,fontWeight:"bold",display:"inline-block"}},q.slice(2)));
-    kqFlex.appendChild(item);
+  var kqBox = div({margin:'0 12px 12px', padding:'9px 12px', background:C.lgray, borderRadius:'6px'});
+  kqBox.appendChild(div({fontSize:'10px', fontWeight:'bold', color:C.ink, marginBottom:'7px'},
+    'Ke Qi Sequence \u5ba2\u6c23 \u2014 Si Tian = 3rd position | 2026 verified: ColdWater, WindWood, EmperorFire(ST), DampEarth, MinisterFire, DrynessM'));
+  var kqRow = div({display:'flex', gap:'8px', flexWrap:'wrap'});
+  data.keQi.forEach(function(q, i) {
+    var isST = i===2, isZQ = i===5;
+    var colKq = ec(QI_EL[q]||'');
+    var item = div({textAlign:'center'});
+    item.appendChild(div({fontSize:'9px', color:'#888', marginBottom:'3px'},
+      (i+1)+'\u6c23'+(isST?' \u2605ST':isZQ?' ZQ':'')));
+    var badge = span({background:colKq.bg, color:colKq.tx,
+      border:(isST?'2px solid '+C.gold:isZQ?'2px solid '+C.navy:'1px solid '+colKq.bd),
+      borderRadius:'4px', padding:'2px 7px', fontSize:'10px',
+      fontWeight:'bold', display:'inline-block'}, q.slice(2)||q);
+    item.appendChild(badge);
+    kqRow.appendChild(item);
   });
-  kqRow.appendChild(kqFlex);
-  sumCard.appendChild(kqRow);
-  root.appendChild(sumCard);
+  kqBox.appendChild(kqRow);
+  sumWrap.appendChild(kqBox);
+  root.appendChild(sumWrap);
 
-  // ── 10-SEGMENT TABLE ──────────────────────────────────────
-  const segCard=div({background:C.white,borderRadius:8,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,.08)"});
-  const segHdr=div({background:C.navy,color:"#fff",padding:"9px 14px",fontWeight:"bold",fontSize:13});
-  segHdr.textContent="\u5341\u7bc0\u6bb5 Ten Segments \u00b7 "+(currentHemi==="S"?"Southern \u5357\u534a\u7403":"Northern \u5317\u534a\u7403")+" Hemisphere";
-  segCard.appendChild(segHdr);
+  // ── TEN SEGMENTS TABLE ────────────────────────────────────
+  var tblWrap = div({background:C.white, borderRadius:'8px', overflow:'hidden',
+    marginBottom:'12px', boxShadow:'0 1px 4px rgba(0,0,0,.08)'});
 
-  // Disclaimer
-  const disc=div({background:"#FFFBE8",borderLeft:"4px solid "+C.dkGold,padding:"9px 14px",fontSize:10,color:"#5A4A00",lineHeight:1.6});
-  disc.innerHTML="<strong>Note:</strong> Acupuncture points and herbal formulas shown are general climate-based recommendations from Su Wen Ch.66\u201374. They apply to the general population under these climate conditions and are <strong>NOT personalised</strong> to any individual's constitution or health conditions. If you have existing health conditions, consult a qualified TCM practitioner.";
-  segCard.appendChild(disc);
+  var tblHdr = div({background:C.navy, color:'#fff', padding:'9px 14px',
+    fontWeight:'bold', fontSize:'13px'},
+    '\u5341\u7bc0\u6bb5 Ten Segments \u00b7 '+(CUR_HEMI==='S'?'Southern':'Northern')+' Hemisphere');
+  tblWrap.appendChild(tblHdr);
 
-  const tblWrap=div({overflowX:"auto"});
-  const tbl=h("table");
-  const thead=h("thead");
-  const hrow=h("tr");
-  ["Segment","Date ("+currentHemi+")","Zhu Yun \u4e3b\u904b","Ke Yun \u5ba2\u904b","Zhu Qi \u4e3b\u6c23","Ke Qi \u5ba2\u6c23","Risk","Climate","Disease","Acu Points \u9462\u4f4d","Herbs \u65b9\u5291"].forEach(t=>{
-    hrow.appendChild(h("th",null,t));
+  var disclaimer = div({background:'#FFFBE8', borderLeft:'4px solid '+C.dkGold,
+    padding:'9px 14px', fontSize:'10px', color:'#5A4A00', lineHeight:'1.6'},
+    'Acupuncture Points and Herbal Formulas shown are general climate-based recommendations from Su Wen Ch.66-74 only. They are NOT personalised to any individual. If you have existing health conditions, please consult a qualified TCM practitioner.');
+  tblWrap.appendChild(disclaimer);
+
+  var tblOuter = div({overflowX:'auto'});
+  var tbl = document.createElement('table');
+
+  var thead = document.createElement('thead');
+  var hrow = document.createElement('tr');
+  ['Segment','Date','Zhu Yun','Ke Yun','Zhu Qi','Ke Qi','Risk','Climate','Disease','Acu Points','Herbs'].forEach(function(t) {
+    var th = document.createElement('th');
+    th.textContent = t;
+    hrow.appendChild(th);
   });
   thead.appendChild(hrow);
   tbl.appendChild(thead);
 
-  const tbody=h("tbody");
-  const dates=currentHemi==="N"?DATES_N:DATES_S;
+  var tbody = document.createElement('tbody');
+  data.segs.forEach(function(s, i) {
+    var ri = RISK_INFO[s.risk];
+    var cl = CL[s.risk];
+    var epiKey = CUR_YEAR + '-' + i;
+    var epidemic = EPIDEMIC[epiKey] || null;
 
-  d.segs.forEach((s,i)=>{
-    const cl=SEG_CLINICAL[s.risk];
-    const epidemicKey=currentYear+"-"+i;
-    const epidemic=EPIDEMIC_WARN[epidemicKey];
-    const tr=h("tr");
-    tr.style.background=i%2===0?"#FAFAFA":"#FFF";
-    tr.style.borderLeft="3px solid "+cl.color;
-    if(epidemic)tr.style.background=cl.bg;
+    var tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#FAFAFA' : '#FFF';
+    tr.style.borderLeft = '3px solid ' + ri.bd;
+    if (epidemic) tr.style.background = '#FFF8F5';
 
     // Segment name
-    const nameTd=h("td");
-    nameTd.appendChild(div({fontWeight:"bold",color:cl.color,fontSize:11,whiteSpace:"nowrap"},SEG_NAMES[i]));
-    if(epidemic){
-      const epBadge=div({background:C.red,color:"#fff",fontSize:9,fontWeight:"bold",padding:"1px 5px",borderRadius:3,marginTop:3,whiteSpace:"nowrap"},"\u26a0\uFE0F EPIDEMIC");
-      nameTd.appendChild(epBadge);
+    var tdName = document.createElement('td');
+    tdName.style.fontWeight = 'bold';
+    tdName.style.color = ri.color;
+    tdName.style.whiteSpace = 'nowrap';
+    tdName.textContent = s.name;
+    if (epidemic) {
+      var epB = div({background:C.red, color:'#fff', fontSize:'8px', fontWeight:'bold',
+        padding:'1px 5px', borderRadius:'3px', marginTop:'3px', whiteSpace:'nowrap'}, 'EPIDEMIC');
+      tdName.appendChild(epB);
     }
-    tr.appendChild(nameTd);
+    tr.appendChild(tdName);
 
     // Date
-    const dateTd=h("td");
-    dateTd.appendChild(div({fontSize:10,color:"#555",whiteSpace:"nowrap"},dates[i]));
-    tr.appendChild(dateTd);
+    var tdDate = document.createElement('td');
+    tdDate.style.whiteSpace = 'nowrap';
+    tdDate.style.color = '#555';
+    tdDate.textContent = dates[i];
+    tr.appendChild(tdDate);
 
     // Zhu Yun
-    const zyTd=h("td");
-    zyTd.appendChild(badge(s.zYun,s.zYun));
-    tr.appendChild(zyTd);
+    var tdZY = document.createElement('td');
+    tdZY.appendChild(elemBadge(s.zYun, s.zYun));
+    tr.appendChild(tdZY);
 
     // Ke Yun
-    const kyTd=h("td");
-    const kyCol=ec(s.kYun);
-    kyTd.appendChild(div({display:"inline-block"},badge(s.kYun,s.kYun)));
-    kyTd.appendChild(div({fontSize:9,color:"#888",marginTop:2},s.kYunLbl));
-    tr.appendChild(kyTd);
+    var tdKY = document.createElement('td');
+    tdKY.appendChild(elemBadge(s.kYun, s.kYun));
+    var kyL = div({fontSize:'9px', color:'#888', marginTop:'2px'}, s.kYunLbl);
+    tdKY.appendChild(kyL);
+    tr.appendChild(tdKY);
 
-    // Zhu Qi
-    const zqTd=h("td");
-    zqTd.appendChild(div({fontSize:10,color:ec(s.zQiEl).tx,whiteSpace:"nowrap"},s.zQi));
-    zqTd.appendChild(div({fontSize:9,color:"#999"},SQ_EN[s.zQi]));
-    tr.appendChild(zqTd);
+    // Zhu Qi (Host Qi)
+    var tdZQ = document.createElement('td');
+    var zqEl = QI_EL[s.zQi] || '';
+    var zqC = ec(zqEl);
+    tdZQ.appendChild(div({color:zqC.tx, fontSize:'10px', whiteSpace:'nowrap'}, s.zQi));
+    tdZQ.appendChild(div({color:'#999', fontSize:'9px'}, QI_EN[s.zQi]||''));
+    tr.appendChild(tdZQ);
 
-    // Ke Qi
-    const kqTd=h("td");
-    kqTd.appendChild(div({fontSize:10,color:ec(s.kQiEl).tx,fontWeight:"bold",whiteSpace:"nowrap"},s.kQi));
-    kqTd.appendChild(div({fontSize:9,color:"#999"},SQ_EN[s.kQi]));
-    tr.appendChild(kqTd);
+    // Ke Qi (Guest Qi)
+    var tdKQ = document.createElement('td');
+    var kqEl = QI_EL[s.kQi] || '';
+    var kqC = ec(kqEl);
+    tdKQ.appendChild(div({color:kqC.tx, fontSize:'10px', fontWeight:'bold', whiteSpace:'nowrap'}, s.kQi));
+    tdKQ.appendChild(div({color:'#999', fontSize:'9px'}, QI_EN[s.kQi]||''));
+    tr.appendChild(tdKQ);
 
     // Risk badge
-    const riskTd=h("td");
-    const rb=h("span",{style:{background:cl.bg,color:cl.color,border:"1px solid "+cl.color,borderRadius:4,padding:"2px 6px",fontSize:9,fontWeight:"bold",display:"block",whiteSpace:"nowrap"}},cl.label);
-    riskTd.appendChild(rb);
-    tr.appendChild(riskTd);
+    var tdRisk = document.createElement('td');
+    var rb = span({background:ri.bg, color:ri.color, border:'1px solid '+ri.bd,
+      borderRadius:'4px', padding:'2px 6px', fontSize:'9px', fontWeight:'bold',
+      display:'block', whiteSpace:'nowrap'}, ri.label);
+    tdRisk.appendChild(rb);
+    tr.appendChild(tdRisk);
 
     // Climate
-    const ctTd=h("td",{style:{minWidth:120,fontSize:9,color:"#444",lineHeight:1.5}},cl.climate);
-    tr.appendChild(ctTd);
+    var tdCl = document.createElement('td');
+    tdCl.style.minWidth = '120px';
+    tdCl.style.fontSize = '10px';
+    tdCl.style.color = '#444';
+    tdCl.style.lineHeight = '1.5';
+    tdCl.textContent = cl.climate;
+    tr.appendChild(tdCl);
 
     // Disease + epidemic warning
-    const disTd=h("td",{style:{minWidth:140,fontSize:9}});
-    disTd.appendChild(div({color:"#444",lineHeight:1.5,marginBottom:epidemic?4:0},cl.disease));
-    if(epidemic){
-      const epDiv=div({background:"#FFF0EE",border:"1px solid "+C.red,borderRadius:4,padding:"4px 6px",fontSize:9,color:C.red,lineHeight:1.5},epidemic);
-      disTd.appendChild(epDiv);
+    var tdDis = document.createElement('td');
+    tdDis.style.minWidth = '140px';
+    tdDis.style.fontSize = '10px';
+    tdDis.style.lineHeight = '1.5';
+    tdDis.appendChild(div({color:'#444'}, cl.disease));
+    if (epidemic) {
+      var epDiv = div({background:'#FFF0EE', border:'1px solid '+C.red,
+        borderRadius:'4px', padding:'4px 6px', fontSize:'9px', color:C.red,
+        lineHeight:'1.4', marginTop:'4px'}, epidemic);
+      tdDis.appendChild(epDiv);
     }
-    tr.appendChild(disTd);
+    tr.appendChild(tdDis);
 
     // Acu points
-    const acuTd=h("td",{style:{minWidth:130,fontSize:9,color:C.ink,lineHeight:1.6,fontFamily:"monospace"}},cl.acu);
-    tr.appendChild(acuTd);
+    var tdAcu = document.createElement('td');
+    tdAcu.style.minWidth = '130px';
+    tdAcu.style.fontSize = '10px';
+    tdAcu.style.color = C.ink;
+    tdAcu.style.lineHeight = '1.6';
+    tdAcu.textContent = cl.acu;
+    tr.appendChild(tdAcu);
 
     // Herbs
-    const herbTd=h("td",{style:{minWidth:150,fontSize:9,color:"#2D5A3D",lineHeight:1.5}},cl.herbs);
-    tr.appendChild(herbTd);
+    var tdHerb = document.createElement('td');
+    tdHerb.style.minWidth = '150px';
+    tdHerb.style.fontSize = '10px';
+    tdHerb.style.color = '#2D5A3D';
+    tdHerb.style.lineHeight = '1.5';
+    tdHerb.textContent = cl.herbs;
+    tr.appendChild(tdHerb);
 
     tbody.appendChild(tr);
   });
+
   tbl.appendChild(tbody);
-  tblWrap.appendChild(tbl);
-  segCard.appendChild(tblWrap);
-  root.appendChild(segCard);
-
-  // ── HIGH RISK SUMMARY ─────────────────────────────────────
-  const highRisk=d.segs.filter(s=>s.risk==="\u96d9\u706b"||s.risk==="\u96d9\u571f"||s.risk==="\u9006");
-  if(highRisk.length>0){
-    const hrCard=div({background:C.white,borderRadius:8,overflow:"hidden",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,.08)"});
-    const hrHdr=div({background:C.red,color:"#fff",padding:"9px 14px",fontWeight:"bold",fontSize:13});
-    hrHdr.textContent="\u26a0\uFE0F High-Risk Periods — "+currentYear+" ("+highRisk.length+" segments)";
-    hrCard.appendChild(hrHdr);
-
-    const hrGrid=div({display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:8,padding:12});
-    d.segs.forEach((s,i)=>{
-      if(s.risk==="\u9806")return;
-      const cl=SEG_CLINICAL[s.risk];
-      const epidemic=EPIDEMIC_WARN[currentYear+"-"+i];
-      const card=div({background:cl.bg,border:"1px solid "+cl.color,borderRadius:8,padding:12});
-      card.appendChild(div({fontWeight:"bold",color:cl.color,fontSize:12,marginBottom:3},SEG_NAMES[i]+" \u00b7 "+dates[i]));
-      card.appendChild(div({fontSize:11,color:cl.color,marginBottom:5},cl.label));
-      card.appendChild(div({fontSize:10,color:"#555",marginBottom:4},"Prepare: "+SEG_CLINICAL[s.risk].prep));
-      if(epidemic){
-        card.appendChild(div({fontSize:10,color:C.red,fontWeight:"bold",padding:"4px 6px",background:"#FFF",borderRadius:4,border:"1px solid "+C.red},epidemic));
-      }
-      hrGrid.appendChild(card);
-    });
-    hrCard.appendChild(hrGrid);
-    root.appendChild(hrCard);
-  }
-
-  // ── SPECIAL YEAR INFO ─────────────────────────────────────
-  const spInfo={
-    "\u592a\u4e59\u5929\u7b26":{desc:"MAXIMUM severity. Da Yun = Si Tian = Earthly Branch (triple alignment). Strikes like an arrow — deepest penetration, slowest recovery. Maximum clinical vigilance.",color:C.red},
-    "\u5929\u7b26":{desc:"HIGH severity. Da Yun element = Si Tian element. Sudden onset, difficult to treat.",color:C.orange},
-    "\u540c\u5929\u7b26":{desc:"ELEVATED severity. Yang Da Yun = Zai Quan element. Sustained intensity, Yang-type excess.",color:C.orange},
-    "\u6b72\u6703":{desc:"ORDERLY. Da Yun = Earthly Branch position. Persistent but stable, easier to manage.",color:C.green},
-    "\u540c\u6b72\u6703":{desc:"MODERATE. Yin Da Yun = Zai Quan element. Sustained, slow building, chronic conditions.",color:C.dkGold}
-  };
-  const matchedSp=Object.keys(spInfo).find(k=>d.special.includes(k));
-  if(matchedSp){
-    const spCard=div({background:spInfo[matchedSp].color,borderRadius:8,padding:14,marginBottom:12,color:"#fff"});
-    spCard.appendChild(div({fontWeight:"bold",fontSize:14,marginBottom:6},"\u2605 Special Year Classification: "+d.special));
-    spCard.appendChild(div({fontSize:12,lineHeight:1.6,opacity:0.95},spInfo[matchedSp].desc));
-    root.appendChild(spCard);
-  }
+  tblOuter.appendChild(tbl);
+  tblWrap.appendChild(tblOuter);
+  root.appendChild(tblWrap);
 
   // ── FOOTER ───────────────────────────────────────────────
-  const footer=div({textAlign:"center",padding:"14px 0",color:"#999",fontSize:10,lineHeight:1.8});
-  footer.innerHTML="Educational purposes only \u00b7 Not a substitute for clinical judgement \u00b7 \u00a9 Blossom Skin & Health Pty Ltd<br/>Source: Su Wen Ch.66\u201374 \u00b7 Sang Hee Park PhD course materials \u00b7 <a href='"+BOOKING+"' target='_blank' style='color:"+C.gold+";'>Book with Sang Hee</a>";
+  var footer = div({textAlign:'center', padding:'14px 0 20px', color:'#999', fontSize:'10px', lineHeight:'1.8'});
+  footer.innerHTML = 'Educational purposes only \u00b7 Not a substitute for clinical judgement \u00b7 \u00a9 Blossom Skin & Health Pty Ltd<br/>Source: Su Wen Ch.66-74 \u00b7 Sang Hee Park PhD course materials';
   root.appendChild(footer);
 }
 
 // Initial render
 render();
 
-if("serviceWorker"in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
 }
 </script>
 </body>
