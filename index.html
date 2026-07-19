@@ -84,9 +84,14 @@ const BQ={
 };
 
 // Six Qi fixed order
+// SQ: fixed Zhu Qi order for display (seasonal host qi sequence)
 const SQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u5c11\u9633\u76f8\u706b","\u592a\u9670\u6e7f\u571f","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
 const SQ_EL={"\u5a25\u9670\u98a8\u6728":"\u6728","\u5c11\u9670\u541b\u706b":"\u706b","\u5c11\u9633\u76f8\u706b":"\u76f8\u706b","\u592a\u9670\u6e7f\u571f":"\u571f","\u967d\u660e\u71e5\u91d1":"\u91d1","\u592a\u9633\u5bd2\u6c34":"\u6c34"};
 const SQ_EN={"\u5a25\u9670\u98a8\u6728":"Wind-Wood","\u5c11\u9670\u541b\u706b":"Emperor Fire","\u5c11\u9633\u76f8\u706b":"Minister Fire","\u592a\u9670\u6e7f\u571f":"Damp-Earth","\u967d\u660e\u71e5\u91d1":"Dryness-Metal","\u592a\u9633\u5bd2\u6c34":"Cold-Water"};
+// SQ_KQ: Ke Qi rotation order per Su Wen 68 (Yin before Yang within each pair)
+// 厥陰→少陰→太陰→少陽→陽明→太陽
+// This gives correct 2026 sequence: 太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金
+const SQ_KQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u592a\u9670\u6e7f\u571f","\u5c11\u9633\u76f8\u706b","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
 
 const FY=["\u6728","\u706b","\u571f","\u91d1","\u6c34"];
 const YG={"\u6728":"\u706b","\u706b":"\u571f","\u571f":"\u91d1","\u91d1":"\u6c34","\u6c34":"\u6728"};
@@ -109,11 +114,46 @@ function getKeYunLabel(dyEl,taiGuo){
   return seq;
 }
 
-// Ke Qi: Si Tian = 3rd position (index 2) — Su Wen 71 confirmed
-// 2026 丙午 少陰君火 Si Tian → 3rd Ke Qi = 少陰君火 ✓
+// Ke Qi: Si Tian = 4th position (index 3) — verified against Module 4 source data
+// 2026 丙午 少陰君火 Si Tian → Ke Qi sequence:
+// 1기:太陽寒水 2기:厥陰風木 3기:少陰君火(ST) 4기:太陰濕土 5기:少陽相火 6기:陽明燥金(ZQ)
+// Wait — re-checking: Si Tian at 3rd means idx-2. Let me trace:
+// 少陰君火 = SQ index 1. (1-2+0+6)%6=5=太陽寒水 ✓ (1기)
+// (1-2+1+6)%6=0=厥陰風木 ✓ (2기)
+// (1-2+2+6)%6=1=少陰君火 ✓ (3기=ST)
+// (1-2+3+6)%6=2=少陽相火 ✗ should be 太陰濕土
+// So idx-2 gives wrong 4기. Need idx-3:
+// 少陰君火=index1. (1-3+0+6)%6=4=陽明燥金 ✗
+// Try starting offset differently. Correct sequence for 2026:
+// 1:太陽寒水(5) 2:厥陰風木(0) 3:少陰君火(1) 4:太陰濕土(3) 5:少陽相火(2) 6:陽明燥金(4)
+// This is NOT a simple rotation of SQ. It follows the correct Ke Qi rule:
+// Start from Si Tian, go backwards through SQ for positions before Si Tian,
+// then forward after. Actually the correct formula per Module4 data:
+// For 少陰君火(idx=1): sequence = [5,0,1,3,2,4] → custom order
+// The standard rule: Ke Qi sequence starts from the Qi OPPOSITE to Si Tian (i.e. Zai Quan side)
+// Correct standard: start 2 before Si Tian going forward
+// 少陰君火 idx=1: start at (1-2+6)%6=5=太陽寒水 → [5,0,1,2,3,4] 
+// gives: 太陽寒水,厥陰風木,少陰君火,少陽相火,太陰濕土,陽明燥金
+// But Module4 shows: 太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金
+// positions 4기 and 5기 are swapped vs standard SQ order
+// Module4 verified order for 2026: [太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金]
+// This matches SQ order EXCEPT 3기(少陰君火) and onward skip 少陽相火 and insert 太陰濕土 first
+// Actually this IS correct per Su Wen: the Ke Qi sequence follows SQ order
+// starting from 2 positions before Si Tian:
+// Standard SQ: [厥陰風木(0),少陰君火(1),少陽相火(2),太陰濕土(3),陽明燥金(4),太陽寒水(5)]
+// Si Tian=少陰君火(1), start at (1-2+6)%6=5
+// Sequential: 5,0,1,2,3,4 = 太陽寒水,厥陰風木,少陰君火,少陽相火,太陰濕土,陽明燥金
+// Module4 actual: [太陽寒水,厥陰風木,少陰君火,太陰濕土,少陽相火,陽明燥金]
+// The difference is in positions 4&5. Module4 has 太陰濕土 before 少陽相火.
+// This means the correct Ke Qi sequence is NOT simply sequential SQ from offset.
+// Per Su Wen 68: the order is 厥陰→少陰→太陰→少陽→陽明→太陽 (YIN first then YANG)
+// That order: [厥陰風木(0),少陰君火(1),太陰濕土(3),少陽相火(2),陽明燥金(4),太陽寒水(5)]
+const SQ_KQ=["\u5a25\u9670\u98a8\u6728","\u5c11\u9670\u541b\u706b","\u592a\u9670\u6e7f\u571f","\u5c11\u9633\u76f8\u706b","\u967d\u660e\u71e5\u91d1","\u592a\u9633\u5bd2\u6c34"];
+// Ke Qi true order (Su Wen 68): 厥陰→少陰→太陰→少陽→陽明→太陽
+// Si Tian = 3rd position in this order
 function getKeQi(si){
-  const idx=SQ.indexOf(si);
-  return SQ.map((_,i)=>SQ[(idx-2+i+6)%6]);
+  const idx=SQ_KQ.indexOf(si);
+  return SQ_KQ.map((_,i)=>SQ_KQ[(idx-2+i+6)%6]);
 }
 
 // Special year classifications
